@@ -29,6 +29,8 @@ enum wip_logType {
 };
 
 void wip_log(enum wip_logType, const char *message, ...);
+void _wip_glError(const char *func);
+#define wip_glError(...) _wip_glError(__func__)
 GLFWwindow *wip_initWindow(const char *name);
 GLuint wip_loadShader(const GLchar *source, GLenum type);
 

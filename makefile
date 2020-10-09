@@ -12,7 +12,7 @@ CFLAGS = -std=c11 -I /usr/lib/graphene-1.0/include
 
 GLSL = *.glsl
 SRC = *.c
-OBJ = *.o
+OBJ = wip.o funcs.o callback.o
 
 all: $(GLSL) $(NAME)
 $(NAME): $(OBJ)

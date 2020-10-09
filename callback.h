@@ -10,4 +10,4 @@
 #include "funcs.h"
 
 void error_callback(int error, const char *message);
-
+void window_close_callback(GLFWwindow* window);
