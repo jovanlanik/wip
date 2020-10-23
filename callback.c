@@ -5,6 +5,9 @@
 
 // GLFW Callback Functions
 
+#include <GLFW/glfw3.h>
+
+#include "wip_fn.h"
 #include "callback.h"
 
 void error_callback(int error, const char *message) {

@@ -22,6 +22,7 @@ $(GLSL): clean_shaders
 	@mv $@ _$@
 	@grep -v '^$$' _$@ | grep -v '^//' > $@
 	@xxd -i $@ >> shaders.h
+	@echo >> shaders.h
 	@rm -f $@
 	@mv _$@ $@
 clean: clean_shaders clean_obj

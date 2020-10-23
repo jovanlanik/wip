@@ -7,11 +7,6 @@
 
 #pragma once
 
-#include <GL/glew.h>
-#include <stdbool.h>
-
-#include "wip_fn.h"
-
 void _wip_glError(const char *func);
 #define wip_glError(void) _wip_glError(__func__)
 void wip_glInit(void);

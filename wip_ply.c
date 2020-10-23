@@ -5,10 +5,16 @@
 
 // PLY model loading
 
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+
 #include "wip_ply.h"
 #include "wip_fn.h"
 #define MSH_PLY_IMPLEMENTATION
-#include "msh_ply.h"
+#include "lib/msh_ply.h"
 
 wip_modelPly *wip_loadModelPly(wip_modelPly *m, char *file) {
 	wip_debug(WIP_INFO, "%s: Loading model from %s", __func__, file);

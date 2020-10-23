@@ -5,6 +5,14 @@
 
 // Functions
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <pwd.h>
+
 #include "wip_fn.h"
 
 void wip_log(enum wip_logType type, const char *message, ...) {

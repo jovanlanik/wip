@@ -5,6 +5,10 @@
 
 // GL Functions
 
+#include <stdbool.h>
+#include <GL/glew.h>
+
+#include "wip_fn.h"
 #include "wip_gl.h"
 
 void _wip_glError(const char *func) {

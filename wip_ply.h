@@ -7,12 +7,6 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-
 typedef struct {
 	int vertCount;
 	float *vertData;

@@ -7,14 +7,6 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <pwd.h>
-
 #ifdef NDEBUG
 	#define wip_debug(...) ((void)0)
 #else
@@ -30,3 +22,4 @@ enum wip_logType {
 
 void wip_log(enum wip_logType, const char *message, ...);
 char *wip_getConf(void);
+

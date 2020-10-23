@@ -5,8 +5,8 @@
 
 // Main Source
 
-//#include <GL/glew.h>
-//#include <GLFW/glfw3.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <graphene-1.0/graphene.h>
 //#include <pthread.h>
 
@@ -15,7 +15,6 @@
 #include "wip_ply.h"
 #include "wip_glfw.h"
 
-//#include "models.h"
 #include "shaders.h"
 
 int main(int argc, char *argv[]) {

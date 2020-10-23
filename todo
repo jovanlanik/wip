@@ -25,4 +25,5 @@
 - threads
 	- render thread
 	- logic thread
++ clean up header includes
 - clean up makefile

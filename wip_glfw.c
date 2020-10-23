@@ -5,7 +5,12 @@
 
 // GLFW Functions
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include "wip_fn.h"
 #include "wip_glfw.h"
+#include "callback.h"
 
 GLFWwindow *wip_initWindow(const char *name) {
 	wip_debug(WIP_INFO, "%s: Initializing window...", __func__);
