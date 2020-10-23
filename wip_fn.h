@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include "callback.h"
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <pwd.h>
 
 #ifdef NDEBUG
 	#define wip_debug(...) ((void)0)
@@ -29,8 +29,4 @@ enum wip_logType {
 };
 
 void wip_log(enum wip_logType, const char *message, ...);
-void _wip_glError(const char *func);
-#define wip_glError(...) _wip_glError(__func__)
-GLFWwindow *wip_initWindow(const char *name);
-GLuint wip_loadShader(const GLchar *source, GLenum type);
-
+char *wip_getConf(void);

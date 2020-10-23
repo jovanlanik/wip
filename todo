@@ -1,0 +1,28 @@
+# Todo list
+- init code
+	+ seperate GL and GLFW
+	- resolution and fullscreen settings
+- implement model loading
+	+ ply loading
+	- gl helper function
+	- figure out materials
+		+ load normals
+		+ load vertex colors
+		- mapped color palette texture
+- artstyle
+	+ vertex lighting
+		- smooth
+		- gradient
+	+ outlines
+- image loading
++ antialiasing
+	- settings
+- input
+- settings
+	+ xdg config
+	- config loading
+	- setting storage
+- threads
+	- render thread
+	- logic thread
+- clean up makefile

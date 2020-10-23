@@ -3,20 +3,9 @@
 // Copyright (c) 2020 Jovan Lanik
 //
 
-// Functions
+// GL Functions
 
-#include "funcs.h"
-
-void wip_log(enum wip_logType type, const char *message, ...) {
-	FILE *out = type < WIP_WARN ? stdout : stderr;
-	va_list args;
-	va_start(args, message);
-	vfprintf(out, message, args);
-	fputc('\n', out);
-	va_end(args);
-	if(type == WIP_FATAL) exit(1);
-	return;
-}
+#include "wip_gl.h"
 
 void _wip_glError(const char *func) {
 	GLenum error;
@@ -26,37 +15,23 @@ void _wip_glError(const char *func) {
 	return;
 }
 
-GLFWwindow *wip_initWindow(const char *name) {
-	wip_debug(WIP_INFO, "%s: Initializing window...", __func__);
-	if(!glfwInit())
-		wip_log(WIP_FATAL, "Couldn't initialize GLWF.");
-	glfwSetErrorCallback(error_callback);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	GLFWwindow *window = glfwCreateWindow(512, 512, name, NULL, NULL);
-	if(!window) {
-		wip_log(WIP_FATAL, "Couldn't create window.");
-	}
-	glfwSetWindowCloseCallback(window, window_close_callback);
-	glfwMakeContextCurrent(window);
-
+void wip_glInit(void) {
 	wip_debug(WIP_INFO, "%s: Initializing GL...", __func__);
 	glewInit();
 	if(!GLEW_VERSION_3_2)
 		wip_log(WIP_FATAL, "OpenGL 3.3 not supported.");
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_CULL_FACE);
 
-	glViewport(0, 0, 512, 512);
+	glViewport(0, 0, 900, 600);
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
-	return window;
+	return;
 }
 
 GLuint wip_loadShader(const GLchar *source, GLenum type) {
@@ -79,5 +54,14 @@ GLuint wip_loadShader(const GLchar *source, GLenum type) {
 	}
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return shader;
+}
+
+GLuint wip_mkProgram(GLuint vert, GLuint frag) {
+	// Add error handling below
+	GLuint program = glCreateProgram();
+	glAttachShader(program, vert);
+	glAttachShader(program, frag);
+	glLinkProgram(program);
+	return program;
 }
 

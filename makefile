@@ -8,16 +8,22 @@
 NAME = wip
 CC = gcc
 LDLIBS = -lGL -lGLEW -lglfw -lgraphene-1.0
-CFLAGS = -std=c11 -I /usr/lib/graphene-1.0/include
+CFLAGS = -std=c11 -Wall -pedantic -I /usr/lib/graphene-1.0/include
 
 GLSL = *.glsl
 SRC = *.c
-OBJ = wip.o funcs.o callback.o
+OBJ = wip.o wip_fn.o wip_gl.o wip_ply.o wip_glfw.o callback.o
 
 all: $(GLSL) $(NAME)
 $(NAME): $(OBJ)
 $(GLSL): clean_shaders
-	xxd -i $@ >> shaders.h
+	@printf 'shaders.h: from file $@ '
+	@sed 1,5d $@ | sed 1q | tee -a shaders.h | sed 's/\/\//adding/g'
+	@mv $@ _$@
+	@grep -v '^$$' _$@ | grep -v '^//' > $@
+	@xxd -i $@ >> shaders.h
+	@rm -f $@
+	@mv _$@ $@
 clean: clean_shaders clean_obj
 	rm -f $(NAME)
 clean_shaders:

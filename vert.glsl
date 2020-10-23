@@ -7,12 +7,17 @@
 
 #version 330
 
-in vec3 inPos;
-in vec3 inCol;
+layout (location = 0) in vec3 inPos;
+layout (location = 1) in vec3 inNor;
+layout (location = 2) in vec4 inCol;
 uniform mat4 transform;
-out vec3 ourCol;
+uniform mat4 view;
+uniform mat4 projection;
+out vec3 nor;
+out vec4 col;
 
 void main() {
-	gl_Position = transform * vec4(inPos, 1.0f);
-	ourCol = inCol;
+	gl_Position = projection * view * transform * vec4(inPos, 1.0f);
+	nor = inNor;
+	col = inCol;
 }
