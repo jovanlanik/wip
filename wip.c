@@ -22,19 +22,24 @@ int main(int argc, char *argv[]) {
 	GLFWwindow *window = wip_initWindow(argv[0]);
 	wip_glInit();
 
-	GLuint vertShader = wip_loadShader((GLchar*)vert_glsl, GL_VERTEX_SHADER);
-	GLuint fragShader = wip_loadShader((GLchar*)frag_glsl, GL_FRAGMENT_SHADER);
-	GLuint frag2Shader = wip_loadShader((GLchar*)frag2_glsl, GL_FRAGMENT_SHADER);
 
-	wip_modelPly model;
-	wip_loadModelPly(&model, "wip_model.ply");
+	GLuint vertShader = wip_loadShader((GLchar*)glsl_main_vert, GL_VERTEX_SHADER);
+	GLuint fragShader = wip_loadShader((GLchar*)glsl_main_frag, GL_FRAGMENT_SHADER);
+
+	GLuint vert2Shader = wip_loadShader((GLchar*)glsl_invertedHull_vert, GL_VERTEX_SHADER);
+	GLuint frag2Shader = wip_loadShader((GLchar*)glsl_outline_frag, GL_FRAGMENT_SHADER);
 
 	GLuint program = wip_mkProgram(vertShader, fragShader);
-	GLuint program2 = wip_mkProgram(vertShader, frag2Shader);
+	GLuint program2 = wip_mkProgram(vert2Shader, frag2Shader);
 
 	glDeleteShader(vertShader);
+	glDeleteShader(vert2Shader);
 	glDeleteShader(fragShader);
 	glDeleteShader(frag2Shader);
+
+
+	wip_modelPly model;
+	wip_loadModelPly(&model, "mdl/wip_model.ply");
 
 	GLuint posBuff;
 	GLuint norBuff;
@@ -65,6 +70,11 @@ int main(int argc, char *argv[]) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.indxCount*3*sizeof(model.indxData[0]), model.indxData, GL_STATIC_DRAW);
 
+
+	float rot_x = 0;
+	float rot_y = 0;
+	float rot_z = 0;
+	
 	float lightFloat[3];
 	float transformFloat[16];
 	float viewFloat[16];
@@ -79,7 +89,7 @@ int main(int argc, char *argv[]) {
 	unsigned int projectionLocation2 = glGetUniformLocation(program2, "projection");
 	unsigned int viewLocation2 = glGetUniformLocation(program2, "view");
 
-	graphene_vec3_t *light = graphene_vec3_init_from_float(graphene_vec3_alloc(), (float[]){0.0f, 0.0f, 1.0f});
+	graphene_vec3_t *light = graphene_vec3_init_from_float(graphene_vec3_alloc(), (float[]){-1.0f, 0.2f, 0.2f});
 	graphene_vec3_normalize(light, light);
 	
 	graphene_vec3_t *eye = graphene_vec3_init_from_float(graphene_vec3_alloc(), (float[]){0.0f, 0.0f, 3.0f});
@@ -87,7 +97,7 @@ int main(int argc, char *argv[]) {
 
 	graphene_matrix_t *transform = graphene_matrix_alloc();
 	graphene_matrix_t *view = graphene_matrix_init_look_at(graphene_matrix_alloc(), eye, center, graphene_vec3_y_axis());
-	graphene_matrix_t *projection = graphene_matrix_init_perspective(graphene_matrix_alloc(), 90.0f, 450.0f/300.0f, 0.1f, 100.0f);
+	graphene_matrix_t *projection = graphene_matrix_init_perspective(graphene_matrix_alloc(), 90.0f, 16.0f/10.0f, 0.1f, 100.0f);
 
 	graphene_vec3_to_float(light, lightFloat);
 	graphene_matrix_to_float(view, viewFloat);
@@ -98,27 +108,40 @@ int main(int argc, char *argv[]) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+		rot_x = 15;
+		//rot_x = 25*glfwGetTime();
+		//rot_y = 90;
+		rot_y = 25*glfwGetTime();
+		//rot_z = 90;
+		//rot_z = 25*glfwGetTime();
+		float scale = 1.0f;
+
+
 		glUseProgram(program2);
 
 		transform = graphene_matrix_init_identity(transform);
-		graphene_matrix_rotate_x(transform, 25*glfwGetTime());
-		graphene_matrix_rotate_y(transform, 25*glfwGetTime());
-		graphene_matrix_scale(transform, 1.03f, 1.03f, 1.03f);
+		graphene_matrix_rotate_x(transform, rot_x);
+		graphene_matrix_rotate_y(transform, rot_y);
+		graphene_matrix_rotate_z(transform, rot_z);
+		graphene_matrix_scale(transform, scale, scale, scale);
 		graphene_matrix_to_float(transform, transformFloat);
 
 		glUniformMatrix4fv(transformLocation2, 1, GL_FALSE, transformFloat);
 		glUniformMatrix4fv(viewLocation2, 1, GL_FALSE, viewFloat);
 		glUniformMatrix4fv(projectionLocation2, 1, GL_FALSE, projectionFloat);
 
+		glCullFace(GL_FRONT);
 		glDrawElements(GL_TRIANGLES, model.indxCount*3, GL_UNSIGNED_INT, 0);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		glCullFace(GL_BACK);
 
 
 		glUseProgram(program);
 
 		transform = graphene_matrix_init_identity(transform);
-		graphene_matrix_rotate_x(transform, 25*glfwGetTime());
-		graphene_matrix_rotate_y(transform, 25*glfwGetTime());
+		graphene_matrix_rotate_x(transform, rot_x);
+		graphene_matrix_rotate_y(transform, rot_y);
+		graphene_matrix_rotate_z(transform, rot_z);
+		graphene_matrix_scale(transform, scale, scale, scale);
 		graphene_matrix_to_float(transform, transformFloat);
 		
 		glUniform3fv(lightLocation, 1, lightFloat);

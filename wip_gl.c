@@ -32,7 +32,7 @@ void wip_glInit(void) {
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_CULL_FACE);
 
-	glViewport(0, 0, 900, 600);
+	glViewport(0, 0, 1680, 1050);
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;

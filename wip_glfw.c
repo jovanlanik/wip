@@ -23,7 +23,7 @@ GLFWwindow *wip_initWindow(const char *name) {
 	//glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	GLFWwindow *window = glfwCreateWindow(900, 600, name, NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(1680, 1050, name, NULL, NULL);
 	if(!window) {
 		wip_log(WIP_FATAL, "Couldn't create window.");
 	}

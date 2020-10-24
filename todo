@@ -11,9 +11,10 @@
 		- mapped color palette texture
 - artstyle
 	+ vertex lighting
-		- smooth
-		- gradient
+		+ cell shading
 	+ outlines
+		+ inverted hull
+		- calculate own normals for outline
 - image loading
 + antialiasing
 	- settings
@@ -26,4 +27,4 @@
 	- render thread
 	- logic thread
 + clean up header includes
-- clean up makefile
++ clean up makefile
