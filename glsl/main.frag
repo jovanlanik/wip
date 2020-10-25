@@ -22,7 +22,7 @@ void main() {
 	value = smoothstep(l, l + d, value);
 	value = clamp(value, m, 1.0);
 
-	fragColor = vec4(value * col.r, value * col.g, value * col.b, 1.0);
+	fragColor = vec4(value * col.rgb, col.a);
 	//fragColor = vec4(value, value, value, 1.0);
 	//fragColor = vec4(nor+0.5, 1.0);
 }

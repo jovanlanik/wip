@@ -2,19 +2,62 @@
 - init code
 	+ seperate GL and GLFW
 	- resolution and fullscreen settings
-- implement model loading
-	+ ply loading
-	- gl helper function
+- objects
+	= obj:
+		= position
+		= rotation
+		= scale
+		= momentum
+		= anglular momentum
+
+		- obj make(void);
+		- void free(obj);
+	= globj:
+		= transformation matrix
+
+		- globj load(obj);
+		- globj reload(globj, obj);
+		- void free(globj);
+- models
+	= ply:
+		= vertex
+		= normal
+		= color
+		= index
+		= vertex count
+		= index count
+
+		+ ply read(file);
+			- make properties optional
+		- void free(ply);
+	= mdl:
+		= model
+		= index
+		= vertex count
+		= index count
+
+		- mdl prep(ply);
+			- calculate normals for outline
+		- void free(mdl);
+	= glmdl:
+		= model
+		= element array
+		= attribute array
+
+		- glmdl load(mdl);
+		- glmdl reload(glmdl, mdl);
+		- void draw(glmdl, globj, program);
+			- draws on screen
+		- void free(glmdl)
+
 	- figure out materials
-		+ load normals
-		+ load vertex colors
 		- mapped color palette texture
 - artstyle
 	+ vertex lighting
 		+ cell shading
 	+ outlines
 		+ inverted hull
-		- calculate own normals for outline
+		- calculate normals for outline
 - image loading
 + antialiasing
 	- settings

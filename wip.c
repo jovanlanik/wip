@@ -12,7 +12,7 @@
 
 #include "wip_fn.h"
 #include "wip_gl.h"
-#include "wip_ply.h"
+#include "wip_mdl.h"
 #include "wip_glfw.h"
 
 #include "shaders.h"
@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 	GLuint vert2Shader = wip_loadShader((GLchar*)glsl_invertedHull_vert, GL_VERTEX_SHADER);
 	GLuint frag2Shader = wip_loadShader((GLchar*)glsl_outline_frag, GL_FRAGMENT_SHADER);
 
-	GLuint program = wip_mkProgram(vertShader, fragShader);
-	GLuint program2 = wip_mkProgram(vert2Shader, frag2Shader);
+	GLuint program = wip_loadProgram(vertShader, fragShader);
+	GLuint program2 = wip_loadProgram(vert2Shader, frag2Shader);
 
 	glDeleteShader(vertShader);
 	glDeleteShader(vert2Shader);
@@ -38,8 +38,8 @@ int main(int argc, char *argv[]) {
 	glDeleteShader(frag2Shader);
 
 
-	wip_modelPly model;
-	wip_loadModelPly(&model, "mdl/wip_model.ply");
+	wip_ply_t model;
+	wip_readModel(&model, "mdl/wip_model.ply");
 
 	GLuint posBuff;
 	GLuint norBuff;
@@ -53,22 +53,22 @@ int main(int argc, char *argv[]) {
 	glGenBuffers(1, &ebo);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, posBuff);
-	glBufferData(GL_ARRAY_BUFFER, model.vertCount*3*sizeof(model.vertData[0]), model.vertData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, model.vertex_c*3*sizeof(model.vertex[0]), model.vertex, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, norBuff);
-	glBufferData(GL_ARRAY_BUFFER, model.vertCount*3*sizeof(model.vertNormal[0]), model.vertNormal, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, model.vertex_c*3*sizeof(model.normal[0]), model.normal, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, colBuff);
-	glBufferData(GL_ARRAY_BUFFER, model.vertCount*4*sizeof(model.vertColor[0]), model.vertColor, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, model.vertex_c*4*sizeof(model.color[0]), model.color, GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, 0);
 	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.indxCount*3*sizeof(model.indxData[0]), model.indxData, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.index_c*3*sizeof(model.index[0]), model.index, GL_STATIC_DRAW);
 
 
 	float rot_x = 0;
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
 		glUniformMatrix4fv(projectionLocation2, 1, GL_FALSE, projectionFloat);
 
 		glCullFace(GL_FRONT);
-		glDrawElements(GL_TRIANGLES, model.indxCount*3, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
 		glCullFace(GL_BACK);
 
 
@@ -149,9 +149,9 @@ int main(int argc, char *argv[]) {
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, viewFloat);
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projectionFloat);
 
-		glDrawElements(GL_TRIANGLES, model.indxCount*3, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
 		
-
+		
 		glfwSwapBuffers(window);
 	}
 

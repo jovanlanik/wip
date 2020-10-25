@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "wip_ply.h"
+#include "wip_mdl.h"
 #include "wip_fn.h"
 #define MSH_PLY_IMPLEMENTATION
 #include "lib/msh_ply.h"
