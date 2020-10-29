@@ -1,6 +1,6 @@
 # Todo list
 - priority
-	- graphene must go, it's using libgobject and causing a bunch of leaks
+	+ graphene must go, it's using libgobject and causing a bunch of leaks
 - init code
 	+ seperate GL and GLFW
 	- resolution and fullscreen settings
@@ -8,6 +8,7 @@
 	- make objects for these things
 		+ camera
 		+ light
+		- mpv
 	- rework rotations
 	= obj:
 		= position
@@ -21,8 +22,7 @@
 	= globj:
 		= transformation matrix
 
-		- globj load(obj);
-		- void unload(globj);
+		+ globj load(obj);
 - models
 	= ply:
 		= vertex
@@ -33,10 +33,14 @@
 		= index count
 
 		+ ply read(file);
-			- make properties optional
+			+ make properties optional
+			- calculate normals
 		- void free(ply);
 	= mdl:
 		= model
+			= vertex
+			= normal
+			= color
 		= index
 		= vertex count
 		= index count
