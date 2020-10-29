@@ -6,9 +6,9 @@
 # Makefile
 
 NAME = wip
-CC = cc
-LDLIBS = -lGL -lGLEW -lglfw -lgraphene-1.0
-CFLAGS = -std=c11 -Wall -pedantic -I /usr/lib/graphene-1.0/include
+CC = gcc
+LDLIBS = -lm -lGL -lGLEW -lglfw
+CFLAGS = -std=c11 -Wall -pedantic
 
 GLSL = $(wildcard glsl/*.vert glsl/*.frag)
 SRC = $(wildcard *.c)

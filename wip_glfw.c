@@ -28,6 +28,7 @@ GLFWwindow *wip_initWindow(const char *name) {
 		wip_log(WIP_FATAL, "Couldn't create window.");
 	}
 	glfwSetWindowCloseCallback(window, window_close_callback);
+	glfwSetKeyCallback(window, key_callback);
 	glfwMakeContextCurrent(window);
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);

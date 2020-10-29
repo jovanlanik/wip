@@ -61,7 +61,7 @@ GLuint wip_loadShader(const GLchar *source, GLenum type) {
 }
 
 GLuint wip_loadProgram(GLuint vert, GLuint frag) {
-	// Add error handling below
+	// TODO: add error handling below
 	GLuint program = glCreateProgram();
 	glAttachShader(program, vert);
 	glAttachShader(program, frag);

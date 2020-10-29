@@ -14,11 +14,13 @@ uniform mat4 transform;
 uniform mat4 view;
 uniform mat4 projection;
 out vec3 nor;
+out vec3 pos;
 out vec4 col;
 
 void main() {
 	gl_Position = projection * view * transform * vec4(inPos, 1.0f);
 	//gl_Position = projection * view * vec4(inPos, 1.0f);
 	nor = inNor;
+	pos = inPos;
 	col = inCol;
 }

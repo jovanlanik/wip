@@ -8,6 +8,7 @@
 #version 330
 
 in vec3 nor;
+in vec3 pos;
 in vec4 col;
 uniform vec3 light;
 uniform mat4 transform;
@@ -15,9 +16,10 @@ out vec4 fragColor;
 
 void main() {
 	vec3 tNor = mat3(transpose(inverse(transform))) * nor;
-	float value = float(dot(tNor, light));
+	vec3 nLight = light - vec3(transform * vec4(pos, 1.0f));
+	float value = float(dot(tNor, nLight));
 	float l = 0.1;
-	float d = 0.1;
+	float d = 0.15;
 	float m = 0.4;
 	value = smoothstep(l, l + d, value);
 	value = clamp(value, m, 1.0);

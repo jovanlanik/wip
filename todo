@@ -1,8 +1,14 @@
 # Todo list
+- priority
+	- graphene must go, it's using libgobject and causing a bunch of leaks
 - init code
 	+ seperate GL and GLFW
 	- resolution and fullscreen settings
 - objects
+	- make objects for these things
+		+ camera
+		+ light
+	- rework rotations
 	= obj:
 		= position
 		= rotation
@@ -10,14 +16,13 @@
 		= momentum
 		= anglular momentum
 
-		- obj make(void);
-		- void free(obj);
+		+ obj make(void);
+			? is this necesary, if not put code in alloc.
 	= globj:
 		= transformation matrix
 
 		- globj load(obj);
-		- globj reload(globj, obj);
-		- void free(globj);
+		- void unload(globj);
 - models
 	= ply:
 		= vertex
@@ -45,10 +50,9 @@
 		= attribute array
 
 		- glmdl load(mdl);
-		- glmdl reload(glmdl, mdl);
+		- void unload(glmdl)
 		- void draw(glmdl, globj, program);
 			- draws on screen
-		- void free(glmdl)
 
 	- figure out materials
 		- mapped color palette texture
@@ -62,6 +66,9 @@
 + antialiasing
 	- settings
 - input
+	+ callback
+	- mapping
+	- handling
 - settings
 	+ xdg config
 	- config loading
@@ -70,4 +77,5 @@
 	- render thread
 	- logic thread
 + clean up header includes
+	- do it again
 + clean up makefile

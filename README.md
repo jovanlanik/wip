@@ -5,6 +5,5 @@ I just want to learn and experiment.
 ## Dependencies
 - GLEW
 - GLFW
-- Graphene
 ## Building
 `$ make clean all`

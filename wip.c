@@ -5,17 +5,25 @@
 
 // Main Source
 
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+//#include <pthread.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <graphene-1.0/graphene.h>
-//#include <pthread.h>
 
 #include "wip_fn.h"
 #include "wip_gl.h"
+#include "wip_obj.h"
 #include "wip_mdl.h"
 #include "wip_glfw.h"
+#include "lib/linmath.h"
 
 #include "shaders.h"
+
+#define M_PI 3.14159265358979323846
+#define	DEG(rad) (rad*180.0/M_PI)
+#define RAD(deg) (deg*M_PI/180.0)
 
 int main(int argc, char *argv[]) {
 	wip_debug(WIP_INFO, "WIP built %s %s", __DATE__, __TIME__);
@@ -36,7 +44,7 @@ int main(int argc, char *argv[]) {
 	glDeleteShader(vert2Shader);
 	glDeleteShader(fragShader);
 	glDeleteShader(frag2Shader);
-
+	
 
 	wip_ply_t model;
 	wip_readModel(&model, "mdl/wip_model.ply");
@@ -71,14 +79,10 @@ int main(int argc, char *argv[]) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.index_c*3*sizeof(model.index[0]), model.index, GL_STATIC_DRAW);
 
 
-	float rot_x = 0;
-	float rot_y = 0;
-	float rot_z = 0;
-	
-	float lightFloat[3];
-	float transformFloat[16];
-	float viewFloat[16];
-	float projectionFloat[16];
+	wip_obj_t *rocket = wip_allocType(wip_obj_t);
+	wip_makeObject(rocket);
+	wip_globj_t *transformFloat = wip_allocType(wip_globj_t);
+
 
 	unsigned int lightLocation = glGetUniformLocation(program, "light");
 	unsigned int transformLocation = glGetUniformLocation(program, "transform");
@@ -89,46 +93,50 @@ int main(int argc, char *argv[]) {
 	unsigned int projectionLocation2 = glGetUniformLocation(program2, "projection");
 	unsigned int viewLocation2 = glGetUniformLocation(program2, "view");
 
-	graphene_vec3_t *light = graphene_vec3_init_from_float(graphene_vec3_alloc(), (float[]){-1.0f, 0.2f, 0.2f});
-	graphene_vec3_normalize(light, light);
+	float step = 0.2;
+
+	wip_obj_t light, eye, center; 
+	wip_makeObject(&light);
+	wip_makeObject(&eye);
+	wip_makeObject(&center);
+	light.x = -2;
+	light.y = -3;
+	light.z = 2;
 	
-	graphene_vec3_t *eye = graphene_vec3_init_from_float(graphene_vec3_alloc(), (float[]){0.0f, 0.0f, 3.0f});
-	graphene_vec3_t *center = graphene_vec3_init_from_float(graphene_vec3_alloc(), (float[]){0.0f, 0.0f, 0.0f});
+	vec3 axis = {0.0f, 0.0f, 1.0f};
+	mat4x4 view;
 
-	graphene_matrix_t *transform = graphene_matrix_alloc();
-	graphene_matrix_t *view = graphene_matrix_init_look_at(graphene_matrix_alloc(), eye, center, graphene_vec3_y_axis());
-	graphene_matrix_t *projection = graphene_matrix_init_perspective(graphene_matrix_alloc(), 90.0f, 16.0f/10.0f, 0.1f, 100.0f);
-
-	graphene_vec3_to_float(light, lightFloat);
-	graphene_matrix_to_float(view, viewFloat);
-	graphene_matrix_to_float(projection, projectionFloat);
+	mat4x4 projection;
+	mat4x4_perspective(projection, RAD(70), 16.0f/10.0f, 0.1, 100);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.3f, 0.6f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) eye.y += step;
+		if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) eye.y -= step;
+		if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) eye.x += step;
+		if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) eye.x -= step;
+		if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) eye.z += step;
+		if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) eye.z -= step;
+		center.x = eye.x;
+		center.y = eye.y + 1;
+		center.z = eye.z;
+		mat4x4_look_at(view, eye.position, center.position, axis);
 
-		rot_x = 15;
-		//rot_x = 25*glfwGetTime();
-		//rot_y = 90;
-		rot_y = 25*glfwGetTime();
-		//rot_z = 90;
-		//rot_z = 25*glfwGetTime();
-		float scale = 1.0f;
+		rocket->z = 0.5*sin(glfwGetTime());
+		rocket->r.y = 90;
+		rocket->r.x = 25*glfwGetTime();
+		rocket->s.x = 1.2;
+		rocket->s.y = 1.2;
+		rocket->s.z = 1.2;
+		wip_loadObject(transformFloat, rocket);
 
 
 		glUseProgram(program2);
-
-		transform = graphene_matrix_init_identity(transform);
-		graphene_matrix_rotate_x(transform, rot_x);
-		graphene_matrix_rotate_y(transform, rot_y);
-		graphene_matrix_rotate_z(transform, rot_z);
-		graphene_matrix_scale(transform, scale, scale, scale);
-		graphene_matrix_to_float(transform, transformFloat);
-
-		glUniformMatrix4fv(transformLocation2, 1, GL_FALSE, transformFloat);
-		glUniformMatrix4fv(viewLocation2, 1, GL_FALSE, viewFloat);
-		glUniformMatrix4fv(projectionLocation2, 1, GL_FALSE, projectionFloat);
+		glUniformMatrix4fv(transformLocation2, 1, GL_FALSE, transformFloat->matrix);
+		glUniformMatrix4fv(viewLocation2, 1, GL_FALSE, (const float*)&view);
+		glUniformMatrix4fv(projectionLocation2, 1, GL_FALSE, (const float*)&projection);
 
 		glCullFace(GL_FRONT);
 		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
@@ -136,25 +144,28 @@ int main(int argc, char *argv[]) {
 
 
 		glUseProgram(program);
-
-		transform = graphene_matrix_init_identity(transform);
-		graphene_matrix_rotate_x(transform, rot_x);
-		graphene_matrix_rotate_y(transform, rot_y);
-		graphene_matrix_rotate_z(transform, rot_z);
-		graphene_matrix_scale(transform, scale, scale, scale);
-		graphene_matrix_to_float(transform, transformFloat);
 		
-		glUniform3fv(lightLocation, 1, lightFloat);
-		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformFloat);
-		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, viewFloat);
-		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projectionFloat);
+		
+		glUniform3fv(lightLocation, 1, light.position);
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformFloat->matrix);
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, (const float*)&view);
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, (const float*)&projection);
 
 		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
 		
 		
 		glfwSwapBuffers(window);
+		//glfwSetWindowShouldClose(window, GLFW_TRUE);
+		glfwPollEvents();
 	}
 
+	wip_free(transformFloat);
+	wip_free(rocket);
+
+	wip_free(model.vertex);
+	wip_free(model.index);
+	wip_free(model.color);
+	wip_free(model.normal);
 
 	glfwTerminate();
 	return 0;
