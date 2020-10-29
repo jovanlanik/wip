@@ -61,6 +61,8 @@
 		+ cell shading
 	+ outlines
 		+ inverted hull
+		- same thickness for distant objects
+		- shader inputs
 		- calculate normals for outline
 - image loading
 + antialiasing
