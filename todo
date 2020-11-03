@@ -1,6 +1,7 @@
 # Todo list
 - priority
 	+ graphene must go, it's using libgobject and causing a bunch of leaks
+		= replaced with linmath.h
 - init code
 	+ seperate GL and GLFW
 	- resolution and fullscreen settings
@@ -18,7 +19,6 @@
 		= anglular momentum
 
 		+ obj make(void);
-			? is this necesary, if not put code in alloc.
 	= globj:
 		= transformation matrix
 
@@ -35,6 +35,7 @@
 		+ ply read(file);
 			+ make properties optional
 			- calculate normals
+				? not sure if here or in prep
 		- void free(ply);
 	= mdl:
 		= model
@@ -50,6 +51,7 @@
 		- void free(mdl);
 	= glmdl:
 		= model
+			- seperate face and outline normals
 		= element array
 		= attribute array
 
@@ -57,18 +59,32 @@
 		- void unload(glmdl)
 		- void draw(glmdl, globj, program);
 			- draws on screen
-
 	- figure out materials
-		- mapped color palette texture
+		- UV mapped color palette texture
+		+ material properties
+			= vec3 defining how shadows look
 - artstyle
 	+ vertex lighting
 		+ cell shading
 	+ outlines
 		+ inverted hull
 		- same thickness for distant objects
-		- shader inputs
+		+ shader inputs
 		- calculate normals for outline
+- shaders
+	- vert
+	- frag
+		+ material properties
+	- outline
+		+ shader inputs
+			+ color
+	- inverted hull
+		- same thickness for distant objects
+		+ shader inputs
+			+ thickness
 - image loading
+	- choose library
+		? stb_image.h
 + antialiasing
 	- settings
 - input

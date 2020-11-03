@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
 	wip_glInit();
 
 
-	GLuint vertShader = wip_loadShader((GLchar*)glsl_main_vert, GL_VERTEX_SHADER);
-	GLuint fragShader = wip_loadShader((GLchar*)glsl_main_frag, GL_FRAGMENT_SHADER);
+	GLuint vertShader = wip_loadShader((char*)glsl_main_vert, GL_VERTEX_SHADER);
+	GLuint fragShader = wip_loadShader((char*)glsl_main_frag, GL_FRAGMENT_SHADER);
 
 	GLuint vert2Shader = wip_loadShader((GLchar*)glsl_invertedHull_vert, GL_VERTEX_SHADER);
 	GLuint frag2Shader = wip_loadShader((GLchar*)glsl_outline_frag, GL_FRAGMENT_SHADER);
@@ -88,10 +88,13 @@ int main(int argc, char *argv[]) {
 	unsigned int transformLocation = glGetUniformLocation(program, "transform");
 	unsigned int projectionLocation = glGetUniformLocation(program, "projection");
 	unsigned int viewLocation = glGetUniformLocation(program, "view");
+	unsigned int materialLocation = glGetUniformLocation(program, "material");
 
 	unsigned int transformLocation2 = glGetUniformLocation(program2, "transform");
 	unsigned int projectionLocation2 = glGetUniformLocation(program2, "projection");
 	unsigned int viewLocation2 = glGetUniformLocation(program2, "view");
+	unsigned int outlineThicknessLocation2 = glGetUniformLocation(program2, "outlineThickness");
+	unsigned int outlineColorLocation2 = glGetUniformLocation(program2, "outlineColor");
 
 	float step = 0.2;
 
@@ -137,6 +140,8 @@ int main(int argc, char *argv[]) {
 		glUniformMatrix4fv(transformLocation2, 1, GL_FALSE, transformFloat->matrix);
 		glUniformMatrix4fv(viewLocation2, 1, GL_FALSE, (const float*)&view);
 		glUniformMatrix4fv(projectionLocation2, 1, GL_FALSE, (const float*)&projection);
+		glUniform1f(outlineThicknessLocation2, 0.02);
+		glUniform3fv(outlineColorLocation2, 1, (float []){0.1, 0, 0});
 
 		glCullFace(GL_FRONT);
 		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
@@ -150,6 +155,7 @@ int main(int argc, char *argv[]) {
 		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformFloat->matrix);
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, (const float*)&view);
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, (const float*)&projection);
+		glUniform3fv(materialLocation, 1, (float []){0.1, 0.15, 0.4});
 
 		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
 		
