@@ -18,8 +18,12 @@ uniform vec3 material;
 out vec4 fragColor;
 
 void main() {
-	vec3 tNor = mat3(transpose(inverse(transform))) * nor;
-	vec3 nLight = light - vec3(transform * vec4(pos, 1.0f));
+	vec3 tNor;
+	tNor = mat3(transpose(inverse(transform))) * nor;
+	tNor = normalize(tNor);
+	vec3 nLight;
+	nLight = light - vec3(transform);
+	nLight = normalize(nLight);
 	float value;
 	value = float(dot(tNor, nLight));
 	value = smoothstep(material[0], material[0] + material[1], value);

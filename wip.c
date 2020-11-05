@@ -97,14 +97,22 @@ int main(int argc, char *argv[]) {
 	unsigned int outlineColorLocation2 = glGetUniformLocation(program2, "outlineColor");
 
 	float step = 0.2;
+	float m[3] = { 0.1, 0.1, 0.4 };
 
 	wip_obj_t light, eye, center; 
-	wip_makeObject(&light);
-	wip_makeObject(&eye);
+
 	wip_makeObject(&center);
+
+	wip_makeObject(&eye);
+	eye.y = -3;
+
+	wip_makeObject(&light);
 	light.x = -2;
 	light.y = -3;
 	light.z = 2;
+	//light.x = 0;
+	//light.y = 0;
+	//light.z = 0;
 	
 	vec3 axis = {0.0f, 0.0f, 1.0f};
 	mat4x4 view;
@@ -116,27 +124,51 @@ int main(int argc, char *argv[]) {
 		glClearColor(0.3f, 0.6f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) eye.y += step;
-		if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) eye.y -= step;
-		if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) eye.x += step;
-		if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) eye.x -= step;
-		if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) eye.z += step;
-		if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) eye.z -= step;
+		#define KEY(x) if(glfwGetKey(window, x) == GLFW_PRESS)
+		KEY(GLFW_KEY_W) eye.y += step;
+		KEY(GLFW_KEY_S) eye.y -= step;
+		KEY(GLFW_KEY_D) eye.x += step;
+		KEY(GLFW_KEY_A) eye.x -= step;
+		KEY(GLFW_KEY_SPACE) eye.z += step;
+		KEY(GLFW_KEY_X) eye.z -= step;
 		center.x = eye.x;
 		center.y = eye.y + 1;
 		center.z = eye.z;
 		mat4x4_look_at(view, eye.position, center.position, axis);
 
+		//light.x = sin(glfwGetTime());
+
 		rocket->z = 0.5*sin(glfwGetTime());
 		rocket->r.y = 90;
-		rocket->r.x = 25*glfwGetTime();
+		rocket->r.x = 50*glfwGetTime();
 		rocket->s.x = 1.2;
 		rocket->s.y = 1.2;
 		rocket->s.z = 1.2;
 		wip_loadObject(transformFloat, rocket);
 
+		//m[0] = M_PI*sin(glfwGetTime());
+		//m[1] = 1.5*M_PI*sin(glfwGetTime());
+		//m[2] = sin(glfwGetTime())/2+0.5;
+		
+		KEY(GLFW_KEY_C) m[0] += 0.1;
+		KEY(GLFW_KEY_V) m[0] -= 0.1;
 
+		#undef KEY
+
+
+		glUseProgram(program);
+		
+		glUniform3fv(lightLocation, 1, light.position);
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformFloat->matrix);
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, (const float*)&view);
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, (const float*)&projection);
+		glUniform3fv(materialLocation, 1, m);
+
+		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
+		
+		
 		glUseProgram(program2);
+
 		glUniformMatrix4fv(transformLocation2, 1, GL_FALSE, transformFloat->matrix);
 		glUniformMatrix4fv(viewLocation2, 1, GL_FALSE, (const float*)&view);
 		glUniformMatrix4fv(projectionLocation2, 1, GL_FALSE, (const float*)&projection);
@@ -148,18 +180,6 @@ int main(int argc, char *argv[]) {
 		glCullFace(GL_BACK);
 
 
-		glUseProgram(program);
-		
-		
-		glUniform3fv(lightLocation, 1, light.position);
-		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformFloat->matrix);
-		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, (const float*)&view);
-		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, (const float*)&projection);
-		glUniform3fv(materialLocation, 1, (float []){0.1, 0.15, 0.4});
-
-		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
-		
-		
 		glfwSwapBuffers(window);
 		//glfwSetWindowShouldClose(window, GLFW_TRUE);
 		glfwPollEvents();
