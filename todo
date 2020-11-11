@@ -6,11 +6,11 @@
 	+ seperate GL and GLFW
 	- resolution and fullscreen settings
 - objects
-	- make objects for these things
+	+ make objects for these things
 		+ camera
 		+ light
-		- mpv
-	- rework rotations
+		+ mpv
+	? rework rotations
 	= obj:
 		= position
 		= rotation
@@ -21,7 +21,6 @@
 		+ obj make(void);
 	= globj:
 		= transformation matrix
-
 		+ globj load(obj);
 - models
 	= ply:
@@ -46,7 +45,7 @@
 		= vertex count
 		= index count
 
-		- mdl prep(ply);
+		+ mdl prep(ply);
 			- calculate normals for outline
 		- void free(mdl);
 	= glmdl:
@@ -55,10 +54,12 @@
 		= element array
 		= attribute array
 
-		- glmdl load(mdl);
+		+ glmdl load(mdl);
 		- void unload(glmdl)
 		- void draw(glmdl, globj, program);
 			- draws on screen
+	= seq
+		- figure this shit out;
 	- figure out materials
 		- UV mapped color palette texture
 		+ material properties

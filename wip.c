@@ -46,57 +46,55 @@ int main(int argc, char *argv[]) {
 	glDeleteShader(frag2Shader);
 	
 
-	wip_ply_t model;
-	wip_readModel(&model, "mdl/wip_model.ply");
+	wip_ply_t ply;
+	wip_mdl_t mdl;
+	wip_glmdl_t glmdl[2];
 
-	GLuint posBuff;
-	GLuint norBuff;
-	GLuint colBuff;
-	GLuint ebo, vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glGenBuffers(1, &posBuff);
-	glGenBuffers(1, &norBuff);
-	glGenBuffers(1, &colBuff);
-	glGenBuffers(1, &ebo);
+	mdl.vertex_c = wip_allocType(int);
+	mdl.index_c = wip_allocType(int);
+
+	wip_readModel(&ply, "mdl/wip_model.ply");
+	wip_prepModel(&mdl, &ply);
+
+	wip_free(ply.vertex);
+	wip_free(ply.index);
+	wip_free(ply.color);
+	wip_free(ply.normal);
+
+	wip_readModel(&ply, "mdl/wip_model2.ply");
+	wip_loadModel(&glmdl[0], &mdl);
+
+	wip_free(mdl.model);
+	wip_free(mdl.index);
+	wip_prepModel(&mdl, &ply);
+
+	wip_free(ply.vertex);
+	wip_free(ply.index);
+	wip_free(ply.color);
+	wip_free(ply.normal);
+	wip_loadModel(&glmdl[1], &mdl);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, posBuff);
-	glBufferData(GL_ARRAY_BUFFER, model.vertex_c*3*sizeof(model.vertex[0]), model.vertex, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
+	wip_free(mdl.vertex_c);
+	wip_free(mdl.index_c);
 
-	glBindBuffer(GL_ARRAY_BUFFER, norBuff);
-	glBufferData(GL_ARRAY_BUFFER, model.vertex_c*3*sizeof(model.normal[0]), model.normal, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, colBuff);
-	glBufferData(GL_ARRAY_BUFFER, model.vertex_c*4*sizeof(model.color[0]), model.color, GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.index_c*3*sizeof(model.index[0]), model.index, GL_STATIC_DRAW);
-
+	wip_glmdl_t *currentGlmdl = &glmdl[0];
 
 	wip_obj_t *rocket = wip_allocType(wip_obj_t);
 	wip_makeObject(rocket);
-	wip_globj_t *transformFloat = wip_allocType(wip_globj_t);
+	wip_globj_t *transform = wip_allocType(wip_globj_t);
 
 
 	unsigned int lightLocation = glGetUniformLocation(program, "light");
+	unsigned int mpvLocation = glGetUniformLocation(program, "mpv");
 	unsigned int transformLocation = glGetUniformLocation(program, "transform");
-	unsigned int projectionLocation = glGetUniformLocation(program, "projection");
-	unsigned int viewLocation = glGetUniformLocation(program, "view");
+	unsigned int normalTransformLocation = glGetUniformLocation(program, "normalTransform");
 	unsigned int materialLocation = glGetUniformLocation(program, "material");
 
-	unsigned int transformLocation2 = glGetUniformLocation(program2, "transform");
-	unsigned int projectionLocation2 = glGetUniformLocation(program2, "projection");
-	unsigned int viewLocation2 = glGetUniformLocation(program2, "view");
+	unsigned int mpvLocation2 = glGetUniformLocation(program2, "mpv");
 	unsigned int outlineThicknessLocation2 = glGetUniformLocation(program2, "outlineThickness");
 	unsigned int outlineColorLocation2 = glGetUniformLocation(program2, "outlineColor");
 
-	float step = 0.2;
+	float step = 0.1;
 	float m[3] = { 0.1, 0.1, 0.4 };
 
 	wip_obj_t light, eye, center; 
@@ -131,6 +129,7 @@ int main(int argc, char *argv[]) {
 		KEY(GLFW_KEY_A) eye.x -= step;
 		KEY(GLFW_KEY_SPACE) eye.z += step;
 		KEY(GLFW_KEY_X) eye.z -= step;
+
 		center.x = eye.x;
 		center.y = eye.y + 1;
 		center.z = eye.z;
@@ -140,43 +139,62 @@ int main(int argc, char *argv[]) {
 
 		rocket->z = 0.5*sin(glfwGetTime());
 		rocket->r.y = 90;
-		rocket->r.x = 50*glfwGetTime();
+		rocket->r.x = 25*glfwGetTime();
 		rocket->s.x = 1.2;
 		rocket->s.y = 1.2;
 		rocket->s.z = 1.2;
-		wip_loadObject(transformFloat, rocket);
+		wip_loadObject(transform, rocket);
 
 		//m[0] = M_PI*sin(glfwGetTime());
 		//m[1] = 1.5*M_PI*sin(glfwGetTime());
 		//m[2] = sin(glfwGetTime())/2+0.5;
 		
-		KEY(GLFW_KEY_C) m[0] += 0.1;
-		KEY(GLFW_KEY_V) m[0] -= 0.1;
+		KEY(GLFW_KEY_C) m[0] += 0.01;
+		KEY(GLFW_KEY_V) m[0] -= 0.01;
+
+		KEY(GLFW_KEY_E) currentGlmdl = &glmdl[0];
+		KEY(GLFW_KEY_R) currentGlmdl = &glmdl[1];
+		KEY(GLFW_KEY_T) currentGlmdl = &glmdl[2];
+
+
+		KEY(GLFW_KEY_Q) glfwSetWindowShouldClose(window, GLFW_TRUE);
 
 		#undef KEY
 
+		wip_globj_t normalTransform;
+		{
+			wip_globj_t go;
+			mat4x4_invert(go.m, transform->m);
+			mat4x4_transpose(normalTransform.m, go.m);
+		}
+
+		wip_globj_t mpv;
+		mat4x4_mul(mpv.m, projection, view);
+		mat4x4_mul(mpv.m, mpv.m, transform->m);
 
 		glUseProgram(program);
 		
 		glUniform3fv(lightLocation, 1, light.position);
-		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformFloat->matrix);
-		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, (const float*)&view);
-		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, (const float*)&projection);
+		glUniformMatrix4fv(mpvLocation, 1, GL_FALSE, mpv.f);
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transform->f);
+		glUniformMatrix4fv(normalTransformLocation, 1, GL_FALSE, normalTransform.f);
 		glUniform3fv(materialLocation, 1, m);
 
-		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(currentGlmdl->vertex_a);
+		glDrawElements(GL_TRIANGLES, currentGlmdl->element_c, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 		
 		
 		glUseProgram(program2);
 
-		glUniformMatrix4fv(transformLocation2, 1, GL_FALSE, transformFloat->matrix);
-		glUniformMatrix4fv(viewLocation2, 1, GL_FALSE, (const float*)&view);
-		glUniformMatrix4fv(projectionLocation2, 1, GL_FALSE, (const float*)&projection);
+		glUniformMatrix4fv(mpvLocation2, 1, GL_FALSE, mpv.f);
 		glUniform1f(outlineThicknessLocation2, 0.02);
 		glUniform3fv(outlineColorLocation2, 1, (float []){0.1, 0, 0});
 
 		glCullFace(GL_FRONT);
-		glDrawElements(GL_TRIANGLES, model.index_c*3, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(currentGlmdl->vertex_a);
+		glDrawElements(GL_TRIANGLES, currentGlmdl->element_c, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 		glCullFace(GL_BACK);
 
 
@@ -185,13 +203,8 @@ int main(int argc, char *argv[]) {
 		glfwPollEvents();
 	}
 
-	wip_free(transformFloat);
+	wip_free(transform);
 	wip_free(rocket);
-
-	wip_free(model.vertex);
-	wip_free(model.index);
-	wip_free(model.color);
-	wip_free(model.normal);
 
 	glfwTerminate();
 	return 0;

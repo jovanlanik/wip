@@ -33,7 +33,7 @@ wip_globj_t *wip_loadObject(wip_globj_t *go, wip_obj_t *o) {
 	mat4x4_rotate_Y(matrix, matrix, RAD(o->r.y));
 	mat4x4_rotate_X(matrix, matrix, RAD(o->r.x));
 	mat4x4_rotate_Z(matrix, matrix, RAD(o->r.z));
-	memcpy(go->matrix, matrix, sizeof(mat4x4));
+	memcpy(go->m, matrix, sizeof(mat4x4));
 	return go;
 }
 

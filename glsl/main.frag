@@ -13,13 +13,14 @@ in vec4 col;
 
 uniform vec3 light;
 uniform mat4 transform;
+uniform mat4 normalTransform;
 uniform vec3 material;
 
 out vec4 fragColor;
 
 void main() {
 	vec3 tNor;
-	tNor = mat3(transpose(inverse(transform))) * nor;
+	tNor = mat3(normalTransform) * nor;
 	tNor = normalize(tNor);
 	vec3 nLight;
 	nLight = light - vec3(transform);

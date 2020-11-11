@@ -12,5 +12,4 @@ void _wip_glError(const char *func);
 void wip_glInit(void);
 GLuint wip_loadShader(const GLchar *source, GLenum type);
 GLuint wip_loadProgram(GLuint vert, GLuint frag);
-GLuint wip_loadModel();
 

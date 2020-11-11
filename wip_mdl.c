@@ -10,9 +10,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <GL/glew.h>
 
-#include "wip_mdl.h"
 #include "wip_fn.h"
+#include "wip_mdl.h"
 #define MSH_PLY_MALLOC(x) wip_alloc(x)
 #define MSH_PLY_REALLOC(x, y) wip_realloc(x, y)
 #define MSH_PLY_FREE(x) wip_free(x)
@@ -128,5 +129,49 @@ wip_ply_t *wip_readModel(wip_ply_t *p, char *file) {
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return p;
+}
+
+wip_mdl_t *wip_prepModel(wip_mdl_t *m, wip_ply_t *p) {
+	*m->vertex_c = p->vertex_c;
+	*m->index_c = p->index_c;
+
+	m->model = wip_alloc(p->vertex_c*sizeof(m->model[0]));
+	for(int i = 0; i < p->vertex_c; ++i) {
+		memcpy(m->model[i].vertex, &p->vertex[i*3], 3*sizeof(float));
+		memcpy(m->model[i].normal, &p->normal[i*3], 3*sizeof(float));
+		memcpy(m->model[i].color, &p->color[i*4], 4*sizeof(uint8_t));
+	}
+
+	m->index = wip_alloc(3*p->index_c*sizeof(uint32_t));
+	memcpy(m->index, p->index, 3*p->index_c*sizeof(uint32_t));
+
+	return m;
+}
+
+wip_glmdl_t *wip_loadModel(wip_glmdl_t *gm, wip_mdl_t *m) {
+	gm->element_c = *m->index_c * 3;
+
+	glGenVertexArrays(1, &gm->vertex_a);
+	glBindVertexArray(gm->vertex_a);
+
+	glGenBuffers(2, gm->buffers);
+	glBindBuffer(GL_ARRAY_BUFFER, gm->data_b);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gm->element_b);
+
+	glBufferData(GL_ARRAY_BUFFER, *m->vertex_c*sizeof(m->model[0]), m->model, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3*(*m->index_c)*sizeof(uint32_t), m->index, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(m->model[0]), 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(m->model[0]), (void *)(sizeof(float)*6));
+	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(m->model[0]), (void *)(sizeof(float)*12));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	return gm;
 }
 
