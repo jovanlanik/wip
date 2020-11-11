@@ -6,6 +6,7 @@
 // Main Source
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 //#include <pthread.h>
@@ -16,14 +17,12 @@
 #include "wip_gl.h"
 #include "wip_obj.h"
 #include "wip_mdl.h"
+#include "wip_input.h"
 #include "wip_glfw.h"
+#include "wip_math.h"
 #include "lib/linmath.h"
 
 #include "shaders.h"
-
-#define M_PI 3.14159265358979323846
-#define	DEG(rad) (rad*180.0/M_PI)
-#define RAD(deg) (deg*M_PI/180.0)
 
 int main(int argc, char *argv[]) {
 	wip_debug(WIP_INFO, "WIP built %s %s", __DATE__, __TIME__);
@@ -33,7 +32,6 @@ int main(int argc, char *argv[]) {
 
 	GLuint vertShader = wip_loadShader((char*)glsl_main_vert, GL_VERTEX_SHADER);
 	GLuint fragShader = wip_loadShader((char*)glsl_main_frag, GL_FRAGMENT_SHADER);
-
 	GLuint vert2Shader = wip_loadShader((GLchar*)glsl_invertedHull_vert, GL_VERTEX_SHADER);
 	GLuint frag2Shader = wip_loadShader((GLchar*)glsl_outline_frag, GL_FRAGMENT_SHADER);
 
@@ -122,13 +120,32 @@ int main(int argc, char *argv[]) {
 		glClearColor(0.3f, 0.6f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		#define KEY(x) if(glfwGetKey(window, x) == GLFW_PRESS)
+		//#define KEY(x) if(glfwGetKey(window, x) == GLFW_PRESS)
+		#define KEY(x) if(k.key == x)
+		wip_key_t k;
+		while((k = wip_keyRead()).key != -1) {
+		wip_debug(WIP_INFO, "Input read: %s %s", k.action ? "Pressed" : "Released", glfwGetKeyName(k.key, 0));
+		if(k.action == 0) break;
+
 		KEY(GLFW_KEY_W) eye.y += step;
 		KEY(GLFW_KEY_S) eye.y -= step;
 		KEY(GLFW_KEY_D) eye.x += step;
 		KEY(GLFW_KEY_A) eye.x -= step;
 		KEY(GLFW_KEY_SPACE) eye.z += step;
 		KEY(GLFW_KEY_X) eye.z -= step;
+
+		KEY(GLFW_KEY_C) m[0] += 0.01;
+		KEY(GLFW_KEY_V) m[0] -= 0.01;
+
+		KEY(GLFW_KEY_E) currentGlmdl = &glmdl[0];
+		KEY(GLFW_KEY_R) currentGlmdl = &glmdl[1];
+		KEY(GLFW_KEY_T) currentGlmdl = &glmdl[2];
+
+
+		KEY(GLFW_KEY_Q) glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+		}
+		#undef KEY
 
 		center.x = eye.x;
 		center.y = eye.y + 1;
@@ -149,17 +166,6 @@ int main(int argc, char *argv[]) {
 		//m[1] = 1.5*M_PI*sin(glfwGetTime());
 		//m[2] = sin(glfwGetTime())/2+0.5;
 		
-		KEY(GLFW_KEY_C) m[0] += 0.01;
-		KEY(GLFW_KEY_V) m[0] -= 0.01;
-
-		KEY(GLFW_KEY_E) currentGlmdl = &glmdl[0];
-		KEY(GLFW_KEY_R) currentGlmdl = &glmdl[1];
-		KEY(GLFW_KEY_T) currentGlmdl = &glmdl[2];
-
-
-		KEY(GLFW_KEY_Q) glfwSetWindowShouldClose(window, GLFW_TRUE);
-
-		#undef KEY
 
 		wip_globj_t normalTransform;
 		{

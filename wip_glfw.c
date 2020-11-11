@@ -9,11 +9,12 @@
 #include <GLFW/glfw3.h>
 
 #include "wip_fn.h"
+#include "wip_input.h"
 #include "wip_glfw.h"
-#include "callback.h"
 
 GLFWwindow *wip_initWindow(const char *name) {
 	wip_debug(WIP_INFO, "%s: Initializing window...", __func__);
+
 	if(!glfwInit())
 		wip_log(WIP_FATAL, "Couldn't initialize GLWF.");
 	glfwSetErrorCallback(error_callback);
@@ -33,5 +34,31 @@ GLFWwindow *wip_initWindow(const char *name) {
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return window;
+}
+
+void error_callback(int error, const char *message) {
+	wip_log(WIP_ERROR, "GLFW error: %s", message);
+	return;
+}
+
+void window_close_callback(GLFWwindow *window) {
+	wip_debug(WIP_INFO, "Close requested, exiting...");
+	//glfwSetWindowShouldClose(window, GLFW_FALSE);
+	return;
+}
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	// TODO: clean up
+	if(action == GLFW_REPEAT) return;
+	wip_key_t nkey = { action ? 1 : 0, key };
+	int ret = wip_keyWrite(nkey);
+	wip_debug(
+		ret ? WIP_INFO: WIP_ERROR,
+		"Input %s: %s %s",
+		ret ? "sent" : "dropped",
+	 	action ? "Pressed" : "Released",
+		glfwGetKeyName(key, 0)
+		);
+	return;
 }
 

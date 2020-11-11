@@ -72,6 +72,7 @@
 		- same thickness for distant objects
 		+ shader inputs
 		- calculate normals for outline
+			? compute shader
 - shaders
 	- vert
 	- frag
