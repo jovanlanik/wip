@@ -5,11 +5,27 @@
 
 // GL Functions
 
-#include <stdbool.h>
+#include <pthread.h>
 #include <GL/glew.h>
 
 #include "wip_fn.h"
+#include "wip_window.h"
 #include "wip_gl.h"
+
+void *wip_renderThread(void *arg) {
+	wip_setWindow(&wip_globalWindow);
+	wip_glInit();
+
+	glClearColor(0.3f, 0.6f, 0.8f, 1.0f);
+
+	while(!wip_globalWindow.close) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		wip_swapWindow(&wip_globalWindow);
+	}
+
+	pthread_exit(NULL);
+}
 
 void _wip_glError(const char *func) {
 	GLenum error;
@@ -23,7 +39,7 @@ void wip_glInit(void) {
 	wip_debug(WIP_INFO, "%s: Initializing GL...", __func__);
 	glewInit();
 	if(!GLEW_VERSION_3_2)
-		wip_log(WIP_FATAL, "OpenGL 3.3 not supported.");
+		wip_log(WIP_FATAL, "%s: OpenGL 3.3 not supported.", __func__);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);

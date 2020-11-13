@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "wip_types.h"
+#include "include/wip_types.h"
 
 typedef struct {
 	float *vertex;
@@ -32,6 +32,7 @@ typedef struct {
 typedef struct {
 	#define BUFF2(type) { type data_b; type element_b; }
 	union NAMED_VEC(2, GLuint, BUFF2, buffers, );
+	#undef BUFF2
 	size_t element_c;
 	GLuint vertex_a;
 } wip_glmdl_t;

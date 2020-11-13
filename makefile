@@ -7,7 +7,7 @@
 
 NAME = wip
 CC = gcc
-LDLIBS = -lm -lGL -lGLEW -lglfw
+LDLIBS = -lm -lpthread -lGL -lGLEW -lglfw
 CFLAGS = -std=c11 -Wall -pedantic
 
 GLSL = $(wildcard glsl/*.vert glsl/*.frag)
