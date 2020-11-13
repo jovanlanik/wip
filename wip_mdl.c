@@ -20,7 +20,7 @@
 #define MSH_PLY_IMPLEMENTATION
 #include "lib/msh_ply.h"
 
-wip_ply_t *wip_readModel(wip_ply_t *p, char *file) {
+wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 	wip_debug(WIP_INFO, "%s: Loading model from %s", __func__, file);
 
 

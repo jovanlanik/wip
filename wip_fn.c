@@ -12,6 +12,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <pthread.h>
+
+#if _POSIX_MAPPED_FILES > 0
+	#include <sys/mman.h>
+#endif
 
 #include "wip_fn.h"
 
@@ -65,7 +70,7 @@ void wip_log(enum wip_logType type, const char *message, ...) {
 	return;
 }
 
-char *wip_getConf(void) {
+char *wip_getConfPath(void) {
 	char *config = getenv("XDG_CONFIG_HOME");
 	if(config != NULL && *config != '\0') {
 		char *c = malloc(strlen(config)+1);
@@ -102,5 +107,50 @@ char *wip_getConf(void) {
 	strcat(c, filename);
 	config = c;
 	return config;
+}
+
+void *wip_openFile(const char *name, const char *mode) {
+	FILE *file = fopen(name, mode);
+	if(!file) wip_log(WIP_ERROR, "%s: Couldn't open %s: %s", __func__, name, strerror(errno));
+	return file;
+}
+
+char *wip_readFile(void* file) {
+	if(!file) return NULL;
+	fseek(file, 0, SEEK_END);
+	long int size = ftell(file);
+	rewind(file);
+	char *buff = wip_alloc(size+1);
+	fread(buff, 1, size, file);
+	return buff;
+}
+
+void *wip_timeoutFunc(void *arg) {
+	wip_timeout_t *timeout = (wip_timeout_t *)arg;
+
+	*timeout->done = 0;
+	sleep(timeout->time);
+	timeout->func(timeout->arg);
+
+	*timeout->done = 1;
+	free(timeout);
+	pthread_exit(0);
+}
+
+int *wip_setTimeout(void *(*func)(void *), void *arg, int time) {
+	pthread_t thread;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+	wip_timeout_t *timeout = wip_allocType(wip_timeout_t);
+	timeout->done = wip_allocType(int);
+	timeout->func = func;
+	timeout->arg = arg;
+	timeout->time = time;
+
+	pthread_create(&thread, &attr, wip_timeoutFunc, timeout);
+	pthread_attr_destroy(&attr);
+	return timeout->done;
 }
 

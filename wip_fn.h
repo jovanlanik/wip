@@ -31,6 +31,16 @@ enum wip_logType {
 	WIP_FATAL
 };
 
-void wip_log(enum wip_logType, const char *, ...);
-char *wip_getConf(void);
+typedef struct {
+	int *done;
+	unsigned int time;
+	void *(*func)(void *);
+	void *arg;
+} wip_timeout_t;
+
+void wip_log(enum wip_logType, const char *m, ...);
+void *wip_openFile(const char *n, const char *m);
+char *wip_readFile(void *f);
+char *wip_getConfPath(void);
+int *wip_setTimeout(void *(*func)(void *), void *arg, int time);
 

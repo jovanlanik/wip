@@ -37,7 +37,7 @@ typedef struct {
 	GLuint vertex_a;
 } wip_glmdl_t;
 
-wip_ply_t *wip_readModel(wip_ply_t *p, char *file);
+wip_ply_t *wip_readModel(wip_ply_t *p, const char *file);
 wip_mdl_t *wip_prepModel(wip_mdl_t *m, wip_ply_t *p);
 wip_glmdl_t *wip_loadModel(wip_glmdl_t *gm, wip_mdl_t *m);
 
