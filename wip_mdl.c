@@ -23,7 +23,6 @@
 wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 	wip_debug(WIP_INFO, "%s: Loading model from %s", __func__, file);
 
-
 	msh_ply_desc_t formatVertex = {
 		.element_name = "vertex",
 		.property_names = (const char*[]){"x", "y", "z"},
@@ -67,7 +66,6 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 
 	formatFace.data = &p->index;
 	formatFace.data_count = &p->index_c;
-
 
 	bool hasColor = true, hasNormal = true;
 	int r = 0;
@@ -125,7 +123,6 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 		}
 			
 	}
-
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return p;

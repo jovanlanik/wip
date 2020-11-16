@@ -14,6 +14,6 @@ typedef struct {
 	int key : 31;
 } wip_key_t;
 
-int wip_keyWrite(wip_key_t k);
-wip_key_t wip_keyRead(void);
+int wip_writeKey(wip_key_t k);
+wip_key_t wip_readKey(void);
 

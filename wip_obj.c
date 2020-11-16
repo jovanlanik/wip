@@ -10,11 +10,9 @@
 
 #include "wip_obj.h"
 #include "wip_fn.h"
+#include "include/wip_math.h"
 #include "lib/linmath.h"
 
-#define M_PI 3.14159265358979323846
-#define	DEG(rad) (rad*180.0/M_PI)
-#define RAD(deg) (deg*M_PI/180.0)
 
 wip_obj_t *wip_makeObject(wip_obj_t *o) {
 	if(o) {

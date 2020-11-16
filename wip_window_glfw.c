@@ -24,20 +24,10 @@ void window_close_callback(GLFWwindow *window) {
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-	// TODO: clean up
 	if(action == GLFW_REPEAT) return;
 	wip_key_t nkey = { action ? 1 : 0, key };
-	wip_keyWrite(nkey);
-	/*
-	int ret = wip_keyWrite(nkey);
-	wip_debug(
-		ret ? WIP_INFO: WIP_ERROR,
-		"Input %s: %s %s",
-		ret ? "sent" : "dropped",
-	 	action ? "Pressed" : "Released",
-		glfwGetKeyName(key, 0)
-		);
-	*/
+	int ret = wip_writeKey(nkey);
+	if(!ret) wip_log(WIP_ERROR, "GLFW: Dropped input key.");
 	return;
 }
 

@@ -6,4 +6,4 @@ I just want to learn and experiment.
 - GLEW
 - GLFW
 ## Building
-`$ make clean all`
+`$ make`

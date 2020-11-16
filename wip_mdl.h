@@ -20,9 +20,9 @@ typedef struct {
 
 typedef struct {
 	struct {
-		struct NAMED_VEC(3, float, XYZ, vertex, v);
-		struct NAMED_VEC(3, float, XYZ, normal, n);
-		struct NAMED_VEC(4, uint8_t, RGBA, color, c);
+		struct WIP_NAMED_VEC(3, float, WIP_XYZ, vertex, v);
+		struct WIP_NAMED_VEC(3, float, WIP_XYZ, normal, n);
+		struct WIP_NAMED_VEC(4, uint8_t, WIP_RGBA, color, c);
 	} *model;
 	uint32_t *index;
 	int *vertex_c;
@@ -31,7 +31,7 @@ typedef struct {
 
 typedef struct {
 	#define BUFF2(type) { type data_b; type element_b; }
-	union NAMED_VEC(2, GLuint, BUFF2, buffers, );
+	union WIP_NAMED_VEC(2, GLuint, BUFF2, buffers, );
 	#undef BUFF2
 	size_t element_c;
 	GLuint vertex_a;
