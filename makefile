@@ -17,7 +17,7 @@ OBJ = $(SRC:%.c=%.o)
 
 all: $(NAME)
 $(NAME): $(OBJ)
-wip.o : shaders.h
+wip_gl.o : shaders.h
 shaders.h: $(GLSL:%=%.h)
 	@cat $(GLSL:%=%.h) > $@
 	@echo making $@ from $(GLSL)

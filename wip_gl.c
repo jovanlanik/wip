@@ -74,7 +74,7 @@ void *wip_renderThread(void *arg) {
 
 	vec3 axis = {0.0f, 0.0f, 1.0f};
 	wip_globj_t projection;
-	mat4x4_perspective(projection.m, RAD(70), 16.0f/10.0f, 0.1, 100);
+	mat4x4_perspective(projection.m, RAD(15), 16.0f/10.0f, 0.1, 100);
 
 	while(!wip_globalWindow.close) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

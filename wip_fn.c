@@ -14,10 +14,6 @@
 #include <pwd.h>
 #include <pthread.h>
 
-#if _POSIX_MAPPED_FILES > 0
-	#include <sys/mman.h>
-#endif
-
 #include "wip_fn.h"
 
 #ifdef NDEBUG

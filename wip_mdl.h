@@ -29,6 +29,10 @@ typedef struct {
 	int *index_c;
 } wip_mdl_t;
 
+wip_ply_t *wip_readModel(wip_ply_t *p, const char *file);
+wip_mdl_t *wip_prepModel(wip_mdl_t *m, wip_ply_t *p);
+
+#ifdef GL_TRUE
 typedef struct {
 	#define BUFF2(type) { type data_b; type element_b; }
 	union WIP_NAMED_VEC(2, GLuint, BUFF2, buffers, );
@@ -37,7 +41,6 @@ typedef struct {
 	GLuint vertex_a;
 } wip_glmdl_t;
 
-wip_ply_t *wip_readModel(wip_ply_t *p, const char *file);
-wip_mdl_t *wip_prepModel(wip_mdl_t *m, wip_ply_t *p);
 wip_glmdl_t *wip_loadModel(wip_glmdl_t *gm, wip_mdl_t *m);
+#endif
 

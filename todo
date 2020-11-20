@@ -1,19 +1,10 @@
 # Todo list
-- priority
-	+ graphene must go, it's using libgobject and causing a bunch of leaks
-		= replaced with linmath.h
-- init code
-	+ seperate GL and GLFW
-	- resolution and fullscreen settings
 - objects
-	+ make objects for these things
-		+ camera
-		+ light
-		+ mpv
-	? rework rotations
+	- free
 	= obj:
 		= position
 		= rotation
+			? rework rotations
 		= scale
 		= momentum
 		= anglular momentum
@@ -22,42 +13,9 @@
 	= globj:
 		= transformation matrix
 		+ globj load(obj);
+	- rework objs
 - models
-	= ply:
-		= vertex
-		= normal
-		= color
-		= index
-		= vertex count
-		= index count
-
-		+ ply read(file);
-			+ make properties optional
-			- calculate normals
-				? not sure if here or in prep
-		- void free(ply);
-	= mdl:
-		= model
-			= vertex
-			= normal
-			= color
-		= index
-		= vertex count
-		= index count
-
-		+ mdl prep(ply);
-			- calculate normals for outline
-		- void free(mdl);
-	= glmdl:
-		= model
-			- seperate face and outline normals
-		= element array
-		= attribute array
-
-		+ glmdl load(mdl);
-		- void unload(glmdl)
-		- void draw(glmdl, globj, program);
-			- draws on screen
+	- free
 	= seq
 		- figure this shit out;
 	- figure out materials
@@ -73,33 +31,20 @@
 		+ shader inputs
 		- calculate normals for outline
 			? compute shader
-- shaders
-	- vert
-	- frag
-		+ material properties
-	- outline
-		+ shader inputs
-			+ color
-	- inverted hull
-		- same thickness for distant objects
-		+ shader inputs
-			+ thickness
 - image loading
 	- choose library
 		? stb_image.h
-+ antialiasing
-	- settings
 - input
 	+ callback
 	- mapping
-	- handling
+	+ handling
 - settings
 	+ xdg config
 	- config loading
 	- setting storage
-- threads
-	- render thread
-	- logic thread
-+ clean up header includes
-	- do it again
-+ clean up makefile
+	- resolution and fullscreen
+	- antialiasing
+- colisions
+- audio
+	? openAL
+	? something simpler

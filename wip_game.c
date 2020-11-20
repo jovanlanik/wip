@@ -23,7 +23,7 @@ void *wip_logicThread(void *arg) {
 	wip_makeObject(&center);
 
 	wip_makeObject(&eye);
-	eye.y = -3;
+	eye.y = -32;
 
 	wip_makeObject(&light);
 	light.x = -2;
@@ -53,6 +53,8 @@ void *wip_logicThread(void *arg) {
 
 		object[0].z = 0.5*sin(glfwGetTime());
 		object[0].r.x = 25*glfwGetTime();
+
+		object[1].x = 8*sin(glfwGetTime());
 	}
 
 	pthread_exit(NULL);

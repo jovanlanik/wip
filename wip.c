@@ -8,7 +8,6 @@
 #include <pthread.h>
 
 #include "wip_fn.h"
-#include "wip_res.h"
 #include "wip_window.h"
 
 void *wip_logicThread(void *arg);
