@@ -7,13 +7,16 @@
 
 NAME = wip
 CC = gcc
-LDLIBS = -lm -lpthread -lGL -lGLEW -lglfw
-CFLAGS = -std=c11 -Wall -pedantic
+LDLIBS = -lm -lpthread -lGL -lGLEW
+CFLAGS = -std=c11 -Wall -pedantic -I ./ -I ./include
 
 GLSL = $(wildcard glsl/*.vert glsl/*.frag)
 SRC = $(wildcard *.c)
-DEPS = $(wildcard *.h)
 OBJ = $(SRC:%.c=%.o)
+
+WIP_WINDOW_BACKEND ?= glfw
+LDLIBS += -l$(WIP_WINDOW_BACKEND)
+SRC += backend/wip_window_$(WIP_WINDOW_BACKEND).c
 
 all: $(NAME)
 $(NAME): $(OBJ)

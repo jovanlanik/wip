@@ -21,5 +21,6 @@ void wip_initWindow(wip_window_t *w);
 void wip_setWindow(wip_window_t *w);
 void wip_swapWindow(wip_window_t *w);
 void wip_pollWindow(wip_window_t *w);
+double wip_timeWindow(wip_window_t *w);
 void wip_termWindow(wip_window_t *w);
 

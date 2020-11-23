@@ -7,7 +7,7 @@
 
 #include <unistd.h>
 
-#include "include/wip_types.h"
+#include "wip_types.h"
 #include "wip_input.h"
 
 struct WIP_FIFO(WIP_KEY_BUFFER, wip_key_t) wip_key;

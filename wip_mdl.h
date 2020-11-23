@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "include/wip_types.h"
+#include "wip_types.h"
 
 typedef struct {
 	float *vertex;

@@ -17,7 +17,7 @@
 #include "wip_game.h"
 
 void *wip_logicThread(void *arg) {
-	wip_obj_t object[2];
+	wip_obj_t object[1];
 	wip_obj_t light, eye, center;
 
 	wip_makeObject(&center);
@@ -31,17 +31,13 @@ void *wip_logicThread(void *arg) {
 	light.z = 2;
 
 	wip_makeObject(&object[0]);
-	object[0].x = -1.5;
-	wip_makeObject(&object[1]);
-	object[1].x = 1.5;
 
-	wip_globalScene.object = wip_alloc(5*sizeof(void *));
+	wip_globalScene.object = wip_alloc(4*sizeof(void *));
 	wip_globalScene.object[0] = &light;
 	wip_globalScene.object[1] = &eye;
 	wip_globalScene.object[2] = &center;
 	wip_globalScene.object[3] = &object[0];
-	wip_globalScene.object[4] = &object[1];
-	wip_globalScene.length = 5;
+	wip_globalScene.length = 4;
 
 	while(!wip_globalWindow.close) {
 		wip_key_t key = wip_readKey();
@@ -51,10 +47,8 @@ void *wip_logicThread(void *arg) {
 			pthread_mutex_unlock(&wip_globalWindow_m);
 		}
 
-		object[0].z = 0.5*sin(glfwGetTime());
-		object[0].r.x = 25*glfwGetTime();
-
-		object[1].x = 8*sin(glfwGetTime());
+		object[0].z = 0.5*sin(wip_timeWindow(&wip_globalWindow));
+		object[0].r.x = 25*wip_timeWindow(&wip_globalWindow);
 	}
 
 	pthread_exit(NULL);

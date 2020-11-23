@@ -9,7 +9,7 @@
 
 #include "wip_fn.h"
 #include "wip_obj.h"
-#include "include/wip_math.h"
+#include "wip_math.h"
 #include "lib/linmath.h"
 
 

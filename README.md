@@ -5,5 +5,6 @@ I just want to learn and experiment.
 ## Dependencies
 - GLEW
 - GLFW
+- xxd
 ## Building
 `$ make`

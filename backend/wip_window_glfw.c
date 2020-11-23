@@ -62,9 +62,12 @@ void wip_swapWindow(wip_window_t *window) {
 }
 
 void wip_pollWindow(wip_window_t *window) {
-	if(window->close) glfwSetWindowShouldClose(window->handle, GLFW_TRUE);
 	glfwPollEvents();
 	if(glfwWindowShouldClose(window->handle)) window->close = 1;
+}
+
+double wip_timeWindow(wip_window_t *window) {
+	return glfwGetTime();
 }
 
 void wip_termWindow(wip_window_t *window) {

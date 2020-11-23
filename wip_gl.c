@@ -15,7 +15,7 @@
 #include "wip_game.h"
 #include "wip_window.h"
 #include "wip_gl.h"
-#include "include/wip_math.h"
+#include "wip_math.h"
 #include "lib/linmath.h"
 
 #include "shaders.h"
@@ -40,18 +40,34 @@ void *wip_renderThread(void *arg) {
 
 	wip_ply_t ply;
 	wip_mdl_t mdl;
-	wip_glmdl_t glmdl;
+	wip_glmdl_t glmdl, glmdl_outline;
 	mdl.vertex_c = wip_allocType(int);
 	mdl.index_c = wip_allocType(int);
+
 	wip_readModel(&ply, "mdl/wip_model.ply");
+
 	wip_prepModel(&mdl, &ply);
 	wip_free(ply.vertex);
 	wip_free(ply.index);
 	wip_free(ply.color);
 	wip_free(ply.normal);
+
+	wip_readModel(&ply, "mdl/wip_model_outline.ply");
+
 	wip_loadModel(&glmdl, &mdl);
 	wip_free(mdl.model);
 	wip_free(mdl.index);
+
+	wip_prepModel(&mdl, &ply);
+	wip_free(ply.vertex);
+	wip_free(ply.index);
+	wip_free(ply.color);
+	wip_free(ply.normal);
+
+	wip_loadModel(&glmdl_outline, &mdl);
+	wip_free(mdl.model);
+	wip_free(mdl.index);
+
 	wip_free(mdl.vertex_c);
 	wip_free(mdl.index_c);
 
@@ -107,12 +123,14 @@ void *wip_renderThread(void *arg) {
 			glUniform3fv(materialLocation, 1, m);
 			glDrawElements(GL_TRIANGLES, glmdl.element_c, GL_UNSIGNED_INT, 0);
 
+			glBindVertexArray(glmdl_outline.vertex_a);
+
 			glUseProgram(program2);
 			glUniformMatrix4fv(mpvLocation2, 1, GL_FALSE, mpv.f);
-			glUniform1f(outlineThicknessLocation2, 0.02);
+			glUniform1f(outlineThicknessLocation2, 0.05);
 			glUniform3fv(outlineColorLocation2, 1, (float []){0.1, 0, 0});
 			glCullFace(GL_FRONT);
-			glDrawElements(GL_TRIANGLES, glmdl.element_c, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, glmdl_outline.element_c, GL_UNSIGNED_INT, 0);
 			glCullFace(GL_BACK);
 			wip_glError();
 	
