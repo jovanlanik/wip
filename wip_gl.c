@@ -10,6 +10,7 @@
 #include <GL/glew.h>
 
 #include "wip_fn.h"
+#include "wip_conf.h"
 #include "wip_obj.h"
 #include "wip_mdl.h"
 #include "wip_game.h"
@@ -90,7 +91,8 @@ void *wip_renderThread(void *arg) {
 
 	vec3 axis = {0.0f, 0.0f, 1.0f};
 	wip_globj_t projection;
-	mat4x4_perspective(projection.m, RAD(15), 16.0f/10.0f, 0.1, 100);
+	float ratio = (float)wip_getConfInt("video.width")/(float)wip_getConfInt("video.height");
+	mat4x4_perspective(projection.m, RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 100);
 
 	while(!wip_globalWindow.close) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -166,7 +168,7 @@ void wip_glInit(void) {
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_CULL_FACE);
 
-	glViewport(0, 0, 1680, 1050);
+	glViewport(0, 0, wip_getConfInt("video.width"), wip_getConfInt("video.height"));
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;

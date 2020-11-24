@@ -38,12 +38,14 @@
 	+ callback
 	- mapping
 	+ handling
+	- SDL2 support
 - settings
 	+ xdg config
-	- config loading
-	- setting storage
-	- resolution and fullscreen
-	- antialiasing
+	+ config loading
+	? setting storage
+	+ resolution
+	- fullscreen
+	+ antialiasing
 - colisions
 - audio
 	? openAL

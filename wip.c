@@ -8,6 +8,7 @@
 #include <pthread.h>
 
 #include "wip_fn.h"
+#include "wip_conf.h"
 #include "wip_window.h"
 
 void *wip_logicThread(void *arg);
@@ -22,6 +23,8 @@ int main(int argc, char *argv[]) {
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+	wip_initConf();
 
 	wip_initWindow(&wip_globalWindow);
 	pthread_mutex_init(&wip_globalWindow_m, NULL);
@@ -41,6 +44,8 @@ int main(int argc, char *argv[]) {
 
 	wip_termWindow(&wip_globalWindow);
 	pthread_mutex_destroy(&wip_globalWindow_m);
+
+	wip_termConf();
 
 	return 0;
 }

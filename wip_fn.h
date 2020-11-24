@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <stdio.h>
+
 #ifdef NDEBUG
 	#define wip_debug(...) ((void)0)
 	void *wip_alloc(size_t);
@@ -31,16 +33,17 @@ enum wip_logType {
 	WIP_FATAL
 };
 
+/*
 typedef struct {
 	int *done;
 	unsigned int time;
 	void *(*func)(void *);
 	void *arg;
 } wip_timeout_t;
+*/
 
 void wip_log(enum wip_logType, const char *m, ...);
-void *wip_openFile(const char *n, const char *m);
-char *wip_readFile(void *f);
-char *wip_getConfPath(void);
-int *wip_setTimeout(void *(*func)(void *), void *arg, int time);
+FILE *wip_openFile(const char *n);
+//char *wip_readFile(void *f);
+//int *wip_setTimeout(void *(*func)(void *), void *arg, int time);
 

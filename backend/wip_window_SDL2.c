@@ -11,6 +11,7 @@
 #include "wip_window.h"
 #include "wip_input.h"
 
+// TODO: load config values
 void wip_initWindow(wip_window_t *window) {
 	wip_debug(WIP_INFO, "%s: Initializing window...", __func__);
 

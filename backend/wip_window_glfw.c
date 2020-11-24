@@ -10,6 +10,7 @@
 #include "wip_fn.h"
 #include "wip_window.h"
 #include "wip_input.h"
+#include "wip_conf.h"
 
 void error_callback(int error, const char *message) {
 	wip_log(WIP_ERROR, "GLFW: %s", message);
@@ -40,9 +41,9 @@ void wip_initWindow(wip_window_t *window) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, wip_getConfInt("graphics.msaa"));
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	window->handle = glfwCreateWindow(1680, 1050, "WIP", NULL, NULL);
+	window->handle = glfwCreateWindow(wip_getConfInt("video.width"), wip_getConfInt("video.height"), "WIP", NULL, NULL);
 	if(!window->handle) {
 		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
 	}
