@@ -9,6 +9,6 @@
 
 #include <pthread.h>
 
-wip_scene_t wip_globalScene;
-pthread_mutex_t wip_globalScene_m;
+extern wip_scene_t wip_globalScene;
+extern pthread_mutex_t wip_globalScene_m;
 
