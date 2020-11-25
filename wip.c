@@ -9,7 +9,7 @@
 
 #include "wip_fn.h"
 #include "wip_conf.h"
-
+#define WIP_MAIN
 #include "wip_window.h"
 wip_window_t wip_globalWindow;
 pthread_mutex_t wip_globalWindow_m;

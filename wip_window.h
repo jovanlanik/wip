@@ -14,8 +14,10 @@ typedef struct {
 	void *handle;
 } wip_window_t;
 
+#ifndef WIP_MAIN
 extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
+#endif
 
 void wip_initWindow(wip_window_t *w);
 void wip_setWindow(wip_window_t *w);
