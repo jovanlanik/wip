@@ -14,6 +14,7 @@
 #include "wip_obj.h"
 #include "wip_window.h"
 #include "wip_input.h"
+#define WIP_GAME
 #include "wip_game.h"
 wip_scene_t wip_globalScene;
 pthread_mutex_t wip_globalScene_m;
