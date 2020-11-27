@@ -10,13 +10,14 @@
 #include "wip_types.h"
 #include "wip_input.h"
 
-struct WIP_FIFO(WIP_KEY_BUFFER, wip_key_t) wip_key;
+struct WIP_FIFO_T(WIP_KEY_BUFFER, wip_key_t) wip_key;
 
+// TODO: fix this shit
 int wip_writeKey(wip_key_t key) {
 	int a;
 	for(a = WIP_INPUT_ATTEMPTS; a > 0; --a)
 		if(wip_key.head + 1 != wip_key.tail) break;
-		else sleep(WIP_INPUT_SLEEP);
+		else sleep(0);
 	if(a == 0) return 0;
 	wip_key.head = (wip_key.head + 1) % WIP_KEY_BUFFER;
 	wip_key.buffer[wip_key.head] = key;

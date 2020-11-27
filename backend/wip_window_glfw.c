@@ -43,7 +43,8 @@ void wip_initWindow(wip_window_t *window) {
 	//glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, wip_getConfInt("graphics.msaa"));
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	window->handle = glfwCreateWindow(wip_getConfInt("video.width"), wip_getConfInt("video.height"), "WIP", NULL, NULL);
+	window->handle = glfwCreateWindow(wip_getConfInt("video.width"), wip_getConfInt("video.height"),
+		"WIP", wip_getConfBool("video.fullscreen") ? glfwGetPrimaryMonitor() : NULL, NULL);
 	if(!window->handle) {
 		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
 	}

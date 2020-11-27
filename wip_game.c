@@ -26,12 +26,12 @@ void *wip_logicThread(void *arg) {
 	wip_makeObject(&center);
 
 	wip_makeObject(&eye);
-	eye.y = -4;
+	eye.y = -3;
 
 	wip_makeObject(&light);
-	light.x = -2;
-	light.y = -3;
-	light.z = 2;
+	light.x = 2;
+	light.y = 0;
+	light.z = 1;
 
 	wip_makeObject(&object[0]);
 

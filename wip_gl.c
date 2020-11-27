@@ -113,7 +113,7 @@ void *wip_renderThread(void *arg) {
 				mat4x4_transpose(normalTransform.m, go.m);
 			}
 			mat4x4_mul(mpv.m, pv.m, transform.m);
-
+			wip_loadObjectF(WIP_POS, &transform, wip_globalScene.object[i]);
 
 			glBindVertexArray(glmdl.vertex_a);
 
@@ -134,12 +134,11 @@ void *wip_renderThread(void *arg) {
 			glCullFace(GL_FRONT);
 			glDrawElements(GL_TRIANGLES, glmdl_outline.element_c, GL_UNSIGNED_INT, 0);
 			glCullFace(GL_BACK);
-			wip_glError();
+			//wip_glError();
 	
 			glBindVertexArray(0);
 
 		}
-
 
 		wip_swapWindow(&wip_globalWindow);
 	}

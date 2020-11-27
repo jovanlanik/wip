@@ -8,6 +8,7 @@
 #include "SDL2/SDL.h"
 
 #include "wip_fn.h"
+#include "wip_conf.h"
 #include "wip_window.h"
 #include "wip_input.h"
 
@@ -24,7 +25,8 @@ void wip_initWindow(wip_window_t *window) {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-	window->handle = SDL_CreateWindow("WIP", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1680, 1050, SDL_WINDOW_OPENGL);
+	window->handle = SDL_CreateWindow("WIP", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		wip_getConfInt("video.width"), wip_getConfInt("video.height"), SDL_WINDOW_OPENGL);
 	if(!window->handle) {
 		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
 	}

@@ -8,7 +8,7 @@
 NAME = wip
 CC = gcc
 LDLIBS = -lm -lpthread -lGL -lGLEW -lconfig
-CFLAGS = -std=c11 -Wall -pedantic -I ./ -I ./include
+CFLAGS = -DNDEBUG -std=c11 -Wall -pedantic -I ./ -I ./include
 
 GLSL = $(wildcard glsl/*.vert glsl/*.frag)
 SRC = $(wildcard *.c)

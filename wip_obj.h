@@ -9,15 +9,21 @@
 
 #include "wip_types.h"
 
+enum wip_objFlags {
+	WIP_POS = 1,
+	WIP_ROT = 2,
+	WIP_SCALE = 4
+};
+
 typedef struct {
-	union WIP_POS;
-	union WIP_NAMED_VEC(3, float, WIP_XYZ, rotation, r);
-	union WIP_NAMED_VEC(3, float, WIP_XYZ, scale, s);
-	union WIP_NAMED_VEC(3, float, WIP_XYZ, momentum, m);
-	union WIP_NAMED_VEC(3, float, WIP_XYZ, angular, a);
+	union WIP_NAMED_VEC_T(3, float, WIP_XYZ, position, );
+	union WIP_NAMED_VEC_T(3, float, WIP_XYZ, rotation, r);
+	union WIP_NAMED_VEC_T(3, float, WIP_XYZ, scale, s);
+	union WIP_NAMED_VEC_T(3, float, WIP_XYZ, momentum, m);
+	union WIP_NAMED_VEC_T(3, float, WIP_XYZ, angular, a);
 } wip_obj_t;
 
-typedef union WIP_NAMED_MAT(4, 4, float, f, m) wip_globj_t;
+typedef union WIP_NAMED_MAT_T(4, 4, float, f, m) wip_globj_t;
 
 typedef struct {
 	wip_obj_t **object;
@@ -25,6 +31,7 @@ typedef struct {
 } wip_scene_t;
 
 wip_obj_t *wip_makeObject(wip_obj_t *o);
-wip_globj_t *wip_loadObject(wip_globj_t *go, wip_obj_t *o);
+#define wip_loadObject(go, o) wip_loadObjectF(WIP_POS|WIP_ROT|WIP_SCALE, go, o)
+wip_globj_t *wip_loadObjectF(enum wip_objFlags, wip_globj_t *go, wip_obj_t *o);
 void wip_unloadObject(wip_globj_t *go);
 

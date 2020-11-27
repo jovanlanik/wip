@@ -20,9 +20,9 @@ typedef struct {
 
 typedef struct {
 	struct {
-		struct WIP_NAMED_VEC(3, float, WIP_XYZ, vertex, v);
-		struct WIP_NAMED_VEC(3, float, WIP_XYZ, normal, n);
-		struct WIP_NAMED_VEC(4, uint8_t, WIP_RGBA, color, c);
+		struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, vertex, v);
+		struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, normal, n);
+		struct WIP_NAMED_VEC_T(4, uint8_t, WIP_RGBA, color, c);
 	} *model;
 	uint32_t *index;
 	int *vertex_c;
@@ -35,7 +35,7 @@ wip_mdl_t *wip_prepModel(wip_mdl_t *m, wip_ply_t *p);
 #ifdef GL_TRUE
 typedef struct {
 	#define BUFF2(type) { type data_b; type element_b; }
-	union WIP_NAMED_VEC(2, GLuint, BUFF2, buffers, );
+	union WIP_NAMED_VEC_T(2, GLuint, BUFF2, buffers, );
 	#undef BUFF2
 	size_t element_c;
 	GLuint vertex_a;

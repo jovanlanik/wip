@@ -15,9 +15,9 @@
 #include "wip_fn.h"
 
 static config_t wip_globalConf;
-#define WIP_DEFINE_GET_CONF(type, name, lib) \
+#define WIP_DEFINE_GET_CONF(type, name, lib, def) \
 type wip_getConf##name(const char *path) { \
-	type x; \
+	type x = def; \
 	if(!config_lookup_##lib(&wip_globalConf, path, &x)) \
 		wip_log(WIP_ERROR, "%s: Can't find '%s' in config.", __func__, path); \
 	return x; \
