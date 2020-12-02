@@ -19,18 +19,24 @@
 #include "wip_math.h"
 #include "lib/linmath.h"
 
-#include "shaders.h"
+#include "baked/shaders.h"
+
+extern wip_window_t wip_globalWindow;
+extern pthread_mutex_t wip_globalWindow_m;
+
+extern wip_scene_t wip_globalScene;
+extern pthread_mutex_t wip_globalScene_m;
 
 void *wip_renderThread(void *arg) {
-	wip_setWindow(&wip_globalWindow);
+	wip_setWindow();
 	wip_glInit();
 
 	glClearColor(0.3f, 0.6f, 0.8f, 1.0f);
 
-	GLuint vertShader = wip_loadShader((char*)glsl_main_vert, GL_VERTEX_SHADER);
-	GLuint fragShader = wip_loadShader((char*)glsl_main_frag, GL_FRAGMENT_SHADER);
-	GLuint vert2Shader = wip_loadShader((GLchar*)glsl_invertedHull_vert, GL_VERTEX_SHADER);
-	GLuint frag2Shader = wip_loadShader((GLchar*)glsl_outline_frag, GL_FRAGMENT_SHADER);
+	GLuint vertShader = wip_loadShader((char *)glsl_main_vert, GL_VERTEX_SHADER);
+	GLuint fragShader = wip_loadShader((char *)glsl_main_frag, GL_FRAGMENT_SHADER);
+	GLuint vert2Shader = wip_loadShader((GLchar *)glsl_invertedHull_vert, GL_VERTEX_SHADER);
+	GLuint frag2Shader = wip_loadShader((GLchar *)glsl_outline_frag, GL_FRAGMENT_SHADER);
 	GLuint program = wip_loadProgram(vertShader, fragShader);
 	GLuint program2 = wip_loadProgram(vert2Shader, frag2Shader);
 
@@ -140,7 +146,7 @@ void *wip_renderThread(void *arg) {
 
 		}
 
-		wip_swapWindow(&wip_globalWindow);
+		wip_swapWindow();
 	}
 
 	pthread_exit(NULL);

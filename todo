@@ -35,14 +35,14 @@
 	- choose library
 		? stb_image.h
 - input
-	+ callback
-	- mapping
 	+ handling
+	+ mapping
+	- actions
 	- SDL2 support
 - settings
 	+ xdg config
 	+ config loading
-	? setting storage
+	+ setting storage
 	+ resolution
 	+ fullscreen
 	- vsync

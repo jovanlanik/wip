@@ -9,10 +9,11 @@
 
 #include "wip_fn.h"
 #include "wip_conf.h"
-#define WIP_MAIN
 #include "wip_window.h"
-wip_window_t wip_globalWindow;
-pthread_mutex_t wip_globalWindow_m;
+#include "wip_game.h"
+
+extern wip_window_t wip_globalWindow;
+extern pthread_mutex_t wip_globalWindow_m;
 
 void *wip_logicThread(void *arg);
 void *wip_renderThread(void *arg);
@@ -29,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 	wip_initConf();
 
-	wip_initWindow(&wip_globalWindow);
+	wip_initWindow();
 	pthread_mutex_init(&wip_globalWindow_m, NULL);
 
 	pthread_create(&logic, &attr, wip_logicThread, NULL);
@@ -38,14 +39,14 @@ int main(int argc, char *argv[]) {
 
 	while(!wip_globalWindow.close) {
 		pthread_mutex_lock(&wip_globalWindow_m);
-		wip_pollWindow(&wip_globalWindow);
+		wip_pollWindow();
 		pthread_mutex_unlock(&wip_globalWindow_m);
 	}
 
 	pthread_join(logic, NULL);
 	pthread_join(render, NULL);
 
-	wip_termWindow(&wip_globalWindow);
+	wip_termWindow();
 	pthread_mutex_destroy(&wip_globalWindow_m);
 
 	wip_termConf();

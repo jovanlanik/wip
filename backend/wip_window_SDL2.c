@@ -12,8 +12,11 @@
 #include "wip_window.h"
 #include "wip_input.h"
 
+wip_window_t wip_globalWindow;
+pthread_mutex_t wip_globalWindow_m;
+
 // TODO: load config values
-void wip_initWindow(wip_window_t *window) {
+void wip_initWindow(void) {
 	wip_debug(WIP_INFO, "%s: Initializing window...", __func__);
 
 	if(SDL_Init(SDL_INIT_VIDEO))
@@ -25,39 +28,39 @@ void wip_initWindow(wip_window_t *window) {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-	window->handle = SDL_CreateWindow("WIP", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+	wip_globalWindow.handle = SDL_CreateWindow("WIP", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		wip_getConfInt("video.width"), wip_getConfInt("video.height"), SDL_WINDOW_OPENGL);
-	if(!window->handle) {
+	if(!wip_globalWindow.handle) {
 		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
 	}
 	SDL_GL_SetSwapInterval(1);
-	SDL_GL_CreateContext(window->handle);
+	SDL_GL_CreateContext(wip_globalWindow.handle);
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;
 }
 
-void wip_setWindow(wip_window_t *window) {
-	SDL_GL_CreateContext(window->handle);
+void wip_setWindow(void) {
+	SDL_GL_CreateContext(wip_globalWindow.handle);
 }
 
-void wip_swapWindow(wip_window_t *window) {
-	SDL_GL_SwapWindow(window->handle);
+void wip_swapWindow(void) {
+	SDL_GL_SwapWindow(wip_globalWindow.handle);
 }
 
 // TODO: input
-void wip_pollWindow(wip_window_t *window) {
+void wip_pollWindow(void) {
 	SDL_Event event;
 	SDL_PollEvent(&event);
-	if(event.type == SDL_QUIT) window->close = 1;
+	if(event.type == SDL_QUIT) wip_globalWindow.close = 1;
 }
 
-double wip_timeWindow(wip_window_t *window) {
+double wip_timeWindow(void) {
 	return SDL_GetTicks()/1000.0;
 }
 
 // TODO: if needed better cleanup
-void wip_termWindow(wip_window_t *window) {
+void wip_termWindow(void) {
 	wip_debug(WIP_INFO, "%s: Terminating window...", __func__);
 	SDL_Quit();
 }

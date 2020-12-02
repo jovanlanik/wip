@@ -14,14 +14,23 @@
 
 #include "wip_fn.h"
 
-static config_t wip_globalConf;
-#define WIP_DEFINE_GET_CONF(type, name, lib, def) \
+#include "baked/config.h"
+
+config_t wip_globalConf;
+
+#define WIP_DEFINE_CONF_TYPE(type, name, lib, def) \
 type wip_getConf##name(const char *path) { \
 	type x = def; \
 	if(!config_lookup_##lib(&wip_globalConf, path, &x)) \
 		wip_log(WIP_ERROR, "%s: Can't find '%s' in config.", __func__, path); \
 	return x; \
+} \
+int wip_setConf##name(const char *path, type val) { \
+	config_setting_t *setting = config_lookup(&wip_globalConf, path); \
+	if(!setting || !config_setting_set_##lib(setting, val)) return 0; \
+	return 1; \
 }
+
 #include "wip_conf.h"
 
 char *wip_getConfPath(void) {
@@ -69,13 +78,19 @@ char *wip_getConfPath(void) {
 void wip_initConf(void) {
 	config_init(&wip_globalConf);
 	char *confPath = wip_getConfPath();
-	wip_debug(WIP_INFO, "%s: Loading config from %s", __func__, confPath);
+	wip_debug(WIP_INFO, "%s: Loading config from %s...", __func__, confPath);
 	FILE *confFile = wip_openFile(confPath);
-	if(!confFile) wip_log(WIP_FATAL, "Make a config file of fuck off");
 	free(confPath);
-	if(!config_read(&wip_globalConf, confFile)) {
+	int ret;
+	if(!confFile) {
+		wip_log(WIP_WARN, "%s: No config file found. Using default.", __func__);
+		ret = config_read_string(&wip_globalConf, wip_conf);
+	}
+	else ret = config_read(&wip_globalConf, confFile);
+	if(!ret) {
 		wip_log(
-			WIP_ERROR, "%s:%d - %s\n",
+			WIP_FATAL, "%s: Config error:\n%s:%d - %s\n",
+			__func__,
 			config_error_file(&wip_globalConf),
 			config_error_line(&wip_globalConf),
 			config_error_text(&wip_globalConf)

@@ -8,16 +8,18 @@
 #include <stddef.h>
 #include <math.h>
 #include <pthread.h>
-#include <GLFW/glfw3.h>
 
 #include "wip_fn.h"
 #include "wip_obj.h"
 #include "wip_window.h"
 #include "wip_input.h"
-#define WIP_GAME
 #include "wip_game.h"
+
 wip_scene_t wip_globalScene;
 pthread_mutex_t wip_globalScene_m;
+
+extern wip_window_t wip_globalWindow;
+extern pthread_mutex_t wip_globalWindow_m;
 
 void *wip_logicThread(void *arg) {
 	wip_obj_t object[1];
@@ -44,14 +46,15 @@ void *wip_logicThread(void *arg) {
 
 	while(!wip_globalWindow.close) {
 		wip_key_t key = wip_readKey();
-		if(key.key == GLFW_KEY_Q) {
+		//if(key.key) wip_debug(WIP_INFO, "Key: %d - %c", key.key, key.key);
+		if(key.key == WIP_ESC || key.key == 'q') {
 			pthread_mutex_lock(&wip_globalWindow_m);
 			wip_globalWindow.close = 1;
 			pthread_mutex_unlock(&wip_globalWindow_m);
 		}
 
-		object[0].z = 0.5*sin(wip_timeWindow(&wip_globalWindow));
-		object[0].r.x = 25*wip_timeWindow(&wip_globalWindow);
+		object[0].z = 0.5*sin(wip_timeWindow());
+		object[0].r.x = 25*wip_timeWindow();
 	}
 
 	pthread_exit(NULL);

@@ -1,5 +1,4 @@
 wip
-shaders.h
+include/baked/*.h
 glsl/*.h
 *.o
-

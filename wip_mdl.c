@@ -21,7 +21,7 @@
 #include "lib/msh_ply.h"
 
 wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
-	wip_debug(WIP_INFO, "%s: Loading model from %s", __func__, file);
+	wip_debug(WIP_INFO, "%s: Loading model from %s...", __func__, file);
 
 	msh_ply_desc_t formatVertex = {
 		.element_name = "vertex",
