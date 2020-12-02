@@ -5,6 +5,8 @@
 
 // Input Functions
 
+#pragma once
+
 #define WIP_KEY_BUFFER 16
 
 enum wip_keys {

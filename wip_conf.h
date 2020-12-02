@@ -5,6 +5,8 @@
 
 // Configuration Functions
 
+#pragma once
+
 char *wip_getConfPath(void);
 void wip_initConf(void);
 void wip_termConf(void);

@@ -1,4 +1,10 @@
 #!/bin/sh
+# WIP
+# Copyright (c) 2020 Jovan Lanik
+#
+
+# Bake file contents into header
+
 [ "$1" -a "$2" ] || exit 1
 NAME=$(echo $1 | tr -c '[:alnum:]' '_' | sed 's/.$/\n/g')
 INPUT=$1
