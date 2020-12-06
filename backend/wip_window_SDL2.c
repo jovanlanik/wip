@@ -30,6 +30,7 @@ void wip_initWindow(void) {
 
 	wip_globalWindow.handle = SDL_CreateWindow("WIP", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		wip_getConfInt("video.width"), wip_getConfInt("video.height"), SDL_WINDOW_OPENGL);
+
 	if(!wip_globalWindow.handle) {
 		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
 	}

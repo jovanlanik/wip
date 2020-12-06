@@ -93,12 +93,11 @@ void wip_initConf(void) {
 	else ret = config_read(&wip_globalConf, confFile);
 	if(!ret) {
 		wip_log(
-			WIP_FATAL, "%s: Config error:\n%s:%d - %s\n",
-			__func__,
+			WIP_FATAL, "%s: Config error:\n%s:%d - %s\n", __func__,
 			config_error_file(&wip_globalConf),
 			config_error_line(&wip_globalConf),
 			config_error_text(&wip_globalConf)
-			);
+		);
 		config_destroy(&wip_globalConf);
 		return;
 	}
