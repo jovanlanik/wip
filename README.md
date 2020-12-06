@@ -6,10 +6,10 @@ I just want to learn and experiment.
 - GLEW
 - GLFW or SDL2
 - libconfig
-- xxd (only build time)
+- xxd (at build time)
 ## Building
 `$ make`
 or if you want to use the SDL2 backend:
 `$ make WIP_WINDOW_BACKEND=SDL2`
+
 Note that the SDL2 backend is behind GLFW and may not work correctly.
-Remember to copy the wip.conf file to ~/.config/wip/wip.conf

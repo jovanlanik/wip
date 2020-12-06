@@ -34,11 +34,14 @@
 - image loading
 	- choose library
 		? stb_image.h
+- font rendering
+- UI
 - input
 	+ handling
 	+ mapping
 	- actions
 	- SDL2 support
+	- mouse inputs
 - settings
 	+ xdg config
 	+ config loading

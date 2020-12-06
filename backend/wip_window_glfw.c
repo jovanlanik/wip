@@ -119,6 +119,11 @@ void wip_initWindow(void) {
 
 	if(!wip_globalWindow.handle)
 		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
+
+	glfwMakeContextCurrent(wip_globalWindow.handle);
+	glfwSwapInterval(wip_getConfBool("video.vsync"));
+	glfwMakeContextCurrent(NULL);
+
 	glfwSetWindowCloseCallback(wip_globalWindow.handle, window_close_callback);
 	glfwSetKeyCallback(wip_globalWindow.handle, key_callback);
 
