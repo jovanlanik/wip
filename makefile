@@ -5,15 +5,15 @@
 
 # Makefile
 
-NAME := wip
-CC := gcc
-LDLIBS := -lm -lpthread -lGL -lGLEW -lconfig
-CFLAGS := -std=c11 -Wall -pedantic -I ./ -I ./include
+NAME = wip
+CC = gcc
+LDLIBS = -lm -lpthread -lGL -lGLEW -lconfig
+CFLAGS = -std=c11 -Wall -pedantic -I ./ -I ./include
 
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:%.c=%.o)
 GLSL = $(wildcard glsl/*.vert glsl/*.frag)
-CONF := wip.conf
+CONF = wip.conf
 
 WIP_WINDOW_BACKEND ?= glfw
 LDLIBS += -l$(WIP_WINDOW_BACKEND)
@@ -21,6 +21,7 @@ SRC += backend/wip_window_$(WIP_WINDOW_BACKEND).c
 
 all: $(NAME)
 $(NAME): $(OBJ)
+	$(CC) $(OBJ) $(LDLIBS) -o $@
 src/wip_conf.o : include/baked/config.h
 src/wip_gl.o : include/baked/shaders.h
 include/baked/config.h : $(CONF)

@@ -32,8 +32,9 @@
 		- calculate normals for outline
 			? compute shader
 - image loading
-	- choose library
-		? stb_image.h
+	+ choose library
+		= stb_image.h
+	- wip_img
 - font rendering
 - UI
 - input
@@ -48,7 +49,7 @@
 	+ setting storage
 	+ resolution
 	+ fullscreen
-	- vsync
+	+ vsync
 	+ antialiasing
 - colisions
 - audio

@@ -21,12 +21,22 @@ pthread_mutex_t wip_globalScene_m;
 extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
 
+wip_obj_t *getPointOnCircle(wip_obj_t *result, wip_obj_t *center, float angle, float radius) {
+	*result = *center;
+	result->x += radius * sin(angle);
+	result->y += radius * cos(angle);
+	return result;
+}
+
 void *wip_logicThread(void *arg) {
 	wip_obj_t object[1];
-	wip_obj_t light, eye;
+	wip_obj_t light, eye, center;
 
 	wip_makeObject(&eye);
 	eye.y = -3;
+
+	wip_makeObject(&center);
+	getPointOnCircle(&center, &eye, eye.r.y, 1);
 
 	wip_makeObject(&light);
 	light.x = 2;
@@ -35,11 +45,12 @@ void *wip_logicThread(void *arg) {
 
 	wip_makeObject(&object[0]);
 
-	wip_globalScene.object = wip_alloc(3*sizeof(void *));
+	wip_globalScene.object = wip_alloc(4*sizeof(void *));
 	wip_globalScene.object[0] = &light;
 	wip_globalScene.object[1] = &eye;
-	wip_globalScene.object[2] = &object[0];
-	wip_globalScene.length = 3;
+	wip_globalScene.object[2] = &center;
+	wip_globalScene.object[3] = &object[0];
+	wip_globalScene.length = 4;
 
 	while(!wip_globalWindow.close) {
 		wip_key_t key = wip_readKey();
@@ -50,12 +61,17 @@ void *wip_logicThread(void *arg) {
 			pthread_mutex_unlock(&wip_globalWindow_m);
 		}
 		if(key.action) {
-			if(key.key == WIP_U) eye.y++;
-			if(key.key == WIP_D) eye.y--;
-			if(key.key == 'a') eye.x--;
-			if(key.key == 'd') eye.x++;
+			if(key.key == WIP_U) {
+				eye.y -= eye.y - center.y;
+				eye.x -= eye.x - center.x;
+			}
+			if(key.key == WIP_D) {
+				eye.y += eye.y - center.y;
+				eye.x += eye.x - center.x;
+			}
 			if(key.key == WIP_L) eye.r.y -= 0.1;
 			if(key.key == WIP_R) eye.r.y += 0.1;
+			getPointOnCircle(&center, &eye, eye.r.y, 1);
 		}
 
 		object[0].z = 0.5*sin(wip_timeWindow());

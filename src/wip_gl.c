@@ -94,6 +94,7 @@ void *wip_renderThread(void *arg) {
 
 	wip_obj_t *light = wip_globalScene.object[0];
 	wip_obj_t *eye = wip_globalScene.object[1];
+	wip_obj_t *center = wip_globalScene.object[2];
 
 	vec3 axis = {0.0f, 0.0f, 1.0f};
 	wip_globj_t projection;
@@ -109,24 +110,19 @@ void *wip_renderThread(void *arg) {
 		fps++;
 		if(ct - lt >= 1.0) {
 			lt = ct;
-			//wip_log(WIP_INFO, "Framerate: %d\nFrametime: %f\n", fps, 1000.0/fps);
+			wip_log(WIP_INFO, "Framerate: %d\nFrametime: %f\n", fps, 1000.0/fps);
 			fps = 0;
 		}
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		wip_obj_t center;
 		wip_globj_t pv, view;
 
-		center = *eye;
-		center.x += sin(eye->r.y);
-		center.y += cos(eye->r.y);
-		
-		mat4x4_look_at(view.m, eye->position, center.position, axis);
+		mat4x4_look_at(view.m, eye->position, center->position, axis);
 		mat4x4_mul(pv.m, projection.m, view.m);
 		
-		for(int i = 2; i < wip_globalScene.length; ++i) {
+		for(int i = 3; i < wip_globalScene.length; ++i) {
 			wip_globj_t mpv;
 			wip_globj_t transform;
 			wip_loadObject(&transform, wip_globalScene.object[i]);
