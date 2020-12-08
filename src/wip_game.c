@@ -15,6 +15,8 @@
 #include "wip_input.h"
 #include "wip_game.h"
 
+int wip_globalTicksPerSecond;
+
 wip_scene_t wip_globalScene;
 pthread_mutex_t wip_globalScene_m;
 
@@ -52,7 +54,20 @@ void *wip_logicThread(void *arg) {
 	wip_globalScene.object[3] = &object[0];
 	wip_globalScene.length = 4;
 
+	wip_globalTicksPerSecond = 0;
+	double startTime, lastTime = wip_timeWindow();
+
 	while(!wip_globalWindow.close) {
+		startTime = wip_timeWindow();
+
+		wip_globalTicksPerSecond++;
+		if(startTime - lastTime >= 1.0) {
+			lastTime = startTime;
+			//wip_log(WIP_INFO, "Tickrate: %d\nTicktime: %f\n",
+			//	wip_globalTicksPerSecond, 1000.0/wip_globalTicksPerSecond);
+			wip_globalTicksPerSecond = 0;
+		}
+
 		wip_key_t key = wip_readKey();
 		//if(key.key) wip_debug(WIP_INFO, "Key: %d - %c", key.key, key.key);
 		if(key.key == WIP_ESC || key.key == 'q') {
@@ -76,6 +91,8 @@ void *wip_logicThread(void *arg) {
 
 		object[0].z = 0.5*sin(wip_timeWindow());
 		object[0].r.x = 25*wip_timeWindow();
+
+		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close);
 	}
 
 	pthread_exit(NULL);

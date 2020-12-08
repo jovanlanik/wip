@@ -22,6 +22,8 @@
 
 #include "baked/shaders.h"
 
+int wip_globalFramesPerSecond;
+
 extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
 
@@ -89,7 +91,7 @@ void *wip_renderThread(void *arg) {
 	unsigned int outlineColorLocation2 = glGetUniformLocation(program2, "outlineColor");
 
 	float m[3] = { 0.1, 0.1, 0.4 };
-	
+
 	while(!wip_globalScene.length);
 
 	wip_obj_t *light = wip_globalScene.object[0];
@@ -101,19 +103,20 @@ void *wip_renderThread(void *arg) {
 	float ratio = (float)wip_getConfInt("video.width")/(float)wip_getConfInt("video.height");
 	mat4x4_perspective(projection.m, RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 100);
 
-	int fps = 0;
-	double lt = 0;
-	double ct;
+	wip_globalFramesPerSecond = 0;
+	int fpsMax = wip_getConfInt("video.fpsMax");
+	double startTime, lastTime = wip_timeWindow();
 
 	while(!wip_globalWindow.close) {
-		ct = wip_timeWindow();
-		fps++;
-		if(ct - lt >= 1.0) {
-			lt = ct;
-			wip_log(WIP_INFO, "Framerate: %d\nFrametime: %f\n", fps, 1000.0/fps);
-			fps = 0;
-		}
+		startTime = wip_timeWindow();
 
+		wip_globalFramesPerSecond++;
+		if(startTime - lastTime >= 1.0) {
+			lastTime = startTime;
+			//wip_log(WIP_INFO, "Framerate: %d\nFrametime: %f\n",
+			//	wip_globalFramesPerSecond, 1000.0/wip_globalFramesPerSecond);
+			wip_globalFramesPerSecond = 0;
+		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -121,7 +124,7 @@ void *wip_renderThread(void *arg) {
 
 		mat4x4_look_at(view.m, eye->position, center->position, axis);
 		mat4x4_mul(pv.m, projection.m, view.m);
-		
+
 		for(int i = 3; i < wip_globalScene.length; ++i) {
 			wip_globj_t mpv;
 			wip_globj_t transform;
@@ -155,12 +158,12 @@ void *wip_renderThread(void *arg) {
 			glDrawElements(GL_TRIANGLES, glmdl_outline.element_c, GL_UNSIGNED_INT, 0);
 			glCullFace(GL_BACK);
 			//wip_glError();
-	
-			glBindVertexArray(0);
 
+			glBindVertexArray(0);
 		}
 
-		wip_swapWindow();
+		do wip_swapWindow();
+		while(wip_timeWindow() - startTime < 1.0/fpsMax && fpsMax && !wip_globalWindow.close);
 	}
 
 	pthread_exit(NULL);
