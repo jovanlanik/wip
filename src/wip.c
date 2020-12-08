@@ -37,10 +37,14 @@ int main(int argc, char *argv[]) {
 	pthread_create(&render, &attr, wip_renderThread, NULL);
 	pthread_attr_destroy(&attr);
 
+	double startTime;
+
 	while(!wip_globalWindow.close) {
+		startTime = wip_timeWindow();
 		pthread_mutex_lock(&wip_globalWindow_m);
 		wip_pollWindow();
 		pthread_mutex_unlock(&wip_globalWindow_m);
+		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close) wip_sleep(0.001);
 	}
 
 	pthread_join(logic, NULL);

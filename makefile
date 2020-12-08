@@ -14,7 +14,8 @@ NDEBUG ?= 0
 ifeq '$(NDEBUG)' '1'
 	CFLAGS += -DNDEBUG -o3
 else
-	LDFLAGS = -pg
+	CFLAGS += -pg
+	LDFLAGS += -pg
 endif
 
 SRC = $(wildcard src/*.c)
@@ -32,8 +33,8 @@ $(NAME): $(OBJ)
 src/wip_conf.o : include/baked/config.h
 src/wip_gl.o : include/baked/shaders.h
 include/baked/config.h : $(CONF)
-	@echo making $@ from $(CONF)
-	@util/bake $(CONF) $@
+	@echo making $@ from $<
+	@util/bake $< $@
 include/baked/shaders.h: $(GLSL:%=%.h)
 	@cat $(GLSL:%=%.h) > $@
 	@echo making $@ from $(GLSL)

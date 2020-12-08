@@ -5,10 +5,14 @@
 
 // Functions
 
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <math.h>
 //#include <pthread.h>
 
 #include "wip_fn.h"
@@ -61,6 +65,13 @@ void wip_log(enum wip_logType type, const char *message, ...) {
 	va_end(args);
 	if(type == WIP_FATAL) exit(1);
 	return;
+}
+
+void wip_sleep(double seconds) {
+	struct timespec time;
+	time.tv_sec = seconds;
+	time.tv_nsec = 0;
+	nanosleep(&time, NULL);
 }
 
 FILE *wip_openFile(const char *name) {

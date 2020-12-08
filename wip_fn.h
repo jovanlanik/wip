@@ -43,6 +43,7 @@ typedef struct {
 */
 
 void wip_log(enum wip_logType, const char *m, ...);
+void wip_sleep(double seconds);
 FILE *wip_openFile(const char *n);
 //char *wip_readFile(void *f);
 //int *wip_setTimeout(void *(*func)(void *), void *arg, int time);

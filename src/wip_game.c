@@ -89,10 +89,10 @@ void *wip_logicThread(void *arg) {
 			getPointOnCircle(&center, &eye, eye.r.y, 1);
 		}
 
-		object[0].z = 0.5*sin(wip_timeWindow());
-		object[0].r.x = 25*wip_timeWindow();
+		object[0].z = 0.5*sin(startTime);
+		object[0].r.x = 25*startTime;
 
-		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close);
+		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close) wip_sleep(0.001);
 	}
 
 	pthread_exit(NULL);
