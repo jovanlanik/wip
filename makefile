@@ -10,6 +10,13 @@ CC = gcc
 LDLIBS = -lm -lpthread -lGL -lGLEW -lconfig
 CFLAGS = -std=c11 -Wall -pedantic -I ./ -I ./include
 
+NDEBUG ?= 0
+ifeq '$(NDEBUG)' '1'
+	CFLAGS += -DNDEBUG -o3
+else
+	LDFLAGS = -pg
+endif
+
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:%.c=%.o)
 GLSL = $(wildcard glsl/*.vert glsl/*.frag)
@@ -21,7 +28,7 @@ SRC += backend/wip_window_$(WIP_WINDOW_BACKEND).c
 
 all: $(NAME)
 $(NAME): $(OBJ)
-	$(CC) $(OBJ) $(LDLIBS) -o $@
+	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $@
 src/wip_conf.o : include/baked/config.h
 src/wip_gl.o : include/baked/shaders.h
 include/baked/config.h : $(CONF)
@@ -37,8 +44,9 @@ include/baked/shaders.h: $(GLSL:%=%.h)
 	@glslangValidator $<
 	@util/bake $< $<.h
 clean:
-	rm -f $(wildcard include/baked/*)
+	rm -f $(wildcard include/baked/*.h)
 	rm -f $(GLSL:%=%.h)
 	rm -f $(OBJ)
+	rm -f gmon.out
 
 .PHONY: all clean

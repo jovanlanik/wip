@@ -1,4 +1,5 @@
 wip
+gmon.out
 include/baked/*.h
 glsl/*.h
 *.o

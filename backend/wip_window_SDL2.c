@@ -25,8 +25,8 @@ void wip_initWindow(void) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, wip_getConfInt("graphics.msaa") > 0);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, wip_getConfInt("graphics.msaa"));
 
 	wip_globalWindow.handle = SDL_CreateWindow("WIP", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		wip_getConfInt("video.width"), wip_getConfInt("video.height"), SDL_WINDOW_OPENGL);
@@ -34,8 +34,8 @@ void wip_initWindow(void) {
 	if(!wip_globalWindow.handle) {
 		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
 	}
-	SDL_GL_SetSwapInterval(1);
 	SDL_GL_CreateContext(wip_globalWindow.handle);
+	SDL_GL_SetSwapInterval(wip_getConfBool("video.vsync"));
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;
