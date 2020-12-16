@@ -5,6 +5,7 @@
 
 // GLFW Window Functions
 
+#include <pthread.h>
 #include <GLFW/glfw3.h>
 
 #include "wip_fn.h"
@@ -80,9 +81,8 @@ void window_close_callback(GLFWwindow *window) {
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	if(action == GLFW_REPEAT) return;
-	wip_key_t nkey = { action ? 1 : 0, unifyKey(key) };
-	int ret = wip_writeKey(nkey);
-	if(!ret) wip_log(WIP_ERROR, "GLFW: Dropped input key.");
+	wip_key_t nkey = { (action == GLFW_PRESS) ? WIP_PRESS : WIP_RELEASE, unifyKey(key) };
+	if(!wip_writeKey(nkey)) wip_log(WIP_ERROR, "GLFW: Dropped input key.");
 	return;
 }
 

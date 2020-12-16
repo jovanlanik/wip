@@ -40,7 +40,8 @@
 - input
 	+ handling
 	+ mapping
-	- actions
+	+ motions
+	- rebinding
 	- SDL2 support
 	- mouse inputs
 - settings
@@ -51,7 +52,11 @@
 	+ fullscreen
 	+ vsync
 	+ antialiasing
+	- input rebinding
+- logic loop
+	- decouple movement from tickrate
 - colisions
+- commandline arguments
 - audio
 	? openAL
 	? something simpler

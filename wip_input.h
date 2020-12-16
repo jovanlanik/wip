@@ -7,9 +7,9 @@
 
 #pragma once
 
-#define WIP_KEY_BUFFER 16
+#include "wip_keys.h"
 
-enum wip_keys {
+enum wip_key {
 	WIP_UNKNOWN = 0,
 	WIP_KP_NUM_LOCK = 1,
 	WIP_KP = 2,
@@ -38,19 +38,46 @@ enum wip_keys {
 	WIP_L = 29, WIP_LEFT = 29,
 	WIP_D = 30, WIP_DOWN = 30,
 	WIP_U = 31, WIP_UP = 31,
-	WIP_SPACE = ' ',
+	WIP_SPACE = ' ', WIP_SPACEBAR = ' ',
 	WIP_NUM = '0', WIP_NUMBER = '0',
 	WIP_CAPS = 65, WIP_CAPS_LOCK = 65,
 	WIP_F = 'A', WIP_FUNCTION = 'A',
 	WIP_MENU = 90,
+	WIP_ALPHA = 'a',
 	WIP_DEL = 127, WIP_DELETE = 127,
-	WIP_KP_NUM = 128
+	WIP_KP_NUM = 128,
+	WIP_KEY_END
+};
+
+enum wip_key_action {
+	WIP_NONE,
+	WIP_PRESS,
+	WIP_RELEASE
 };
 
 typedef struct {
-	unsigned int action : 1;
-	unsigned int key : 31;
+	unsigned int action : 2;
+	unsigned int key : 8;
 } wip_key_t;
+
+#ifdef WIP_MOTION
+enum wip_motion_type {
+	WIP_ONCE, WIP_ONCE_PRESS = 0,
+	WIP_ONCE_RELEASE,
+	WIP_HOLD
+};
+
+typedef struct {
+	unsigned int state : 1;
+	const unsigned int type: 2;
+	const unsigned int motion : WIP_MOTION_END/2;
+	unsigned int key : 8;
+} wip_motion_t;
+
+int wip_readMotion(enum wip_motion m);
+void wip_prepMotion(wip_key_t key);
+void wip_bindMotion(enum wip_motion m, enum wip_key k);
+#endif
 
 int wip_writeKey(wip_key_t k);
 wip_key_t wip_readKey(void);

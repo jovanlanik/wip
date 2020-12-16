@@ -13,7 +13,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-//#include <pthread.h>
+#include <pthread.h>
 
 #include "wip_fn.h"
 
@@ -68,10 +68,13 @@ void wip_log(enum wip_logType type, const char *message, ...) {
 }
 
 void wip_sleep(double seconds) {
+	double intpart;
 	struct timespec time;
-	time.tv_sec = seconds;
-	time.tv_nsec = 0;
-	nanosleep(&time, NULL);
+	time.tv_nsec = modf(seconds, &intpart) * 1000000000;
+	time.tv_sec = intpart;
+	//wip_debug(WIP_INFO, "%s: Slepping for %d seconds and %ld nanoseconds.",
+	//	__func__, time.tv_sec, time.tv_nsec);
+	if(nanosleep(&time, NULL)) wip_log(WIP_ERROR, "%s: interupted.", __func__);
 }
 
 FILE *wip_openFile(const char *name) {
@@ -90,20 +93,21 @@ char *wip_readFile(void* file) {
 	fread(buff, 1, size, file);
 	return buff;
 }
+*/
 
-void *wip_timeoutFunc(void *arg) {
+void *timeoutFunc(void *arg) {
 	wip_timeout_t *timeout = (wip_timeout_t *)arg;
 
 	*timeout->done = 0;
-	sleep(timeout->time);
+	wip_sleep(timeout->time);
 	timeout->func(timeout->arg);
 
 	*timeout->done = 1;
-	free(timeout);
+	wip_free(timeout);
 	pthread_exit(0);
 }
 
-int *wip_setTimeout(void *(*func)(void *), void *arg, int time) {
+int *wip_setTimeout(void *(*func)(void *), void *arg, double time) {
 	pthread_t thread;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -111,13 +115,12 @@ int *wip_setTimeout(void *(*func)(void *), void *arg, int time) {
 
 	wip_timeout_t *timeout = wip_allocType(wip_timeout_t);
 	timeout->done = wip_allocType(int);
+	timeout->time = time;
 	timeout->func = func;
 	timeout->arg = arg;
-	timeout->time = time;
 
-	pthread_create(&thread, &attr, wip_timeoutFunc, timeout);
+	pthread_create(&thread, &attr, timeoutFunc, timeout);
 	pthread_attr_destroy(&attr);
 	return timeout->done;
 }
-*/
 

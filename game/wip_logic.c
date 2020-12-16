@@ -3,7 +3,7 @@
 // Copyright (c) 2020 Jovan Lanik
 //
 
-// Game Code
+// Game Logic
 
 #include <stddef.h>
 #include <math.h>
@@ -68,32 +68,35 @@ void *wip_logicThread(void *arg) {
 			wip_globalTicksPerSecond = 0;
 		}
 
-		wip_key_t key = wip_readKey();
-		//if(key.key) wip_debug(WIP_INFO, "Key: %d - %c", key.key, key.key);
-		if(key.key == WIP_ESC || key.key == 'q') {
-			pthread_mutex_lock(&wip_globalWindow_m);
-			wip_globalWindow.close = 1;
-			pthread_mutex_unlock(&wip_globalWindow_m);
-		}
-		if(key.action) {
-			if(key.key == WIP_U) {
-				eye.y -= eye.y - center.y;
-				eye.x -= eye.x - center.x;
+		wip_key_t key;
+		while((key = wip_readKey()).action) {
+			//if(key.key) wip_debug(WIP_INFO, "Key: %d - %c", key.key, key.key);
+			if(key.key == WIP_ESC || key.key == 'q') {
+				pthread_mutex_lock(&wip_globalWindow_m);
+				wip_globalWindow.close = 1;
+				pthread_mutex_unlock(&wip_globalWindow_m);
 			}
-			if(key.key == WIP_D) {
-				eye.y += eye.y - center.y;
-				eye.x += eye.x - center.x;
-			}
-			if(key.key == WIP_L) eye.r.y -= 0.1;
-			if(key.key == WIP_R) eye.r.y += 0.1;
-			getPointOnCircle(&center, &eye, eye.r.y, 1);
+			wip_prepMotion(key);
 		}
+		if(wip_readMotion(MOVE_FORWARD)) {
+			eye.y -= eye.y - center.y;
+			eye.x -= eye.x - center.x;
+		}
+		if(wip_readMotion(MOVE_BACK)) {
+			eye.y += eye.y - center.y;
+			eye.x += eye.x - center.x;
+		}
+		getPointOnCircle(&center, &eye, eye.r.y, 0.025);
+		if(wip_readMotion(STRAFE_LEFT)) eye.r.y -= 0.02;
+		if(wip_readMotion(STRAFE_RIGHT)) eye.r.y += 0.02;
 
 		object[0].z = 0.5*sin(startTime);
 		object[0].r.x = 25*startTime;
 
-		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close) wip_sleep(0.001);
+		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close)
+			wip_sleep(0.00001);
 	}
 
 	pthread_exit(NULL);
 }
+

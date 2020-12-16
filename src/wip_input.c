@@ -5,10 +5,51 @@
 
 // Input Functions
 
-#include <unistd.h>
-
+#include "wip_fn.h"
 #include "wip_types.h"
 #include "wip_input.h"
+#include "wip_game.h"
+
+#ifdef WIP_MOTION
+extern wip_motion_t wip_globalMotion[WIP_MOTION_END];
+extern wip_motion_t *wip_globalKey[WIP_KEY_END];
+extern char wip_globalMotionName[WIP_MOTION_END][64];
+
+int wip_readMotion(enum wip_motion m) {
+	wip_motion_t *motion = &wip_globalMotion[m];
+	int ret = motion->state;
+	if(motion->type == WIP_ONCE_PRESS || motion->type == WIP_ONCE_RELEASE)
+		motion->state = 0;
+	return ret;
+}
+
+void wip_prepMotion(wip_key_t key) {
+	wip_motion_t *motion = wip_globalKey[key.key];
+	if(motion) {
+		//wip_debug(WIP_INFO, "%s: Motion %s from key %d", __func__, wip_globalMotionName[motion->motion], key.key);
+		switch(motion->type) {
+			case WIP_HOLD:
+				if(key.action == WIP_RELEASE) motion->state = 0;
+			case WIP_ONCE_PRESS:
+				if(key.action == WIP_PRESS) motion->state = 1;
+				break;
+			case WIP_ONCE_RELEASE:
+				if(key.action == WIP_RELEASE) motion->state = 1;
+				break;
+		}
+	}
+	return;
+}
+
+
+void wip_bindMotion(enum wip_motion m, enum wip_key k) {
+	wip_motion_t *motion = &wip_globalMotion[m];
+	wip_globalKey[motion->key] = NULL;
+	wip_globalKey[k] = motion;
+	motion->key = k;
+	return;
+}
+#endif
 
 struct WIP_FIFO_T(WIP_KEY_BUFFER, wip_key_t) wip_key;
 
@@ -21,7 +62,7 @@ int wip_writeKey(wip_key_t key) {
 
 wip_key_t wip_readKey(void) {
 	if(wip_key.head == wip_key.tail)
-		return (wip_key_t){ 0, 0 };
+		return (wip_key_t){ WIP_NONE, WIP_UNKNOWN };
 	wip_key.tail = (wip_key.tail + 1) % WIP_KEY_BUFFER;
 	return wip_key.buffer[wip_key.tail];
 }

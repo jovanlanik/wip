@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <pthread.h>
-
 typedef struct {
 	int close;
 	void *handle;

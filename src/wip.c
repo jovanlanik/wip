@@ -11,12 +11,10 @@
 #include "wip_conf.h"
 #include "wip_window.h"
 #include "wip_game.h"
+#include "wip_input.h"
 
 extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
-
-void *wip_logicThread(void *arg);
-void *wip_renderThread(void *arg);
 
 int main(int argc, char *argv[]) {
 	wip_debug(WIP_INFO, "WIP built %s %s", __DATE__, __TIME__);
@@ -37,14 +35,15 @@ int main(int argc, char *argv[]) {
 	pthread_create(&render, &attr, wip_renderThread, NULL);
 	pthread_attr_destroy(&attr);
 
-	double startTime;
+	//double startTime;
 
 	while(!wip_globalWindow.close) {
-		startTime = wip_timeWindow();
+		//startTime = wip_timeWindow();
 		pthread_mutex_lock(&wip_globalWindow_m);
 		wip_pollWindow();
 		pthread_mutex_unlock(&wip_globalWindow_m);
-		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close) wip_sleep(0.001);
+		//while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close)
+		wip_sleep(0.0001);
 	}
 
 	pthread_join(logic, NULL);

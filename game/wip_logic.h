@@ -3,7 +3,7 @@
 // Copyright (c) 2020 Jovan Lanik
 //
 
-// Window Functions
+// Game Logic
 
 #pragma once
 

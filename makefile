@@ -7,8 +7,13 @@
 
 NAME = wip
 CC = gcc
-LDLIBS = -lm -lpthread -lGL -lGLEW -lconfig
 CFLAGS = -std=c11 -Wall -pedantic -I ./ -I ./include
+LDLIBS = -lm -lpthread -lGL -lGLEW -lconfig
+
+SRC = $(wildcard src/*.c)
+OBJ = $(SRC:%.c=%.o)
+GLSL = $(wildcard glsl/*.vert glsl/*.frag)
+CONF = wip.conf
 
 NDEBUG ?= 0
 ifeq '$(NDEBUG)' '1'
@@ -18,10 +23,9 @@ else
 	LDFLAGS += -pg
 endif
 
-SRC = $(wildcard src/*.c)
-OBJ = $(SRC:%.c=%.o)
-GLSL = $(wildcard glsl/*.vert glsl/*.frag)
-CONF = wip.conf
+WIP_GAME ?= game
+CFLAGS += -I ./$(WIP_GAME)
+SRC += $(wildcard $(WIP_GAME)/*.c)
 
 WIP_WINDOW_BACKEND ?= glfw
 LDLIBS += -l$(WIP_WINDOW_BACKEND)
