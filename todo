@@ -55,6 +55,7 @@
 	- input rebinding
 - logic loop
 	- decouple movement from tickrate
+- change some errors to warnings
 - colisions
 - commandline arguments
 - audio

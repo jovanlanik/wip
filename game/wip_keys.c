@@ -14,7 +14,7 @@ wip_motion_t wip_globalMotion[] = {
 #undef MOTION
 
 #define MOTION(type, motion, key) [motion] = { #motion }
-char wip_globalMotionName[WIP_KEY_END][64] = {
+char wip_globalMotionName[][64] = {
 	MOTION_LIST
 };
 #undef MOTION

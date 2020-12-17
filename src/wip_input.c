@@ -10,6 +10,12 @@
 #include "wip_input.h"
 #include "wip_game.h"
 
+#define KEY(key, code) [WIP_##key] = { #key }
+char wip_globalKeyName[][64] = {
+	WIP_KEY_LIST
+};
+#undef KEY
+
 #ifdef WIP_MOTION
 extern wip_motion_t wip_globalMotion[WIP_MOTION_END];
 extern wip_motion_t *wip_globalKey[WIP_KEY_END];
@@ -26,7 +32,10 @@ int wip_readMotion(enum wip_motion m) {
 void wip_prepMotion(wip_key_t key) {
 	wip_motion_t *motion = wip_globalKey[key.key];
 	if(motion) {
-		//wip_debug(WIP_INFO, "%s: Motion %s from key %d", __func__, wip_globalMotionName[motion->motion], key.key);
+		wip_debug(WIP_INFO, "%s: Motion %s from key %s", __func__,
+			wip_globalMotionName[motion->motion],
+			wip_globalKeyName[key.key]
+			);
 		switch(motion->type) {
 			case WIP_HOLD:
 				if(key.action == WIP_RELEASE) motion->state = 0;
@@ -40,7 +49,6 @@ void wip_prepMotion(wip_key_t key) {
 	}
 	return;
 }
-
 
 void wip_bindMotion(enum wip_motion m, enum wip_key k) {
 	wip_motion_t *motion = &wip_globalMotion[m];

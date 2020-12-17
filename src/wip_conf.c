@@ -13,13 +13,14 @@
 #include <libconfig.h>
 
 #include "wip_fn.h"
+#include "wip_conf.h"
 
 #include "baked/config.h"
 
 config_t wip_globalConf;
 
 // TODO: Add unknown setting to config if not found.
-#define WIP_DEFINE_CONF_TYPE(type, name, lib, def) \
+#define CONF_TYPE(type, name, lib, def) \
 type wip_getConf##name(const char *path) { \
 	type x = def; \
 	if(!config_lookup_##lib(&wip_globalConf, path, &x)) \
@@ -34,8 +35,8 @@ int wip_setConf##name(const char *path, type val) { \
 	} \
 	return 1; \
 }
-
-#include "wip_conf.h"
+WIP_CONF_TYPE_LIST
+#undef CONF_TYPE
 
 char *wip_getConfPath(void) {
 	char *config = getenv("XDG_CONFIG_HOME");
