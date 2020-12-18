@@ -20,7 +20,12 @@
 config_t wip_globalConf;
 
 // TODO: Add unknown setting to config if not found.
-#define CONF_TYPE(type, name, lib, def) \
+#define CONF_TYPE(type, name, lib, mac, def) \
+int wip_findConf##name(const char*path) { \
+	config_setting_t *s = config_lookup(&wip_globalConf, path); \
+	if(s && config_setting_type(s) == mac) return 1; \
+	return 0; \
+} \
 type wip_getConf##name(const char *path) { \
 	type x = def; \
 	if(!config_lookup_##lib(&wip_globalConf, path, &x)) \

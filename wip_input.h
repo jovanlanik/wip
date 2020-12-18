@@ -96,11 +96,15 @@ typedef struct {
 	unsigned int key : 8;
 } wip_motion_t;
 
+// TODO: wip_findMotion
+
 int wip_readMotion(enum wip_motion m);
 void wip_prepMotion(wip_key_t key);
 void wip_bindMotion(enum wip_motion m, enum wip_key k);
+void wip_loadBindings(void);
 #endif
 
+enum wip_key wip_findKey(const char *name);
 int wip_writeKey(wip_key_t k);
 wip_key_t wip_readKey(void);
 

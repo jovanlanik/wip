@@ -25,6 +25,7 @@
 #endif
 
 #define wip_allocType(t) wip_alloc(sizeof(t))
+#define wip_print(s) wip_log(WIP_INFO, "%s", s);
 
 enum wip_logType {
 	WIP_INFO,

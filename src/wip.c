@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
 	wip_initConf();
+	wip_loadBindings();
 
 	wip_initWindow();
 	pthread_mutex_init(&wip_globalWindow_m, NULL);

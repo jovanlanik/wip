@@ -5,9 +5,12 @@
 
 // Input Functions
 
+#include <string.h>
+
 #include "wip_fn.h"
 #include "wip_types.h"
 #include "wip_input.h"
+#include "wip_conf.h"
 #include "wip_game.h"
 
 #define KEY(key, code) [WIP_##key] = { #key }
@@ -57,9 +60,25 @@ void wip_bindMotion(enum wip_motion m, enum wip_key k) {
 	motion->key = k;
 	return;
 }
+
+void wip_loadBindings(void) {
+	char *c = wip_alloc(64 + 5);
+	for(int i = 0; i < WIP_MOTION_END; ++i ) {
+		strcpy(c, "keys.");
+		strcat(c, wip_globalMotionName[i]);
+		if(wip_findConfStr(c))
+			wip_bindMotion(i, wip_findKey(wip_getConfStr(c)));
+	}
+}
 #endif
 
 struct WIP_FIFO_T(WIP_KEY_BUFFER, wip_key_t) wip_key;
+
+enum wip_key wip_findKey(const char *name) {
+	for(int i = 0; i < WIP_KEY_END; ++i)
+		if(strcmp(name, wip_globalKeyName[i]) == 0) return i;
+	return 0;
+}
 
 int wip_writeKey(wip_key_t key) {
 	if(wip_key.head + 1 == wip_key.tail) return 0;
