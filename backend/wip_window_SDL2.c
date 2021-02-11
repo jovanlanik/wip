@@ -5,7 +5,8 @@
 
 // SDL2 Window Functions
 
-#include "SDL2/SDL.h"
+#include <pthread.h>
+#include <SDL2/SDL.h>
 
 #include "wip_fn.h"
 #include "wip_conf.h"

@@ -35,23 +35,18 @@ void *wip_renderThread(void *arg) {
 
 	glClearColor(0.3f, 0.6f, 0.8f, 1.0f);
 
-	GLuint vertShader = wip_loadShader((char *)glsl_main_vert, GL_VERTEX_SHADER);
-	GLuint fragShader = wip_loadShader((char *)glsl_main_frag, GL_FRAGMENT_SHADER);
-	GLuint vert2Shader = wip_loadShader((GLchar *)glsl_invertedHull_vert, GL_VERTEX_SHADER);
-	GLuint frag2Shader = wip_loadShader((GLchar *)glsl_outline_frag, GL_FRAGMENT_SHADER);
+	GLuint vertShader = wip_loadShader((char *)main_vert, GL_VERTEX_SHADER);
+	GLuint fragShader = wip_loadShader((char *)main_frag, GL_FRAGMENT_SHADER);
 	GLuint program = wip_loadProgram(vertShader, fragShader);
-	GLuint program2 = wip_loadProgram(vert2Shader, frag2Shader);
 
 	glDeleteShader(vertShader);
-	glDeleteShader(vert2Shader);
 	glDeleteShader(fragShader);
-	glDeleteShader(frag2Shader);
 
 	wip_ply_t ply;
 	wip_mdl_t mdl;
-	wip_glmdl_t glmdl, glmdl_outline;
-	mdl.vertex_c = wip_allocType(int);
-	mdl.index_c = wip_allocType(int);
+	wip_glmdl_t glmdl;
+	mdl.vertex_c = wip_alloc(sizeof(int));
+	mdl.index_c = wip_alloc(sizeof(int));
 
 	wip_readModel(&ply, "mdl/wip_model.ply");
 
@@ -61,19 +56,7 @@ void *wip_renderThread(void *arg) {
 	wip_free(ply.color);
 	wip_free(ply.normal);
 
-	wip_readModel(&ply, "mdl/wip_model_outline.ply");
-
 	wip_loadModel(&glmdl, &mdl);
-	wip_free(mdl.model);
-	wip_free(mdl.index);
-
-	wip_prepModel(&mdl, &ply);
-	wip_free(ply.vertex);
-	wip_free(ply.index);
-	wip_free(ply.color);
-	wip_free(ply.normal);
-
-	wip_loadModel(&glmdl_outline, &mdl);
 	wip_free(mdl.model);
 	wip_free(mdl.index);
 
@@ -85,9 +68,6 @@ void *wip_renderThread(void *arg) {
 	unsigned int transformLocation = glGetUniformLocation(program, "transform");
 	unsigned int normalTransformLocation = glGetUniformLocation(program, "normalTransform");
 	unsigned int materialLocation = glGetUniformLocation(program, "material");
-	unsigned int mpvLocation2 = glGetUniformLocation(program2, "mpv");
-	unsigned int outlineThicknessLocation2 = glGetUniformLocation(program2, "outlineThickness");
-	unsigned int outlineColorLocation2 = glGetUniformLocation(program2, "outlineColor");
 
 	float m[3] = { 0.1, 0.1, 0.4 };
 
@@ -146,17 +126,6 @@ void *wip_renderThread(void *arg) {
 			glUniformMatrix4fv(normalTransformLocation, 1, GL_FALSE, normalTransform.f);
 			glUniform3fv(materialLocation, 1, m);
 			glDrawElements(GL_TRIANGLES, glmdl.element_c, GL_UNSIGNED_INT, 0);
-
-			glBindVertexArray(glmdl_outline.vertex_a);
-
-			glUseProgram(program2);
-			glUniformMatrix4fv(mpvLocation2, 1, GL_FALSE, mpv.f);
-			glUniform1f(outlineThicknessLocation2, 0.05);
-			glUniform3fv(outlineColorLocation2, 1, (float []){0.1, 0, 0});
-			glCullFace(GL_FRONT);
-			glDrawElements(GL_TRIANGLES, glmdl_outline.element_c, GL_UNSIGNED_INT, 0);
-			glCullFace(GL_BACK);
-			//wip_glError();
 
 			glBindVertexArray(0);
 		}

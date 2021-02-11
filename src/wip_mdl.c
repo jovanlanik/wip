@@ -15,7 +15,7 @@
 #include "wip_fn.h"
 #include "wip_mdl.h"
 #define MSH_PLY_MALLOC(x) wip_alloc(x)
-#define MSH_PLY_REALLOC(x, y) wip_realloc(x, y)
+#define MSH_PLY_REALLOC(x, y) wip_realloc(x, y, NULL)
 #define MSH_PLY_FREE(x) wip_free(x)
 #define MSH_PLY_IMPLEMENTATION
 #include "lib/msh_ply.h"
@@ -70,14 +70,25 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 	bool hasColor = true, hasNormal = true;
 	int r = 0;
 
+	// TODO: do proper cleanup after failure
+
 	msh_ply_t *ply_file = msh_ply_open(file, "r");
-	if(!ply_file) wip_log(WIP_FATAL, "%s: Couldn't open model %s", __func__, file);
+	if(!ply_file) {
+		wip_log(WIP_ERROR, "%s: Couldn't open model %s", __func__, file);
+		return NULL;
+	}
 
 	r = msh_ply_parse_header(ply_file);
-	if(r) wip_log(WIP_FATAL, "%s: Couldn't parse header: %s", __func__, msh_ply_error_msg(r));
+	if(r) {
+		wip_log(WIP_ERROR, "%s: Couldn't parse header: %s", __func__, msh_ply_error_msg(r));
+		return NULL;
+	}
 
 	r = msh_ply_add_descriptor(ply_file, &formatVertex);
-	if(r) wip_log(WIP_FATAL, "%s: Couldn't read model: %s", __func__, msh_ply_error_msg(r));
+	if(r) {
+		wip_log(WIP_ERROR, "%s: Couldn't read model: %s", __func__, msh_ply_error_msg(r));
+		return NULL;
+	}
 
 	if(msh_ply_has_properties(ply_file, &formatColor))
 		msh_ply_add_descriptor(ply_file, &formatColor);
@@ -89,10 +100,16 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 		hasNormal = false;
 
 	r = msh_ply_add_descriptor(ply_file, &formatFace);
-	if(r) wip_log(WIP_FATAL, "%s: Couldn't read model: %s", __func__, msh_ply_error_msg(r));
+	if(r) {
+		wip_log(WIP_ERROR, "%s: Couldn't read model: %s", __func__, msh_ply_error_msg(r));
+		return NULL;
+	}
 
 	r = msh_ply_read(ply_file);
-	if(r) wip_log(WIP_FATAL, "%s: Couldn't read model: %s", __func__, msh_ply_error_msg(r));
+	if(r) {
+		wip_log(WIP_ERROR, "%s: Couldn't read model: %s", __func__, msh_ply_error_msg(r));
+		return NULL;
+	}
 
 	wip_free(msh_ply_find_element(ply_file, "vertex")->data);
 	wip_free(msh_ply_find_element(ply_file, "face")->data);
@@ -105,6 +122,7 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 
 	for(int i = 0; i < (int)*formatVertex.data_count; ++i) {
 		if(!hasColor) {
+			//wip_debug(WIP_WARN, "%s: Couldn't load vertex colors from model, may be missing.", __func__);
 			uint8_t *colorData = *(void **)formatColor.data;
 			memcpy(
 				&colorData[4*i],
@@ -113,7 +131,7 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 			);
 		}
 		if(!hasNormal) {
-			// TODO: calculate normals here
+			//wip_debug(WIP_WARN, "%s: Couldn't load vertex normals from model, may be missing.", __func__);
 			float *normalData = *(void **)formatNormal.data;
 			memcpy(
 				&normalData[3*i],

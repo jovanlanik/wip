@@ -1,4 +1,7 @@
 # Todo list
+- build system
+	- configure script
+	- install and uninstall target
 - objects
 	- free
 	= obj:
@@ -18,30 +21,20 @@
 	- free
 	= seq
 		- figure this shit out;
-	- figure out materials
-		- UV mapped color palette texture
-		+ material properties
-			= vec3 defining how shadows look
+	- materials and textures
 - artstyle
 	+ vertex lighting
-		+ cell shading
-	+ outlines
-		+ inverted hull
-		- same thickness for distant objects
-		+ shader inputs
-		- calculate normals for outline
-			? compute shader
 - image loading
 	+ choose library
 		= stb_image.h
 	- wip_img
-- font rendering
 - UI
+	- font rendering
 - input
 	+ handling
 	+ mapping
 	+ motions
-	- rebinding
+	+ rebinding
 	- SDL2 support
 	- mouse inputs
 - settings
@@ -52,7 +45,9 @@
 	+ fullscreen
 	+ vsync
 	+ antialiasing
-	- input rebinding
+	+ input rebinding
+		- fix alpha keys
+	- fix include directive in config
 - logic loop
 	- decouple movement from tickrate
 - change some errors to warnings

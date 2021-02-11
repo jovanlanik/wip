@@ -1,12 +1,20 @@
 #!/bin/sh
+#
 # WIP
 # Copyright (c) 2020 Jovan Lanik
 #
 
-# Bake file contents into header
+# Bake file contents into a C header
 
-[ "$1" -a "$2" ] || exit 1
-NAME=$(echo $1 | tr -c '[:alnum:]' '_' | sed 's/.$/\n/g')
+error() {
+	echo "$0: $1. Seek help." >&2
+	exit 1
+}
+
+[ "$1" -a "$2" ] || error "Bad usage"
+command -v xxd > /dev/null || error "xxd is required and not installed"
+
+NAME=$(basename $1 | tr -c '[:alnum:]' '_' | sed 's/.$/\n/g')
 INPUT=$1
 OUTPUT=$2
 (

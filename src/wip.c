@@ -17,7 +17,11 @@ extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
 
 int main(int argc, char *argv[]) {
-	wip_debug(WIP_INFO, "WIP built %s %s", __DATE__, __TIME__);
+#define STR(x) #x
+#define NAME(x) STR(x)
+	wip_debug(WIP_INFO, "WIP "NAME(WIP_NAME)" built %s %s", __DATE__, __TIME__);
+#undef STR
+#undef NAME
 
 	pthread_t logic;
 	pthread_t render;

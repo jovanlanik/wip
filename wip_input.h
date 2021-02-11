@@ -39,28 +39,28 @@
 	KEY(DOWN,		= 30), \
 	KEY(UP,			= 31), \
 	KEY(SPACE,		= ' '), \
-	KEY(CAPS,		= 65), \
+	KEY(CAPS_LOCK,		= 65), \
 	KEY(MENU,		= 90), \
 	KEY(DELETE,		= 127)
 
 #define WIP_KEY_ALT_LIST \
-	KEY(BS,			= 8), \
-	KEY(PRINT,		= 10), \
-	KEY(SCROLL,		= 11), \
-	KEY(RETURN,		= 13), \
-	KEY(ESC,		= 27), \
-	KEY(R,			= 28), \
-	KEY(L,			= 29), \
-	KEY(D,			= 30), \
-	KEY(U,			= 31), \
-	KEY(SPACEBAR,		= ' '), \
+	KEY(BS,			= WIP_BACKSPACE), \
+	KEY(PRINT,		= WIP_PRINT_SCREEN), \
+	KEY(SCROLL,		= WIP_SCROLL_LOCK), \
+	KEY(RETURN,		= WIP_ENTER), \
+	KEY(ESC,		= WIP_ESCAPE), \
+	KEY(R,			= WIP_RIGHT), \
+	KEY(L,			= WIP_LEFT), \
+	KEY(D,			= WIP_DOWN), \
+	KEY(U,			= WIP_UP), \
+	KEY(SPACEBAR,		= WIP_SPACE), \
 	KEY(NUM,		= '0'), \
-	KEY(NUMBER,		= '0'), \
-	KEY(CAPS_LOCK,		= 65), \
+	KEY(NUMBER,		= WIP_NUM), \
+	KEY(CAPS,		= WIP_CAPS_LOCK), \
 	KEY(F,			= 'A'), \
-	KEY(FUNCTION,		= 'A'), \
-	KEY(ALPHA,		='a'), \
-	KEY(DEL,		= 127), \
+	KEY(FUNCTION,		= WIP_F), \
+	KEY(ALPHA,		= 'a'), \
+	KEY(DEL,		= WIP_DELETE), \
 	KEY(KP_NUM,		= 128)
 
 #define KEY(key, code) WIP_##key code
@@ -92,14 +92,13 @@ enum wip_motion_type {
 typedef struct {
 	unsigned int state : 1;
 	const unsigned int type: 2;
-	const unsigned int motion : WIP_MOTION_END/2;
+	const unsigned int motion : WIP_MOTION_END/2+1;
 	unsigned int key : 8;
 } wip_motion_t;
 
-// TODO: wip_findMotion
-
+enum wip_motion wip_findMotion(const char *name);
 int wip_readMotion(enum wip_motion m);
-void wip_prepMotion(wip_key_t key);
+int wip_writeMotion(wip_key_t key);
 void wip_bindMotion(enum wip_motion m, enum wip_key k);
 void wip_loadBindings(void);
 #endif

@@ -23,6 +23,8 @@ pthread_mutex_t wip_globalScene_m;
 extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
 
+extern char wip_globalKeyName[][64];
+
 wip_obj_t *getPointOnCircle(wip_obj_t *result, wip_obj_t *center, float angle, float radius) {
 	*result = *center;
 	result->x += radius * sin(angle);
@@ -70,13 +72,12 @@ void *wip_logicThread(void *arg) {
 
 		wip_key_t key;
 		while((key = wip_readKey()).action) {
-			//if(key.key) wip_debug(WIP_INFO, "Key: %d - %c", key.key, key.key);
 			if(key.key == WIP_ESC || key.key == 'q') {
 				pthread_mutex_lock(&wip_globalWindow_m);
 				wip_globalWindow.close = 1;
 				pthread_mutex_unlock(&wip_globalWindow_m);
 			}
-			wip_prepMotion(key);
+			wip_writeMotion(key);
 		}
 		if(wip_readMotion(MOVE_FORWARD)) {
 			eye.y -= eye.y - center.y;

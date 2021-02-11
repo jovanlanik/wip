@@ -31,17 +31,19 @@
 }
 
 #ifdef NDEBUG
-	void *wip_realloc(void *pointer, size_t size)
+	void *wip_realloc(void *pointer, size_t size, int *ret)
 #else
-	void *_wip_realloc(void *pointer, size_t size, const char *caller)
+	void *_wip_realloc(void *pointer, size_t size, int *ret, const char *caller)
 #endif
 {
 	//wip_debug(WIP_INFO, "%s: reallocating %p to %zu bytes from %s", __func__, pointer, size, caller);
 	void *o = realloc(pointer, size);
 	if(!o) {
+		if(ret) *ret = 0;
 		wip_debug(WIP_ERROR, "%s: failed reallocation from %s, returning original", __func__, caller);
 		return pointer;
 	}
+	if(ret) *ret = 1;
 	//wip_debug(WIP_INFO, "%s: reallocated to %p", __func__, o);
 	return o;
 }
@@ -54,6 +56,7 @@
 {
 	//wip_debug(WIP_INFO, "%s: freeing %p from %s", __func__, pointer, caller);
 	free(pointer);
+	return;
 }
 
 void wip_log(enum wip_logType type, const char *message, ...) {
@@ -75,6 +78,7 @@ void wip_sleep(double seconds) {
 	//wip_debug(WIP_INFO, "%s: Slepping for %d seconds and %ld nanoseconds.",
 	//	__func__, time.tv_sec, time.tv_nsec);
 	if(nanosleep(&time, NULL)) wip_log(WIP_ERROR, "%s: interupted.", __func__);
+	return;
 }
 
 FILE *wip_openFile(const char *name) {
@@ -113,8 +117,8 @@ int *wip_setTimeout(void *(*func)(void *), void *arg, double time) {
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-	wip_timeout_t *timeout = wip_allocType(wip_timeout_t);
-	timeout->done = wip_allocType(int);
+	wip_timeout_t *timeout = wip_alloc(sizeof(wip_timeout_t));
+	timeout->done = wip_alloc(sizeof(int));
 	timeout->time = time;
 	timeout->func = func;
 	timeout->arg = arg;

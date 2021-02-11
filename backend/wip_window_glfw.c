@@ -64,7 +64,7 @@ int unifyKey(int key) {
 		}
 		return keyVal;
 	}
-	wip_log(WIP_ERROR, "GLFW: Couldn't unify keycode: %d", key);
+	wip_log(WIP_WARN, "GLFW: Couldn't unify keycode: %d", key);
 	return WIP_UNKNOWN;
 }
 
@@ -82,7 +82,7 @@ void window_close_callback(GLFWwindow *window) {
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	if(action == GLFW_REPEAT) return;
 	wip_key_t nkey = { (action == GLFW_PRESS) ? WIP_PRESS : WIP_RELEASE, unifyKey(key) };
-	if(!wip_writeKey(nkey)) wip_log(WIP_ERROR, "GLFW: Dropped input key.");
+	if(!wip_writeKey(nkey)) wip_log(WIP_WARN, "GLFW: Dropped input key.");
 	return;
 }
 

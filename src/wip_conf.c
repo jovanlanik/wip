@@ -29,13 +29,13 @@ int wip_findConf##name(const char*path) { \
 type wip_getConf##name(const char *path) { \
 	type x = def; \
 	if(!config_lookup_##lib(&wip_globalConf, path, &x)) \
-		wip_log(WIP_ERROR, "%s: Can't find '%s' in config.", __func__, path); \
+		wip_log(WIP_WARN, "%s: Can't find '%s' in config.", __func__, path); \
 	return x; \
 } \
 int wip_setConf##name(const char *path, type val) { \
 	config_setting_t *setting = config_lookup(&wip_globalConf, path); \
 	if(!setting || !config_setting_set_##lib(setting, val)) { \
-		wip_log(WIP_ERROR, "%s: Can't set '%s': Not in config.", __func__, path); \
+		wip_log(WIP_WARN, "%s: Can't set '%s': Not in config.", __func__, path); \
 		return 0; \
 	} \
 	return 1; \
@@ -46,8 +46,8 @@ WIP_CONF_TYPE_LIST
 char *wip_getConfPath(void) {
 	char *config = getenv("XDG_CONFIG_HOME");
 	if(config != NULL && *config != '\0') {
-		char *c = malloc(strlen(config)+1);
-		if(!c) wip_log(WIP_FATAL, "%s: failed allocation", __func__);
+		char *c = wip_alloc(strlen(config)+1);
+		if(!c) return NULL;
 		strcpy(c, config);
 		config = c;
 
@@ -61,24 +61,32 @@ char *wip_getConfPath(void) {
 				wip_log(WIP_ERROR, "%s: Couldn't find user home: %s", __func__, strerror(errno));
 				return NULL;
 			}
-			char *c = malloc(strlen(pwd->pw_dir)+1);
-			if(!c) wip_log(WIP_FATAL, "%s: failed allocation", __func__);
+			char *c = wip_alloc(strlen(pwd->pw_dir)+1);
+			if(!c) return NULL;
 			strcpy(c, pwd->pw_dir);
 			config = c;
 		}
 		else {
-			char *c = malloc(strlen(config)+1);
-			if(!c) wip_log(WIP_FATAL, "%s: failed allocation", __func__);
+			char *c = wip_alloc(strlen(config)+1);
+			if(!c) return NULL;
 			strcpy(c, config);
 			config = c;
 		}
 		char dirname[] = "/.config";
-		char *c = realloc(config, strlen(config)+sizeof(dirname));
+		int ret;
+		char *c = wip_realloc(config, strlen(config)+sizeof(dirname), &ret);
+		if(!ret) return NULL;
 		strcat(c, dirname);
 		config = c;
 	}
-	char filename[] = "/wip/wip.conf";
-	char *c = realloc(config, strlen(config)+sizeof(filename));
+#define STR(x) #x
+#define NAME(x) STR(x)
+	char filename[] = "/wip/"NAME(WIP_NAME)".conf";
+#undef STR
+#undef NAME
+	int ret;
+	char *c = wip_realloc(config, strlen(config)+sizeof(filename), &ret);
+	if(!ret) return NULL;
 	if(!c) wip_log(WIP_FATAL, "%s: failed allocation", __func__);
 	strcat(c, filename);
 	config = c;
@@ -94,7 +102,11 @@ void wip_initConf(void) {
 	int ret;
 	if(!confFile) {
 		wip_log(WIP_WARN, "%s: No config file found. Using default.", __func__);
-		ret = config_read_string(&wip_globalConf, wip_conf);
+#define CONCAT(x) x ## _conf
+#define CONFIG(x) CONCAT(x)
+		ret = config_read_string(&wip_globalConf, CONFIG(WIP_NAME));
+#undef CONCAT
+#undef CONFIG
 	}
 	else ret = config_read(&wip_globalConf, confFile);
 	if(!ret) {

@@ -1,4 +1,6 @@
-wip
+demo
+nodeath
+config.mk
 gmon.out
 include/baked/*.h
 glsl/*.h
