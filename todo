@@ -1,7 +1,8 @@
 # Todo list
 - build system
-	- configure script
-	- install and uninstall target
+	+ configure script
+	+ install and uninstall target
+	- dist target
 - objects
 	- free
 	= obj:
@@ -22,8 +23,6 @@
 	= seq
 		- figure this shit out;
 	- materials and textures
-- artstyle
-	+ vertex lighting
 - image loading
 	+ choose library
 		= stb_image.h
@@ -51,7 +50,6 @@
 - logic loop
 	- decouple movement from tickrate
 - change some errors to warnings
-- colisions
 - commandline arguments
 - audio
 	? openAL
