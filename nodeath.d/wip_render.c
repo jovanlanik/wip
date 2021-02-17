@@ -29,6 +29,74 @@ extern wip_window_t wip_globalWindow;
 extern wip_scene_t wip_globalScene;
 //extern pthread_mutex_t wip_globalScene_m;
 
+wip_glmdl_t *openModel(char *name) {
+	wip_ply_t ply;
+	wip_mdl_t mdl;
+	wip_glmdl_t *glmdl = wip_alloc(sizeof(wip_glmdl_t));
+
+	mdl.vertex_c = wip_alloc(sizeof(int));
+	mdl.index_c = wip_alloc(sizeof(int));
+
+	const char *prefix = "./mdl/";
+	const char *suffix = ".ply";
+	char *filename = wip_alloc(strlen(prefix)+strlen(name)+strlen(suffix)+1);
+	sprintf(filename, "%s%s%s", prefix, name, suffix);
+
+	wip_readModel(&ply, filename);
+
+	wip_prepModel(&mdl, &ply);
+	wip_free(ply.vertex);
+	wip_free(ply.index);
+	wip_free(ply.color);
+	wip_free(ply.normal);
+
+	wip_loadModel(glmdl, &mdl);
+	wip_free(mdl.model);
+	wip_free(mdl.index);
+
+	wip_free(mdl.vertex_c);
+	wip_free(mdl.index_c);
+
+	return glmdl;
+}
+
+unsigned int lightLocation;
+unsigned int mpvLocation;
+unsigned int transformLocation;
+unsigned int normalTransformLocation;
+unsigned int materialLocation;
+
+GLuint program;
+
+void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t *light) {
+	const float m[3] = { 0.1, 0.1, 0.4 };
+
+	wip_globj_t mpv;
+	wip_globj_t transform;
+	wip_loadObject(&transform, object);
+	wip_globj_t normalTransform;
+	{
+		wip_globj_t go;
+		mat4x4_invert(go.m, transform.m);
+		mat4x4_transpose(normalTransform.m, go.m);
+	}
+	mat4x4_mul(mpv.m, pv.m, transform.m);
+	wip_loadObjectF(WIP_POS, &transform, object);
+
+	glBindVertexArray(model->vertex_a);
+
+	glUseProgram(program);
+	glUniform3fv(lightLocation, 1, light->position);
+	glUniformMatrix4fv(mpvLocation, 1, GL_FALSE, mpv.f);
+	glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transform.f);
+	glUniformMatrix4fv(normalTransformLocation, 1, GL_FALSE, normalTransform.f);
+	glUniform3fv(materialLocation, 1, m);
+	glDrawElements(GL_TRIANGLES, model->element_c, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+	return;
+}
+
 void *wip_renderThread(void *arg) {
 	wip_setWindow();
 	wip_glInit();
@@ -37,50 +105,31 @@ void *wip_renderThread(void *arg) {
 
 	GLuint vertShader = wip_loadShader((char *)main_vert, GL_VERTEX_SHADER);
 	GLuint fragShader = wip_loadShader((char *)main_frag, GL_FRAGMENT_SHADER);
-	GLuint program = wip_loadProgram(vertShader, fragShader);
+	program = wip_loadProgram(vertShader, fragShader);
 
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
 
-	wip_ply_t ply;
-	wip_mdl_t mdl;
-	wip_glmdl_t glmdl;
-	mdl.vertex_c = wip_alloc(sizeof(int));
-	mdl.index_c = wip_alloc(sizeof(int));
+	wip_glmdl_t *playerModel = openModel("player");
+	wip_glmdl_t *enemyModel = openModel("enemy");
 
-	wip_readModel(&ply, "mdl/wip_model.ply");
-
-	wip_prepModel(&mdl, &ply);
-	wip_free(ply.vertex);
-	wip_free(ply.index);
-	wip_free(ply.color);
-	wip_free(ply.normal);
-
-	wip_loadModel(&glmdl, &mdl);
-	wip_free(mdl.model);
-	wip_free(mdl.index);
-
-	wip_free(mdl.vertex_c);
-	wip_free(mdl.index_c);
-
-	unsigned int lightLocation = glGetUniformLocation(program, "light");
-	unsigned int mpvLocation = glGetUniformLocation(program, "mpv");
-	unsigned int transformLocation = glGetUniformLocation(program, "transform");
-	unsigned int normalTransformLocation = glGetUniformLocation(program, "normalTransform");
-	unsigned int materialLocation = glGetUniformLocation(program, "material");
-
-	float m[3] = { 0.1, 0.1, 0.4 };
+	lightLocation = glGetUniformLocation(program, "light");
+	mpvLocation = glGetUniformLocation(program, "mpv");
+	transformLocation = glGetUniformLocation(program, "transform");
+	normalTransformLocation = glGetUniformLocation(program, "normalTransform");
+	materialLocation = glGetUniformLocation(program, "material");
 
 	while(!wip_globalScene.length);
 
 	wip_obj_t *light = wip_globalScene.object[0];
 	wip_obj_t *eye = wip_globalScene.object[1];
 	wip_obj_t *center = wip_globalScene.object[2];
+	wip_obj_t *player = wip_globalScene.object[3];
 
 	vec3 axis = {0.0f, 1.0f, 0.0f};
 	wip_globj_t projection;
 	float ratio = (float)wip_getConfInt("video.width")/(float)wip_getConfInt("video.height");
-	mat4x4_perspective(projection.m, RAD(20), ratio, 0.1, 100);
+	mat4x4_perspective(projection.m, RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 100);
 
 	wip_globalFramesPerSecond = 0;
 	int fpsMax = wip_getConfInt("video.fpsMax");
@@ -104,30 +153,10 @@ void *wip_renderThread(void *arg) {
 		mat4x4_look_at(view.m, eye->position, center->position, axis);
 		mat4x4_mul(pv.m, projection.m, view.m);
 
-		for(int i = 3; i < wip_globalScene.length; ++i) {
-			wip_globj_t mpv;
-			wip_globj_t transform;
-			wip_loadObject(&transform, wip_globalScene.object[i]);
-			wip_globj_t normalTransform;
-			{
-				wip_globj_t go;
-				mat4x4_invert(go.m, transform.m);
-				mat4x4_transpose(normalTransform.m, go.m);
-			}
-			mat4x4_mul(mpv.m, pv.m, transform.m);
-			wip_loadObjectF(WIP_POS, &transform, wip_globalScene.object[i]);
+		drawModel(player, playerModel, pv, light);
 
-			glBindVertexArray(glmdl.vertex_a);
-
-			glUseProgram(program);
-			glUniform3fv(lightLocation, 1, light->position);
-			glUniformMatrix4fv(mpvLocation, 1, GL_FALSE, mpv.f);
-			glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transform.f);
-			glUniformMatrix4fv(normalTransformLocation, 1, GL_FALSE, normalTransform.f);
-			glUniform3fv(materialLocation, 1, m);
-			glDrawElements(GL_TRIANGLES, glmdl.element_c, GL_UNSIGNED_INT, 0);
-
-			glBindVertexArray(0);
+		for(int i = 5; i < wip_globalScene.length; ++i) {
+			drawModel(wip_globalScene.object[i], enemyModel, pv, light);
 		}
 
 		do wip_swapWindow();

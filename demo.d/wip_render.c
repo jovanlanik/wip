@@ -48,7 +48,7 @@ void *wip_renderThread(void *arg) {
 	mdl.vertex_c = wip_alloc(sizeof(int));
 	mdl.index_c = wip_alloc(sizeof(int));
 
-	wip_readModel(&ply, "mdl/wip_model.ply");
+	wip_readModel(&ply, "mdl/demo.ply");
 
 	wip_prepModel(&mdl, &ply);
 	wip_free(ply.vertex);

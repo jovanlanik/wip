@@ -10,3 +10,5 @@
 #include "wip_logic.h"
 #include "wip_render.h"
 
+#define ENEMY_POOL_SIZE 8
+

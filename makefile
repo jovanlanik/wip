@@ -39,9 +39,9 @@ endif
 
 all: $(NAME)
 clean:
-	rm -f $(TRASH)
+	@rm $(TRASH) | true
 distclean: clean
-	rm -f $(DIRT)
+	@rm $(DIRT) | true
 install: all
 	install $(NAME) $(DESTDIR)$(bindir)/$(NAME)
 uninstall:
