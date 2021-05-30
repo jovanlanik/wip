@@ -5,6 +5,7 @@
 
 // Game Logic
 
+#include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
 #include <math.h>
@@ -35,7 +36,7 @@ void *wip_logicThread(void *arg) {
 	wip_obj_t enemy[ENEMY_POOL_SIZE];
 
 	wip_makeObject(&eye);
-	eye.z = 80;
+	eye.z = 150;
 	eye.y = -10;
 
 	wip_makeObject(&center);
@@ -49,18 +50,14 @@ void *wip_logicThread(void *arg) {
 	player.r.x = -40;
 
 	//wip_makeObject(&object[0]);
+	
+	int sceneLength = 4 + ENEMY_POOL_SIZE;
 
-	wip_globalScene.length = 4 + ENEMY_POOL_SIZE;
-	wip_globalScene.object = wip_alloc(wip_globalScene.length*sizeof(void *));
+	wip_globalScene.object = wip_alloc(sceneLength*sizeof(void *));
 	wip_globalScene.object[0] = &light;
 	wip_globalScene.object[1] = &eye;
 	wip_globalScene.object[2] = &center;
 	wip_globalScene.object[3] = &player;
-	for(int i = 5; i < wip_globalScene.length; ++i)
-		wip_globalScene.object[i] = &enemy[i-5];
-
-	wip_globalTicksPerSecond = 0;
-	double startTime, lastTime = wip_timeWindow();
 
 	float maxH;
 	float maxW;
@@ -72,7 +69,19 @@ void *wip_logicThread(void *arg) {
 	}
 	//wip_log(WIP_INFO, "maxH: %f, maxW: %f", maxH, maxW);
 	
+	for(int i = 0; i <= ENEMY_POOL_SIZE; ++i) {
+		wip_globalScene.object[i+4] = &enemy[i];
+		enemy[i].r.z = 180;
+		enemy[i].r.x = -20;
+		enemy[i].y = (float)rand() / (float)(RAND_MAX/(2*maxH)) - 3*maxH;
+		enemy[i].x = (float)rand() / (float)(RAND_MAX/(2*maxW)) - maxW;
+	}
 
+	wip_globalScene.length = sceneLength;
+
+	wip_globalTicksPerSecond = 0;
+	double startTime, lastTime = wip_timeWindow();
+	
 
 	while(!wip_globalWindow.close) {
 		startTime = wip_timeWindow();
@@ -85,6 +94,14 @@ void *wip_logicThread(void *arg) {
 			wip_globalTicksPerSecond = 0;
 		}
 
+		for(int i = 0; i <= ENEMY_POOL_SIZE; ++i) {
+			if(enemy[i].y > maxH + 2.5) {
+				enemy[i].y = -maxH - 2.5;
+				enemy[i].x = (float)rand() / (float)(RAND_MAX/(2*maxW)) - maxW;
+			}
+			else enemy[i].y += 0.15;
+		}
+
 		wip_key_t key;
 		while((key = wip_readKey()).action) {
 			if(key.key == WIP_ESC || key.key == 'q') {
@@ -93,6 +110,13 @@ void *wip_logicThread(void *arg) {
 				pthread_mutex_unlock(&wip_globalWindow_m);
 			}
 			wip_writeMotion(key);
+		}
+
+		if(wip_readMotion(SHOOT)) {
+			for(int i = 0; i <= ENEMY_POOL_SIZE; ++i) {
+				enemy[i].y = (float)rand() / (float)(RAND_MAX/(2*maxH)) - maxH;
+				enemy[i].x = (float)rand() / (float)(RAND_MAX/(2*maxW)) - maxW;
+			}
 		}
 
 		union WIP_NAMED_VEC_T(3, float, WIP_XYZ, vec, ) dir = { .x = 0.0, .y = 0.0, .z = 0.0 };
@@ -111,7 +135,7 @@ void *wip_logicThread(void *arg) {
 		}
 
 		if(vec3_len(dir.vec) != 0) vec3_norm(dir.vec, dir.vec);
-		vec3_scale(dir.vec, dir.vec, 0.01);
+		vec3_scale(dir.vec, dir.vec, 0.015);
 		vec3_add(player.momentum, player.momentum, dir.vec);
 
 		player.r.y = 50 * player.m.x;

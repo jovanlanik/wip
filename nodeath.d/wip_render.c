@@ -129,7 +129,7 @@ void *wip_renderThread(void *arg) {
 	vec3 axis = {0.0f, 1.0f, 0.0f};
 	wip_globj_t projection;
 	float ratio = (float)wip_getConfInt("video.width")/(float)wip_getConfInt("video.height");
-	mat4x4_perspective(projection.m, RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 100);
+	mat4x4_perspective(projection.m, RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 1000);
 
 	wip_globalFramesPerSecond = 0;
 	int fpsMax = wip_getConfInt("video.fpsMax");
@@ -155,7 +155,7 @@ void *wip_renderThread(void *arg) {
 
 		drawModel(player, playerModel, pv, light);
 
-		for(int i = 5; i < wip_globalScene.length; ++i) {
+		for(int i = 4; i < wip_globalScene.length; ++i) {
 			drawModel(wip_globalScene.object[i], enemyModel, pv, light);
 		}
 
