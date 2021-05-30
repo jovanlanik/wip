@@ -35,17 +35,22 @@ LDFLAGS += -pg
 TRASH += gmon.out
 endif
 
-.PHONY: all clean distclean install uninstall
+.PHONY: all clean distclean install uninstall help
 
 all: $(NAME)
-clean:
+clean: ## Clean objects and baked files for NAME
 	@rm $(TRASH) | true
-distclean: clean
+distclean: clean ##Clean all files including config
 	@rm $(DIRT) | true
-install: all
+install: all ## Install NAME to DESTDIR
 	install $(NAME) $(DESTDIR)$(bindir)/$(NAME)
-uninstall:
+uninstall: ## Uninstall NAME from DESTDIR
 	rm -f $(DESTDIR)$(bindir)/$(NAME)
+help: ## Show commented targets
+	@grep -hE '^\S[^:]*:[^#]*##.+' $(MAKEFILE_LIST) \
+		| sed 's/:[^#]*##\s*/#/' \
+		| sort -t '#' -k 1 \
+		| column -tN TARGET,COMMENT  -s '#'
 
 $(NAME): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $@
@@ -56,9 +61,9 @@ $(NAME): $(OBJ)
 	@glslangValidator $<
 	util/bake $< $<.h
 
-src/wip_conf.o : include/baked/config.h
-src/wip_gl.o : include/baked/shaders.h
-include/baked/config.h : $(CONF)
+src/wip_conf.o: include/baked/config.h
+src/wip_gl.o: include/baked/shaders.h
+include/baked/config.h: $(CONF)
 	@echo Baking $@ from $<
 	util/bake $< $@
 include/baked/shaders.h: $(GLSL:%=%.h)
