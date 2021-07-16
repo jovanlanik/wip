@@ -2,7 +2,6 @@
 - build system
 	+ configure script
 	+ install and uninstall target
-	- dist target
 - objects
 	- free
 	= obj:
@@ -26,7 +25,7 @@
 - image loading
 	+ choose library
 		= stb_image.h
-	- wip_img
+	- wip_img wrapper
 - UI
 	- font rendering
 - input

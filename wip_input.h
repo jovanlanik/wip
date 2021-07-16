@@ -61,7 +61,8 @@
 	KEY(FUNCTION,		= WIP_F), \
 	KEY(ALPHA,		= 'a'), \
 	KEY(DEL,		= WIP_DELETE), \
-	KEY(KP_NUM,		= 128)
+	KEY(KP_NUM,		= 128), \
+	KEY(KP_NUM_LAST,	= WIP_KP_NUM+9)
 
 #define KEY(key, code) WIP_##key code
 enum wip_key {

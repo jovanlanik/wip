@@ -16,7 +16,7 @@ $(warning NDEBUG not explicitly set.)
 NDEBUG := 0
 endif
 
-CFLAGS += -std=c11 -I . -I include -I $(NAME).d -DWIP_NAME=$(NAME)
+CFLAGS += -Wall -pedantic -std=c11 -I . -I include -I $(NAME).d -DWIP_NAME=$(NAME)
 LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig -l$(WINDOW_BACKEND)
 
 SRC = $(wildcard src/*.c $(NAME).d/*.c) backend/wip_window_$(WINDOW_BACKEND).c
@@ -28,9 +28,10 @@ TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h) $(OBJ)
 DIRT = $(wildcard *.d/*.o backend/*.o) $(patsubst %.d, %, $(wildcard *.d)) config.mk
 
 ifeq '$(NDEBUG)' '1'
-CFLAGS += -DNDEBUG -o2
+CFLAGS += -DNDEBUG -O2
+LDFLAGS += -Wl,-s
 else
-CFLAGS += -Wall -pedantic -pg
+CFLAGS += -g -pg
 LDFLAGS += -pg
 TRASH += gmon.out
 endif

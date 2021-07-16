@@ -8,26 +8,33 @@
 
 export LC_ALL=C
 
-DEFAULT='CC=gcc NAME=demo NDEBUG=0 WINDOW_BACKEND=glfw
-prefix=/usr/local exec_prefix=$(prefix) bindir=$(exec_prefix)/bin'
+DEFAULT='CC=gcc
+NAME=demo
+NDEBUG=0
+WINDOW_BACKEND=glfw
+prefix=/usr/local
+exec_prefix=$(prefix)
+bindir=$(exec_prefix)/bin'
 
 OUT='/dev/stdout'
 DRY='0'
-IGNORE='0'
 FILE='config.mk'
 
 usage() {
 cat << EOF
 Usage: $0 [OPTIONS] [OPERANDS]
-	-h	show usage and exit
-	-q	suppress standard output
-	-n	show new config but don't write to file
-	-i	ignore defaults ($DEFAULT)
-	-o=F	write to F instead of $FILE
+  -h	show usage and exit
+  -q	suppress standard output
+  -n	don't write to file
+  -i	ignore defaults
+  -o=F	write to F instead of $FILE
 
-	OPERANDS should be formated as VARIABLE=VALUE or VARIABLE.
-	A variable without a value will be set to '1'.
+OPERANDS should be formated as VARIABLE=VALUE or VARIABLE.
+A variable without a value will be set to '1'.
+
+Defaults are:
 EOF
+echo "$DEFAULT" | sed 's/^/  /'
 exit 0
 }
 
@@ -42,7 +49,7 @@ do
 		h) usage;;
 		q) OUT='/dev/null';;
 		n) DRY='1';;
-		i) IGNORE='1';;
+		i) DEFAULT='';;
 		o) FILE=$OPTARG;;
 		:) error "Option -$OPTARG requires an argument. Use -h to see usage";;
 		\?) error "Invalid option: -$OPTARG. Use -h to see usage";;
@@ -51,7 +58,6 @@ done
 shift "$((OPTIND-1))"
 
 [ "$DRY" = '1' ] && FILE='/dev/null'
-[ "$IGNORE" = '1' ] && DEFAULT=''
 
 for i in $DEFAULT
 do

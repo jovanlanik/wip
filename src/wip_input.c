@@ -80,6 +80,11 @@ void wip_loadBindings(void) {
 struct WIP_FIFO_T(WIP_KEY_BUFFER, wip_key_t) wip_key;
 
 enum wip_key wip_findKey(const char *name) {
+	if(name[1] == '\0') {
+		if(name[0] >= 'A' && name[0] <= 'Z') return name[0] + ('a' - 'A');
+		else if(name[0] >= 'a' && name[0] <= 'z') return name[0];
+		else return 0;
+	}
 	for(int i = 0; i < WIP_KEY_END; ++i)
 		if(strcmp(name, wip_globalKeyName[i]) == 0) return i;
 	return 0;

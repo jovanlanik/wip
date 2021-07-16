@@ -16,7 +16,23 @@
 wip_window_t wip_globalWindow;
 pthread_mutex_t wip_globalWindow_m;
 
-// TODO: load config values
+int unifyKey(SDL_Keysym key) {
+	wip_log(
+		WIP_INFO, "scancode: %d, keycode: %d, scanname: %s, keyname: %s",
+		key.scancode,
+		key.sym,
+		SDL_GetScancodeName(key.scancode),
+		SDL_GetKeyName(key.sym)
+	);
+	switch(key.scancode) {
+		case SDL_SCANCODE_UNKNOWN: return WIP_UNKNOWN;
+	}
+	if(key.scancode >= SDL_SCANCODE_A && key.scancode <= SDL_SCANCODE_Z) return key.scancode + ('a' - SDL_SCANCODE_A);
+	return WIP_UNKNOWN;
+}
+
+
+// TODO: fix vsync
 void wip_initWindow(void) {
 	wip_debug(WIP_INFO, "%s: Initializing window...", __func__);
 
@@ -33,9 +49,10 @@ void wip_initWindow(void) {
 		wip_getConfInt("video.width"), wip_getConfInt("video.height"), SDL_WINDOW_OPENGL);
 
 	if(!wip_globalWindow.handle) {
-		wip_log(WIP_FATAL, "%s: Couldn't create window.", __func__);
+		wip_log(WIP_FATAL, "%s: Couldn't create window: %s", __func__, SDL_GetError());
 	}
-	SDL_GL_CreateContext(wip_globalWindow.handle);
+
+	//SDL_GL_CreateContext(wip_globalWindow.handle);
 	SDL_GL_SetSwapInterval(wip_getConfBool("video.vsync"));
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
@@ -52,9 +69,24 @@ void wip_swapWindow(void) {
 
 // TODO: input
 void wip_pollWindow(void) {
-	SDL_Event event;
-	SDL_PollEvent(&event);
-	if(event.type == SDL_QUIT) wip_globalWindow.close = 1;
+	static SDL_Event event;
+	while(SDL_PollEvent(&event)) {
+		switch(event.type) {
+			case SDL_QUIT:
+				wip_debug(WIP_INFO, "SDL2: Quit event received...");
+				wip_globalWindow.close = 1;
+				break;
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
+				if(event.key.repeat) return;
+				wip_key_t nkey = {
+					event.key.type == SDL_KEYDOWN ? WIP_PRESS : WIP_RELEASE,
+					unifyKey(event.key.keysym)
+				};
+				if(!wip_writeKey(nkey)) wip_log(WIP_WARN, "SDL2: Dropped key event");
+				break;
+		}
+	}
 }
 
 double wip_timeWindow(void) {
