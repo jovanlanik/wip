@@ -17,17 +17,42 @@ wip_window_t wip_globalWindow;
 pthread_mutex_t wip_globalWindow_m;
 
 int unifyKey(SDL_Keysym key) {
-	wip_log(
-		WIP_INFO, "scancode: %d, keycode: %d, scanname: %s, keyname: %s",
-		key.scancode,
-		key.sym,
-		SDL_GetScancodeName(key.scancode),
-		SDL_GetKeyName(key.sym)
-	);
 	switch(key.scancode) {
 		case SDL_SCANCODE_UNKNOWN: return WIP_UNKNOWN;
+		case SDL_SCANCODE_NUMLOCKCLEAR: return WIP_KP_NUM_LOCK;
+		case SDL_SCANCODE_KP_ENTER: return WIP_KP_ENTER;
+		case SDL_SCANCODE_BACKSPACE: return WIP_BACKSPACE;
+		case SDL_SCANCODE_TAB: return WIP_TAB;
+		case SDL_SCANCODE_PRINTSCREEN: return WIP_PRINT_SCREEN;
+		case SDL_SCANCODE_PAUSE: return WIP_PAUSE;
+		case SDL_SCANCODE_RETURN: return WIP_ENTER;
+		case SDL_SCANCODE_LCTRL: return WIP_L_CTRL;
+		case SDL_SCANCODE_LSHIFT: return WIP_L_SHIFT;
+		case SDL_SCANCODE_LGUI: return WIP_L_GUI;
+		case SDL_SCANCODE_LALT: return WIP_L_ALT;
+		case SDL_SCANCODE_RCTRL: return WIP_R_CTRL;
+		case SDL_SCANCODE_RSHIFT: return WIP_R_SHIFT;
+		case SDL_SCANCODE_RGUI: return WIP_R_GUI;
+		case SDL_SCANCODE_RALT: return WIP_R_ALT;
+		case SDL_SCANCODE_INSERT: return WIP_INSERT;
+		case SDL_SCANCODE_HOME: return WIP_HOME;
+		case SDL_SCANCODE_END: return WIP_END;
+		case SDL_SCANCODE_PAGEUP: return WIP_PAGEUP;
+		case SDL_SCANCODE_PAGEDOWN: return WIP_PAGEDOWN;
+		case SDL_SCANCODE_ESCAPE: return WIP_ESCAPE;
+		case SDL_SCANCODE_RIGHT: return WIP_RIGHT;
+		case SDL_SCANCODE_LEFT: return WIP_LEFT;
+		case SDL_SCANCODE_DOWN: return WIP_DOWN;
+		case SDL_SCANCODE_UP: return WIP_UP;
+		case SDL_SCANCODE_SPACE: return WIP_SPACE;
+		case SDL_SCANCODE_CAPSLOCK: return WIP_CAPS_LOCK;
+		case SDL_SCANCODE_MENU: return WIP_MENU;
+		case SDL_SCANCODE_DELETE: return WIP_DELETE;
+		default: break;
 	}
-	if(key.scancode >= SDL_SCANCODE_A && key.scancode <= SDL_SCANCODE_Z) return key.scancode + ('a' - SDL_SCANCODE_A);
+	if(key.scancode >= SDL_SCANCODE_F1 && key.scancode <= SDL_SCANCODE_F12) return key.scancode - SDL_SCANCODE_F1 + WIP_F+1;
+	//if(key.scancode >= SDL_SCANCODE_A && key.scancode <= SDL_SCANCODE_Z) return key.scancode + ('a' - SDL_SCANCODE_A);
+	wip_log(WIP_WARN, "SDL2: Couldn't unify scancode: %d", key.scancode);
 	return WIP_UNKNOWN;
 }
 
