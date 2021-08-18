@@ -49,6 +49,7 @@ int unifyKey(int key) {
 		case GLFW_KEY_CAPS_LOCK: return WIP_CAPS_LOCK;
 		case GLFW_KEY_MENU: return WIP_MENU;
 		case GLFW_KEY_DELETE: return WIP_DELETE;
+		default: break;
 	}
 	//if(key >= GLFW_KEY_0 && key <= GLFW_KEY_9) return key;
 	//if(key >= GLFW_KEY_A && key <= GLFW_KEY_Z) return key + ('a' - 'A');
