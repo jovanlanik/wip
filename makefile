@@ -21,7 +21,7 @@ LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig -l$(WINDOW_BACKEND)
 
 SRC = $(wildcard src/*.c $(NAME).d/*.c) backend/wip_window_$(WINDOW_BACKEND).c
 OBJ = $(SRC:%.c=%.o)
-GLSL = $(wildcard glsl/*.vert glsl/*.frag $(NAME).d/glsl/*.vert $(NAME).d/glsl/*.vert)
+GLSL = $(wildcard glsl/*.vert glsl/*.frag $(NAME).d/glsl/*.vert $(NAME).d/glsl/*.frag)
 CONF = conf/$(NAME).conf
 
 TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h) $(OBJ)
