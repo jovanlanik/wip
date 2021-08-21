@@ -12,6 +12,7 @@
 typedef struct {
 	float *vertex;
 	float *normal;
+	float *uv;
 	uint8_t *color;
 	uint32_t *index;
 	int vertex_c;
@@ -22,11 +23,12 @@ typedef struct {
 	struct {
 		struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, vertex, v);
 		struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, normal, n);
+		struct WIP_NAMED_VEC_T(2, float, WIP_UV, uv, u);
 		struct WIP_NAMED_VEC_T(4, uint8_t, WIP_RGBA, color, c);
 	} *model;
 	uint32_t *index;
-	int *vertex_c;
-	int *index_c;
+	int vertex_c;
+	int index_c;
 } wip_mdl_t;
 
 wip_ply_t *wip_readModel(wip_ply_t *p, const char *file);

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#define WIP_UV(type) { type s, t; }
 #define WIP_XYZ(type) { type x, y, z; }
 #define WIP_RGB(type) { type r, g, b; }
 #define WIP_RGBA(type) { type r, g, b, a; }

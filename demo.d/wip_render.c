@@ -45,8 +45,8 @@ void *wip_renderThread(void *arg) {
 	wip_ply_t ply;
 	wip_mdl_t mdl;
 	wip_glmdl_t glmdl;
-	mdl.vertex_c = wip_alloc(sizeof(int));
-	mdl.index_c = wip_alloc(sizeof(int));
+	//mdl.vertex_c = wip_alloc(sizeof(int));
+	//mdl.index_c = wip_alloc(sizeof(int));
 
 	wip_readModel(&ply, "mdl/demo.ply");
 
@@ -60,8 +60,8 @@ void *wip_renderThread(void *arg) {
 	wip_free(mdl.model);
 	wip_free(mdl.index);
 
-	wip_free(mdl.vertex_c);
-	wip_free(mdl.index_c);
+	//wip_free(mdl.vertex_c);
+	//wip_free(mdl.index_c);
 
 	unsigned int lightLocation = glGetUniformLocation(program, "light");
 	unsigned int mpvLocation = glGetUniformLocation(program, "mpv");

@@ -34,8 +34,8 @@ wip_glmdl_t *openModel(char *name) {
 	wip_mdl_t mdl;
 	wip_glmdl_t *glmdl = wip_alloc(sizeof(wip_glmdl_t));
 
-	mdl.vertex_c = wip_alloc(sizeof(int));
-	mdl.index_c = wip_alloc(sizeof(int));
+	//mdl.vertex_c = wip_alloc(sizeof(int));
+	//mdl.index_c = wip_alloc(sizeof(int));
 
 	const char *prefix = "./mdl/";
 	const char *suffix = ".ply";
@@ -54,8 +54,8 @@ wip_glmdl_t *openModel(char *name) {
 	wip_free(mdl.model);
 	wip_free(mdl.index);
 
-	wip_free(mdl.vertex_c);
-	wip_free(mdl.index_c);
+	//wip_free(mdl.vertex_c);
+	//wip_free(mdl.index_c);
 
 	return glmdl;
 }
