@@ -8,7 +8,7 @@
 #version 330
 
 in vec3 nor;
-in vec3 pos;
+//in vec3 pos;
 in vec4 col;
 
 uniform vec3 light;

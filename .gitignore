@@ -1,7 +1,9 @@
-demo
-nodeath
-config.mk
 gmon.out
+mkconf.mk
 include/baked/*.h
 glsl/*.h
 *.o
+demo
+nodeath
+starfield
+dungeon

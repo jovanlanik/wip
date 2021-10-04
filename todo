@@ -1,16 +1,20 @@
 # Todo list
+- FIX NODEATH SEGFAULT
 - build system
+	- switch to cmake
 	+ configure script
 	+ install and uninstall target
+	- separate everything project specific
 - objects
 	- free
 	= obj:
 		= position
 		= rotation
-			? rework rotations
+			- need quaternions
 		= scale
 		= momentum
 		= anglular momentum
+		= target rotation
 
 		+ obj make(void);
 	= globj:
@@ -20,14 +24,27 @@
 - models
 	- free
 	= seq
-		- figure this shit out;
+		- figure this out;
 	- materials and textures
 - image loading
 	+ choose library
 		= stb_image.h
-	- wip_img wrapper
+	+ basic implementation
+	+ wip_img wrapper
+- graphics
+	+ MSAA
+	+ UV maps
+	- normal maps
+		- loading
+		- shaders
+- window
+	- dynamic size
 - UI
 	- font rendering
+		? bitmap fonts
+		? freetype
+	- fps/frametime meter
+	? wip_ui
 - input
 	+ handling
 	+ mapping
@@ -45,9 +62,13 @@
 	+ antialiasing
 	+ input rebinding
 		- fix alpha keys
+			? check on this
 	- fix include directive in config
 - logic loop
-	- decouple movement from tickrate
+	- move rendering to logic loop, render loop is dumb
+	- move logic loop to main thread
+	- move init code from main
+	- decouple movement from tickrate (demo, possibly nodeath)
 - change some errors to warnings
 - commandline arguments
 - audio

@@ -1,0 +1,45 @@
+#
+# Dungeon
+# Copyright (c) 2021 Jovan Lanik
+#
+
+# Dungeon format example file
+
+# `room` starts a room definition
+# accepts room id, width and height
+room 0 5 5
+# following lines define tiles in the room
+# whitespace is ignored
+# first char of tile is tile type
+# second char is data as an int (usually to change model or texture)
+# in the case of doors, data is the id of the key needed to unlock (0 if unlocked)
+# in the case of gates, data targets room
+WW WW WW WW WW
+WW ++ ++ ++ WW
+WW ++ DD ++ G1
+WW ++ ++ ++ WW
+WW WW WW WW WW
+
+# `deco` starts a decoration definition for room id and layer number
+# the decoration layers has the same size as the room
+# the layers are rendered from lowest (0) to hightest
+# first layer (0) is autofilled from room definition but can be overwritten
+deco 0 0
+# first char is deco type
+# second char is direction (one letter cardinal or numeric)
+== == == == ==
+== == TS == ==
+== == OO == ==
+== == TN == ==
+== == == == ==
+deco 0 1
+== == == == ==
+== == TS == ==
+== == == == ==
+== == TN == ==
+== == == == ==
+
+room 1 3 3
+WW WW WW
+G0 ++ WW
+WW WW WW

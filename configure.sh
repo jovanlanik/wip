@@ -18,7 +18,7 @@ bindir=$(exec_prefix)/bin'
 
 OUT='/dev/stdout'
 DRY='0'
-FILE='config.mk'
+FILE='mkconf.mk'
 
 usage() {
 cat << EOF

@@ -6,7 +6,7 @@
 // PLY model loading
 
 #include <stdlib.h>
-#include <stdint.h>
+//#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -165,6 +165,8 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 				4 * sizeof(uint8_t)
 			);
 		}
+		//wip_debug(WIP_INFO, "x: %f, y: %f, z: %f, s: %f, t: %f",
+		//	p->vertex[2*i], p->vertex[2*i+1], p->vertex[2*i+2], p->uv[2*i], p->uv[2*i+1]);
 	}
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);

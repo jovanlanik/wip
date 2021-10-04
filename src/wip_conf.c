@@ -15,7 +15,7 @@
 #include "wip_fn.h"
 #include "wip_conf.h"
 
-#include "baked/config.h"
+extern const char *wip_defaultConf;
 
 config_t wip_globalConf;
 
@@ -102,11 +102,7 @@ void wip_initConf(void) {
 	int ret;
 	if(!confFile) {
 		wip_log(WIP_WARN, "%s: No config file found. Using default.", __func__);
-#define CONCAT(x) x ## _conf
-#define CONFIG(x) CONCAT(x)
-		ret = config_read_string(&wip_globalConf, CONFIG(WIP_NAME));
-#undef CONCAT
-#undef CONFIG
+		ret = config_read_string(&wip_globalConf, wip_defaultConf);
 	}
 	else ret = config_read(&wip_globalConf, confFile);
 	if(!ret) {

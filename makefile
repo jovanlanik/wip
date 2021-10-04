@@ -5,7 +5,7 @@
 
 # Makefile
 
-include config.mk
+include mkconf.mk
 
 ifndef NAME
 $(error NAME not set)
@@ -16,16 +16,26 @@ $(warning NDEBUG not explicitly set.)
 NDEBUG := 0
 endif
 
-CFLAGS += -Wall -pedantic -std=c11 -I . -I include -I $(NAME).d -DWIP_NAME=$(NAME)
-LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig -l$(WINDOW_BACKEND)
+CFLAGS += -Wall -pedantic -std=c11 -I include -I $(NAME).d/include -DWIP_NAME=$(NAME)
+LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig
 
-SRC = $(wildcard src/*.c $(NAME).d/*.c) backend/wip_window_$(WINDOW_BACKEND).c
+ifeq '$(WINDOW_BACKEND)' 'glfw'
+CFLAGS += -DWIP_GLFW
+LDLIBS += -lglfw
+NWINDOW_BACKEND=SDL2
+else
+CFLAGS += -DWIP_SDL2
+LDLIBS += -lSDL2
+NWINDOW_BACKEND=glfw
+endif
+
+SRC = $(filter-out src/wip_window_$(NWINDOW_BACKEND).c, $(wildcard src/*.c $(NAME).d/src/*.c))
 OBJ = $(SRC:%.c=%.o)
 GLSL = $(wildcard glsl/*.vert glsl/*.frag $(NAME).d/glsl/*.vert $(NAME).d/glsl/*.frag)
-CONF = conf/$(NAME).conf
+CONF = res/conf/$(NAME).conf
 
 TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h) $(OBJ)
-DIRT = $(wildcard *.d/*.o backend/*.o) $(patsubst %.d, %, $(wildcard *.d)) config.mk
+DIRT = $(wildcard *.d/src/*.o) $(patsubst %.d, %, $(wildcard *.d)) mkconf.mk
 
 ifeq '$(NDEBUG)' '1'
 CFLAGS += -DNDEBUG -O2
@@ -62,9 +72,9 @@ $(NAME): $(OBJ)
 	@glslangValidator $<
 	util/bake $< $<.h
 
-src/wip_conf.o: include/baked/config.h
+src/wip_conf.o: include/baked/$(NAME)_config.h
 src/wip_gl.o: include/baked/shaders.h
-include/baked/config.h: $(CONF)
+include/baked/$(NAME)_config.h: $(CONF)
 	@echo Baking $@ from $<
 	util/bake $< $@
 include/baked/shaders.h: $(GLSL:%=%.h)
