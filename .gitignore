@@ -2,6 +2,7 @@ gmon.out
 mkconf.mk
 include/baked/*.h
 glsl/*.h
+*.d/glsl/*.h
 *.o
 demo
 nodeath
