@@ -21,6 +21,8 @@ project root:
 			conf/
 		include/
 			*.h
+		README.md - optional
+		LICENCE - optional
 	util - shell scripts, binaries or C source (with build system I end up using for the project), must be PORTABLE!
 	README.md
 	LICENCE
