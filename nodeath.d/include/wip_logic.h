@@ -1,7 +1,5 @@
-//
 // WIP
 // Copyright (c) 2021 Jovan Lanik
-//
 
 // Game Logic
 

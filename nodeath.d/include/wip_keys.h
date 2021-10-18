@@ -1,9 +1,7 @@
-//
 // WIP
 // Copyright (c) 2021 Jovan Lanik
-//
 
-// KeyMaps, Motions and other input
+// Keymaps, Motions and other input
 
 #define WIP_KEY_BUFFER 16
 #define WIP_MOTION

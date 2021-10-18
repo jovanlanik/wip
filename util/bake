@@ -1,8 +1,6 @@
 #!/bin/sh
-#
 # WIP
 # Copyright (c) 2020 Jovan Lanik
-#
 
 # Bake file contents into a C header
 

@@ -1,10 +1,8 @@
 #!/bin/sh
-#
 # WIP
 # Copyright (c) 2021 Jovan Lanik
-#
 
-# Config generator
+# Makefile configure script
 
 export LC_ALL=C
 

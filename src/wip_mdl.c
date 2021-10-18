@@ -1,7 +1,5 @@
-//
 // WIP
 // Copyright (c) 2020 Jovan Lanik
-//
 
 // PLY model loading
 
@@ -218,5 +216,31 @@ wip_glmdl_t *wip_loadModel(wip_glmdl_t *gm, wip_mdl_t *m) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	return gm;
+}
+
+wip_glmdl_t *wip_openModel(char *name) {
+	wip_ply_t ply;
+	wip_mdl_t mdl;
+	wip_glmdl_t *glmdl = wip_alloc(sizeof(wip_glmdl_t));
+
+	// TODO: resource finding function
+	const char *prefix = "./res/mdl/";
+	const char *suffix = ".ply";
+	char *filename = wip_alloc(strlen(prefix)+strlen(name)+strlen(suffix)+1);
+	sprintf(filename, "%s%s%s", prefix, name, suffix);
+
+	wip_readModel(&ply, filename);
+
+	wip_prepModel(&mdl, &ply);
+	wip_free(ply.vertex);
+	wip_free(ply.index);
+	wip_free(ply.color);
+	wip_free(ply.normal);
+
+	wip_loadModel(glmdl, &mdl);
+	wip_free(mdl.model);
+	wip_free(mdl.index);
+
+	return glmdl;
 }
 

@@ -1,7 +1,5 @@
-//
 // WIP
 // Copyright (c) Jovan Lanik 2021
-//
 
 // Image Loading
 

@@ -1,7 +1,5 @@
-//
 // WIP
 // Copyright (c) Jovan Lanik 2020
-//
 
 // Object Functions
 

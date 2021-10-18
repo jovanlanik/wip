@@ -1,13 +1,12 @@
-//
 // WIP
 // Copyright (c) 2020 Jovan Lanik
-//
 
 // Type Generator Macros
 
 #pragma once
 
 #define WIP_UV(type) { type s, t; }
+#define WIP_XY(type) { type x, y; }
 #define WIP_XYZ(type) { type x, y, z; }
 #define WIP_XYZW(type) { type x, y, z, w; }
 #define WIP_RGB(type) { type r, g, b; }

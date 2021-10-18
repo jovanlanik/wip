@@ -1,7 +1,5 @@
-//
 // Dungeon
 // Copyright (c) 2021 Jovan Lanik
-//
 
 // Game Logic
 
@@ -21,6 +19,8 @@
 
 #include "lib/linmath.h"
 
+#include "d_player.h"
+
 int wip_globalTicksPerSecond;
 
 wip_scene_t wip_globalScene;
@@ -34,10 +34,14 @@ extern float m[];
 
 void *wip_logicThread(void *arg) {
 	wip_obj_t center, camera;
+	player_t play;
+	play.x = 0;
+	play.y = 0;
+	play.d = DIR_NORTH;
 
 	wip_makeObject(&camera);
-	camera.y = 5.0f;
-	camera.z = 1.0f;
+	camera.y = 0.0f;
+	camera.z = 0.0f;
 
 	wip_makeObject(&center);
 	
@@ -70,9 +74,33 @@ void *wip_logicThread(void *arg) {
 				wip_globalWindow.close = 1;
 				pthread_mutex_unlock(&wip_globalWindow_m);
 			}
-			if(key.key == WIP_SPACE) wip_log(WIP_INFO, "%f %f %f", m[0], m[1], m[2]);
+			//if(key.key == WIP_SPACE) wip_log(WIP_INFO, "%f %f %f", m[0], m[1], m[2]);
+			if(key.key == WIP_SPACE && key.action == WIP_PRESS) {
+				wip_log(WIP_INFO, "%f, %f", camera.x, camera.y);
+				wip_log(WIP_INFO, "%f, %f", center.x, center.y);
+				wip_print("");
+			}
 			wip_writeMotion(key);
 		}
+
+		if(wip_readMotion(UP)) {
+			play.x += abs(play.d%4-2)-1;
+			play.y += abs(play.d+1%4-2)-1;
+		}
+		if(wip_readMotion(DOWN)) {
+			play.x -= abs(play.d%4-2)-1;
+			play.y -= abs(play.d+1%4-2)-1;
+		}
+		if(wip_readMotion(RIGHT)) play.d++;
+		if(wip_readMotion(LEFT)) play.d--;
+		play.d = play.d % 4;
+		/*
+		if(wip_readMotion(UP)) camera.x += .1f;
+		if(wip_readMotion(DOWN)) camera.x -= .1f;
+		if(wip_readMotion(LEFT)) camera.y += .1f;
+		if(wip_readMotion(RIGHT)) camera.y -= .1f;
+		*/
+		/*
 		const float step = 0.025;
 		if(wip_readMotion(UP)) m[0] += step;
 		if(wip_readMotion(DOWN)) m[0] -= step;
@@ -80,13 +108,19 @@ void *wip_logicThread(void *arg) {
 		if(wip_readMotion(RIGHT)) m[1] += step;
 		if(wip_readMotion(OK)) m[2] += step;
 		if(wip_readMotion(CANCEL)) m[2] -= step;
+		*/
 
 		// TODO: disable this when you fix the material rendering
-		quat rot, cop;
-		quat_dup(cop, center.rotation);
-		quat_rotate(rot, TO_RAD(0.25f), (float[]){0, 0, 1});
-		quat_mul(center.rotation, cop, rot);
-		quat_norm(center.rotation, center.rotation);
+		//quat rot, cop;
+		//quat_dup(cop, center.rotation);
+		//quat_rotate(rot, TO_RAD(0.25f), (float[]){0, 0, 1});
+		//quat_mul(center.rotation, cop, rot);
+		//quat_norm(center.rotation, center.rotation);
+
+		center.x = 2*play.x;
+		center.y = 2*play.y;
+		camera.x = center.x - abs(play.d%4-2)+1;
+		camera.y = center.y - abs(play.d+1%4-2)+1;
 
 		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close)
 			wip_sleep(0.00001);

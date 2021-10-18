@@ -1,11 +1,9 @@
-//
 // Starfield
 // Copyright (c) 2020 Jovan Lanik
-//
 
 // Starfield card game
 
-#include <stdio.h>
+//#include <stdio.h>
 
 // TODO: change ints to more specific types (uint8 and such)
 

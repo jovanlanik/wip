@@ -1,7 +1,5 @@
-//
 // Dungeon
 // Copyright (c) 2021 Jovan Lanik
-//
 
 // Game Functions and Definitions
 

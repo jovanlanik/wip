@@ -1,9 +1,7 @@
-//
 // Dungeon
 // Copyright (c) 2021 Jovan Lanik
-//
 
-// KeyMaps, Motions and other input
+// Keymaps, Motions and other input
 
 #include "wip_input.h"
 

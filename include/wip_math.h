@@ -1,7 +1,5 @@
-//
 // WIP
 // Copyright (c) 2020 Jovan Lanik
-//
 
 // Math Macros
 

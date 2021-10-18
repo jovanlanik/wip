@@ -1,13 +1,10 @@
-//
 // Dungeon
 // Copyright (c) 2021 Jovan Lanik
-//
 
 // Rendering Functions
 
 #include <stdlib.h>
 #include <string.h>
-//#include <time.h>
 #include <pthread.h>
 #include <GL/glew.h>
 
@@ -22,6 +19,8 @@
 #include "wip_math.h"
 #include "lib/linmath.h"
 
+#include "d_format.h"
+
 #include "baked/shaders.h"
 
 int wip_globalFramesPerSecond;
@@ -30,38 +29,6 @@ extern wip_window_t wip_globalWindow;
 //extern pthread_mutex_t wip_globalWindow_m;
 
 extern wip_scene_t wip_globalScene;
-
-wip_glmdl_t *openModel(char *name) {
-	wip_ply_t ply;
-	wip_mdl_t mdl;
-	wip_glmdl_t *glmdl = wip_alloc(sizeof(wip_glmdl_t));
-
-	//mdl.vertex_c = wip_alloc(sizeof(int));
-	//mdl.index_c = wip_alloc(sizeof(int));
-
-	// TODO: resource finding function
-	const char *prefix = "./res/mdl/";
-	const char *suffix = ".ply";
-	char *filename = wip_alloc(strlen(prefix)+strlen(name)+strlen(suffix)+1);
-	sprintf(filename, "%s%s%s", prefix, name, suffix);
-
-	wip_readModel(&ply, filename);
-
-	wip_prepModel(&mdl, &ply);
-	wip_free(ply.vertex);
-	wip_free(ply.index);
-	wip_free(ply.color);
-	wip_free(ply.normal);
-
-	wip_loadModel(glmdl, &mdl);
-	wip_free(mdl.model);
-	wip_free(mdl.index);
-
-	//wip_free(mdl.vertex_c);
-	//wip_free(mdl.index_c);
-
-	return glmdl;
-}
 
 unsigned int mpvLocation;
 unsigned int lightLocation;
@@ -102,6 +69,20 @@ void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t 
 	return;
 }
 
+void drawRoom(room_t *room, wip_globj_t pv) {
+	for(int i = 0; i < room->width; ++i) {
+		for(int n = 0; n < room->height; ++n) {
+			wip_obj_t obj;
+			wip_makeObject(&obj);
+			obj.x = 2*i - 10;
+			obj.y = 2*n - 10;
+			if(*room->deco[i][n] == DECO_MODEL)
+				drawModel(&obj, ((struct deco_model*)room->deco[i][n])->model, pv, &obj);
+		}
+	}
+	return;
+}
+
 void *wip_renderThread(void *arg) {
 	wip_setWindow();
 	wip_glInit();
@@ -115,7 +96,8 @@ void *wip_renderThread(void *arg) {
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
 
-	wip_glmdl_t *model = openModel("dungeon");
+	//wip_glmdl_t *wall_model = openModel("d_wall");
+	//wip_glmdl_t *floor_model = openModel("d_floor");
 
 	GLuint texture;
 	wip_img_t *image = wip_openImage(wip_alloc(sizeof(wip_img_t)), "./res/img/d_wall.png");
@@ -134,13 +116,36 @@ void *wip_renderThread(void *arg) {
 
 	wip_obj_t *center = wip_globalScene.object[0];
 	wip_obj_t *camera = wip_globalScene.object[1];
-	wip_obj_t light;
-	wip_makeObject(&light);
+	//wip_obj_t light;
+	//wip_makeObject(&light);
+
+	/*
+	room_t fake;
+	fake.width = 10;
+	fake.height = 10;
+	fake.tile = NULL;
+	fake.deco = wip_alloc(sizeof(deco_t**[10]));
+	for(int i = 0; i < 10; ++i) {
+		fake.deco[i] = wip_alloc(sizeof(deco_t*[10]));
+		for(int n = 0; n < 10; ++n) {
+			if(i % 9 == 0 || n % 9 == 0) {
+				fake.deco[i][n] = wip_alloc(sizeof(struct deco_model));
+				((struct deco_model*)fake.deco[i][n])->type = DECO_MODEL;
+				((struct deco_model*)fake.deco[i][n])->model = wall_model;
+			}
+			else {
+				fake.deco[i][n] = wip_alloc(sizeof(struct deco_model));
+				((struct deco_model*)fake.deco[i][n])->type = DECO_MODEL;
+				((struct deco_model*)fake.deco[i][n])->model = floor_model;
+			}
+		}
+	}
+	*/
 
 	vec3 axis = {0.0f, 0.0f, 1.0f};
 	wip_globj_t projection;
 	float ratio = (float)wip_getConfInt("video.width")/(float)wip_getConfInt("video.height");
-	mat4x4_perspective(projection.m, TO_RAD(90.0), ratio, 0.1, 1000);
+	mat4x4_perspective(projection.m, TO_RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 1000);
 
 	wip_globalFramesPerSecond = 0;
 	int fpsMax = wip_getConfInt("video.fpsMax");
@@ -165,15 +170,16 @@ void *wip_renderThread(void *arg) {
 		mat4x4_mul(pv.m, projection.m, view.m);
 
 		// Render here...
-		vec3_dup(light.position, camera->position);
-		light.z += 4;
-		light.x += 1;
-		light.y += 1;
-		for(int i = 0; i < 10; ++i) {
-			drawModel(center, model, pv, &light);
-			center->x += 2;
-		}
-		center->x = 0;
+		//vec3_dup(light.position, camera->position);
+		//light.z += 4;
+		//light.x += 1;
+		//light.y += 1;
+		//for(int i = 0; i < 10; ++i) {
+		//	drawModel(center, model, pv, &light);
+		//	center->x += 2;
+		//}
+		//center->x = 0;
+		drawRoom(testRoom(), pv);
 		
 		//wip_glError();
 
