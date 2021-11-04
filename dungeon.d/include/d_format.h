@@ -65,5 +65,5 @@ typedef struct {
 } dungeon_t;
 
 room_t *testRoom(void);
-//openDungeon(dungeon_t *dungeon, const char *filename);
+dungeon_t *readDungeon(dungeon_t *dungeon, const char *filename);
 //freeDungeon(dungeon_t *dungeon);

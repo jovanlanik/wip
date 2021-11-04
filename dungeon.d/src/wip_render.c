@@ -4,6 +4,8 @@
 // Rendering Functions
 
 #include <stdlib.h>
+#include <stdarg.h>
+#include <ctype.h>
 #include <string.h>
 #include <pthread.h>
 #include <GL/glew.h>
@@ -23,15 +25,13 @@
 
 #include "baked/shaders.h"
 
-int wip_globalFramesPerSecond;
-
 extern wip_window_t wip_globalWindow;
 //extern pthread_mutex_t wip_globalWindow_m;
 
 extern wip_scene_t wip_globalScene;
 
-unsigned int mpvLocation;
 unsigned int lightLocation;
+unsigned int mpvLocation;
 unsigned int transformLocation;
 unsigned int normalTransformLocation;
 unsigned int materialLocation;
@@ -40,8 +40,89 @@ GLuint program;
 
 float m[3] = { -1.5, 2.0, 0.4 };
 
+void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned int oy, float scale) {
+	// TODO: you're leaking memory here by allocating the model and losing the pointer...
+	static wip_glmdl_t *model = NULL;
+	static GLuint texture;
+	static unsigned int cLocation;
+	static unsigned int screenLocation;
+	static unsigned int positionLocation;
+	static unsigned int offsetLocation;
+	static unsigned int scaleLocation;
+	static GLuint textProgram;
+	if(!model) {
+		model = wip_openModel("char");
+		texture = wip_openTexture("font");
+		GLuint textVert = wip_loadShader(text_vert, GL_VERTEX_SHADER);
+		GLuint textFrag = wip_loadShader(text_frag, GL_FRAGMENT_SHADER);
+		textProgram = wip_loadProgram(textVert, textFrag);
+		glDeleteShader(textVert);
+		glDeleteShader(textFrag);
+		cLocation = glGetUniformLocation(textProgram, "c");
+		screenLocation = glGetUniformLocation(textProgram, "screen");
+		positionLocation = glGetUniformLocation(textProgram, "position");
+		offsetLocation = glGetUniformLocation(textProgram, "offset");
+		scaleLocation = glGetUniformLocation(textProgram, "scale");
+	}
+
+	glBindVertexArray(model->vertex_a);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	unsigned int s[] = { wip_getConfInt("video.width"), wip_getConfInt("video.height") };
+	unsigned int p[] = { x, y };
+	unsigned int o[] = { ox, oy };
+
+	glUseProgram(textProgram);
+	glUniform1ui(cLocation, c);
+	glUniform2uiv(screenLocation, 1, s);
+	glUniform2uiv(positionLocation, 1, p);
+	glUniform2uiv(offsetLocation, 1, o);
+	glUniform1f(scaleLocation, scale);
+	glDrawElements(GL_TRIANGLES, model->element_c, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+	return;
+}
+
+void drawStr(unsigned int x, unsigned int y, float scale, char *str) {
+	int i = 0, j = 0, k = 0;
+	while(str[i] != '\0') {
+		switch(str[i]) {
+			case '\n': i++; j = 0; k++; continue;
+			//TODO: handle tab
+			default: drawChar(isprint(str[i]) ? str[i] : 127, x, y, j, k, scale);
+		}
+		++i; ++j;
+	}
+}
+
+void drawFormatStr(unsigned int x, unsigned int y, float scale, char *format, ...) {
+	size_t len = 2*strlen(format);
+	char *str = wip_alloc(len);
+	va_list args;
+	va_start(args, format);
+	int n = vsnprintf(str, len, format, args);
+	if(n > len-1) {
+		va_end(args);
+		va_start(args, format);
+		wip_realloc(str, n+1, NULL);
+		vsnprintf(str, n+1, format, args);
+	}
+	va_end(args);
+	drawStr(x, y, scale, str);
+	wip_free(str);
+}
+
 void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t *light) {
 	// TODO: fix material;
+	static int init = 0;
+	static GLuint texture;
+	if(!init) {
+		init = 1;
+		texture = wip_openTexture("d_wall");
+	}
 
 	wip_globj_t mpv;
 	wip_globj_t transform;
@@ -56,13 +137,17 @@ void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t 
 	wip_loadObjectF(WIP_POS, &transform, object);
 
 	glBindVertexArray(model->vertex_a);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glUseProgram(program);
-	glUniform3fv(lightLocation, 1, light->position);
+	if(light) glUniform3fv(lightLocation, 1, light->position);
 	glUniformMatrix4fv(mpvLocation, 1, GL_FALSE, mpv.f);
 	glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transform.f);
 	glUniformMatrix4fv(normalTransformLocation, 1, GL_FALSE, normalTransform.f);
 	glUniform3fv(materialLocation, 1, m);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_TRIANGLES, model->element_c, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
@@ -77,7 +162,7 @@ void drawRoom(room_t *room, wip_globj_t pv) {
 			obj.x = 2*i - 10;
 			obj.y = 2*n - 10;
 			if(*room->deco[i][n] == DECO_MODEL)
-				drawModel(&obj, ((struct deco_model*)room->deco[i][n])->model, pv, &obj);
+				drawModel(&obj, ((struct deco_model*)room->deco[i][n])->model, pv, NULL);
 		}
 	}
 	return;
@@ -96,17 +181,11 @@ void *wip_renderThread(void *arg) {
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
 
-	//wip_glmdl_t *wall_model = openModel("d_wall");
-	//wip_glmdl_t *floor_model = openModel("d_floor");
+	//wip_glmdl_t *wall_model = wip_openModel("d_wall");
+	//wip_glmdl_t *floor_model = wip_openModel("d_floor");
+	wip_glmdl_t *sword_model = wip_openModel("d_sword");
 
-	GLuint texture;
-	wip_img_t *image = wip_openImage(wip_alloc(sizeof(wip_img_t)), "./res/img/d_wall.png");
-	if(image->data) {
-		texture = wip_loadTexture(image);
-		wip_freeImage(image);
-		wip_free(image);
-	}
-
+	lightLocation = glGetUniformLocation(program, "light");
 	mpvLocation = glGetUniformLocation(program, "mpv");
 	transformLocation = glGetUniformLocation(program, "transform");
 	normalTransformLocation = glGetUniformLocation(program, "normalTransform");
@@ -118,49 +197,24 @@ void *wip_renderThread(void *arg) {
 	wip_obj_t *camera = wip_globalScene.object[1];
 	//wip_obj_t light;
 	//wip_makeObject(&light);
+	//light.z = -1.0;
 
-	/*
-	room_t fake;
-	fake.width = 10;
-	fake.height = 10;
-	fake.tile = NULL;
-	fake.deco = wip_alloc(sizeof(deco_t**[10]));
-	for(int i = 0; i < 10; ++i) {
-		fake.deco[i] = wip_alloc(sizeof(deco_t*[10]));
-		for(int n = 0; n < 10; ++n) {
-			if(i % 9 == 0 || n % 9 == 0) {
-				fake.deco[i][n] = wip_alloc(sizeof(struct deco_model));
-				((struct deco_model*)fake.deco[i][n])->type = DECO_MODEL;
-				((struct deco_model*)fake.deco[i][n])->model = wall_model;
-			}
-			else {
-				fake.deco[i][n] = wip_alloc(sizeof(struct deco_model));
-				((struct deco_model*)fake.deco[i][n])->type = DECO_MODEL;
-				((struct deco_model*)fake.deco[i][n])->model = floor_model;
-			}
-		}
-	}
-	*/
+	room_t *fake = testRoom();
+	dungeon_t d;
+	readDungeon(&d, "./dungeon.d/example.df");
 
 	vec3 axis = {0.0f, 0.0f, 1.0f};
-	wip_globj_t projection;
+	wip_globj_t projection, ui;
+	mat4x4_identity(ui.m);
 	float ratio = (float)wip_getConfInt("video.width")/(float)wip_getConfInt("video.height");
 	mat4x4_perspective(projection.m, TO_RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 1000);
 
-	wip_globalFramesPerSecond = 0;
 	int fpsMax = wip_getConfInt("video.fpsMax");
 	double startTime, lastTime = wip_timeWindow();
 
 	while(!wip_globalWindow.close) {
+		lastTime = startTime;
 		startTime = wip_timeWindow();
-
-		wip_globalFramesPerSecond++;
-		if(startTime - lastTime >= 1.0) {
-			lastTime = startTime;
-			//wip_log(WIP_INFO, "Framerate: %d\nFrametime: %f\n",
-			//	wip_globalFramesPerSecond, 1000.0/wip_globalFramesPerSecond);
-			wip_globalFramesPerSecond = 0;
-		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -170,16 +224,14 @@ void *wip_renderThread(void *arg) {
 		mat4x4_mul(pv.m, projection.m, view.m);
 
 		// Render here...
-		//vec3_dup(light.position, camera->position);
-		//light.z += 4;
-		//light.x += 1;
-		//light.y += 1;
-		//for(int i = 0; i < 10; ++i) {
-		//	drawModel(center, model, pv, &light);
-		//	center->x += 2;
-		//}
-		//center->x = 0;
-		drawRoom(testRoom(), pv);
+		drawRoom(fake, pv);
+		// Viewmodel
+		glClear(GL_DEPTH_BUFFER_BIT);
+		drawModel(camera, sword_model, pv, NULL);
+		// HUD
+		glClear(GL_DEPTH_BUFFER_BIT);
+		drawStr(10, 10, 3.0f, "Copyright (c) 2021 Jovan Lanik");
+		drawFormatStr(2*wip_getConfInt("video.width")-130, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
 		
 		//wip_glError();
 

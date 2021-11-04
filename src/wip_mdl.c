@@ -230,6 +230,7 @@ wip_glmdl_t *wip_openModel(char *name) {
 	sprintf(filename, "%s%s%s", prefix, name, suffix);
 
 	wip_readModel(&ply, filename);
+	wip_free(filename);
 
 	wip_prepModel(&mdl, &ply);
 	wip_free(ply.vertex);

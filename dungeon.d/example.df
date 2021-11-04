@@ -7,7 +7,7 @@
 # accepts room id, width and height
 room 0 5 5
 # following lines define tiles in the room
-# whitespace is ignored
+# whitespace is not ignored
 # first char of tile is tile type
 # second char is data as an int (usually to change model or texture)
 # in the case of doors, data is the id of the key needed to unlock (0 if unlocked)
@@ -24,11 +24,11 @@ WW WW WW WW WW
 # first layer (0) is autofilled from room definition but can be overwritten
 deco 0 0
 # first char is deco type
-# second char is direction (one letter cardinal or numeric)
+# second char is direction (one letter cardinal, numeric or arrow)
 == == == == ==
-== == TS == ==
+== == Tv == ==
 == == OO == ==
-== == TN == ==
+== == T^ == ==
 == == == == ==
 deco 0 1
 == == == == ==

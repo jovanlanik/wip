@@ -20,7 +20,7 @@ void _wip_glError(const char *func) {
 void wip_glInit(void) {
 	wip_debug(WIP_INFO, "%s: Initializing GL...", __func__);
 	glewInit();
-	if(!GLEW_VERSION_3_2)
+	if(!GLEW_VERSION_3_3)
 		wip_log(WIP_FATAL, "%s: OpenGL 3.3 not supported.", __func__);
 
 	glEnable(GL_DEPTH_TEST);

@@ -35,10 +35,31 @@ GLuint wip_loadTexture(wip_img_t *image) {
 	GLenum format = image->channels == 4 ? GL_RGBA : GL_RGB;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, format, image->width, image->height, 0, format, GL_UNSIGNED_BYTE, image->data);
 	//glGenerateMipmap(GL_TEXTURE_2D);
+	return texture;
+}
+
+GLuint wip_openTexture(char *name) {
+	GLuint texture = 0;
+	wip_img_t image;
+	
+	// TODO: resource finding function
+	const char *prefix = "./res/img/";
+	const char *suffix = ".png";
+	char *filename = wip_alloc(strlen(prefix)+strlen(name)+strlen(suffix)+1);
+	sprintf(filename, "%s%s%s", prefix, name, suffix);
+
+	wip_openImage(&image, filename);
+	wip_free(filename);
+
+	if(image.data) {
+		texture = wip_loadTexture(&image);
+		wip_freeImage(&image);
+	}
+
 	return texture;
 }
 

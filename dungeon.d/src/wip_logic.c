@@ -75,11 +75,13 @@ void *wip_logicThread(void *arg) {
 				pthread_mutex_unlock(&wip_globalWindow_m);
 			}
 			//if(key.key == WIP_SPACE) wip_log(WIP_INFO, "%f %f %f", m[0], m[1], m[2]);
+			/*
 			if(key.key == WIP_SPACE && key.action == WIP_PRESS) {
 				wip_log(WIP_INFO, "%f, %f", camera.x, camera.y);
 				wip_log(WIP_INFO, "%f, %f", center.x, center.y);
 				wip_print("");
 			}
+			*/
 			wip_writeMotion(key);
 		}
 
@@ -121,6 +123,8 @@ void *wip_logicThread(void *arg) {
 		center.y = 2*play.y;
 		camera.x = center.x - abs(play.d%4-2)+1;
 		camera.y = center.y - abs(play.d+1%4-2)+1;
+
+		quat_rotate(camera.rotation, -TO_RAD(90*(play.d+1)), (float[]){0, 0, 1});
 
 		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close)
 			wip_sleep(0.00001);

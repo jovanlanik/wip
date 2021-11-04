@@ -103,6 +103,7 @@ void wip_initConf(void) {
 		ret = config_read_string(&wip_globalConf, wip_defaultConf);
 	}
 	else ret = config_read(&wip_globalConf, confFile);
+	fclose(confFile);
 	if(!ret) {
 		wip_log(
 			WIP_FATAL, "%s: Config error:\n%s:%d - %s\n", __func__,

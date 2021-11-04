@@ -72,6 +72,7 @@ $(NAME): $(OBJ)
 
 src/wip_conf.o: include/baked/$(NAME)_config.h
 src/wip_gl.o: include/baked/shaders.h
+$(NAME).d/src/wip_render.o: include/baked/shaders.h
 include/baked/$(NAME)_config.h: $(CONF)
 	@echo Baking $@ from $<
 	util/bake $< $@
