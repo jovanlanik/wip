@@ -6,6 +6,7 @@
 #include <pthread.h>
 
 #include "wip_fn.h"
+#include "wip_arg.h"
 #include "wip_conf.h"
 #include "wip_window.h"
 #include "wip_game.h"
@@ -15,11 +16,7 @@ extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
 
 int main(int argc, char *argv[]) {
-#define STR(x) #x
-#define NAME(x) STR(x)
-	wip_debug(WIP_INFO, "WIP "NAME(WIP_NAME)" built %s %s", __DATE__, __TIME__);
-#undef STR
-#undef NAME
+	wip_parseOptions(argc, argv);
 
 	pthread_t logic;
 	pthread_t render;
