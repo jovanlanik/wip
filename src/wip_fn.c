@@ -58,18 +58,22 @@
 }
 
 int wip_atoi(char *s, int *i) {
+	char *end = NULL;
 	errno = 0;
-	*i = strtol(s, NULL, 10);
+	*i = strtol(s, &end, 10);
 	int r = errno;
 	if(r) wip_log(WIP_ERROR, "%s: %s", __func__, strerror(r));
+	if(s == end) r = 1;
 	return r;
 }
 
 int wip_atoui(char *s, unsigned int *i) {
+	char *end = NULL;
 	errno = 0;
-	*i = strtoul(s, NULL, 10);
+	*i = strtoul(s, &end, 10);
 	int r = errno;
 	if(r) wip_debug(WIP_ERROR, "%s: %s", __func__, strerror(r));
+	if(s == end) r = 1;
 	return r;
 }
 

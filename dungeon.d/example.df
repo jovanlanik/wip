@@ -5,7 +5,7 @@
 
 # `room` starts a room definition
 # accepts room id, width and height
-room k 5 5
+room 0 5 5
 # following lines define tiles in the room
 # whitespace is not ignored
 # first char of tile is tile type
