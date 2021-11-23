@@ -5,17 +5,12 @@
 
 include mkconf.mk
 
-ifndef NAME
-$(error NAME not set)
-else ifndef WINDOW_BACKEND
-$(error WINDOW_BACKEND not set)
-else ifndef NDEBUG
-$(warning NDEBUG not explicitly set.)
-NDEBUG := 0
-endif
+MAKEFLAGS += --no-builtin-rules
+MAKEFLAGS += --no-builtin-variables
 
-CFLAGS += -Wall -pedantic -std=c11 -I include -I $(NAME).d/include -DWIP_NAME=$(NAME)
-LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig
+NAME ?= demo
+BUILDDIR ?= build
+WINDOW_BACKEND ?= glfw
 
 ifeq '$(WINDOW_BACKEND)' 'glfw'
 CFLAGS += -DWIP_GLFW
@@ -28,12 +23,20 @@ NWINDOW_BACKEND=glfw
 endif
 
 SRC = $(filter-out src/wip_window_$(NWINDOW_BACKEND).c, $(wildcard src/*.c $(NAME).d/src/*.c))
-OBJ = $(SRC:%.c=%.o)
+OBJ = $(addprefix $(BUILDDIR)/, $(SRC:%.c=%.o))
+DEPS = $(addprefix $(BUILDDIR)/, $(SRC:%.c=%.d))
 GLSL = $(wildcard glsl/*.vert glsl/*.frag $(NAME).d/glsl/*.vert $(NAME).d/glsl/*.frag)
 CONF = res/conf/$(NAME).conf
 
-TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h) $(OBJ)
-DIRT = $(wildcard *.d/src/*.o) $(patsubst %.d, %, $(wildcard *.d)) mkconf.mk
+TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h)
+
+CFLAGS += -Wall -pedantic -std=c11 -I ./ -I include -I $(NAME).d/include -DWIP_NAME=$(NAME)
+LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig
+
+ifndef NDEBUG
+$(warning NDEBUG not explicitly set.)
+NDEBUG := 0
+endif
 
 ifeq '$(NDEBUG)' '1'
 CFLAGS += -DNDEBUG -O2
@@ -44,35 +47,34 @@ LDFLAGS += -pg
 TRASH += gmon.out
 endif
 
-.PHONY: all clean distclean install uninstall help
+.PHONY: all clean install uninstall help
 
 all: $(NAME)
-clean: ## Clean objects and baked files for NAME
+clean:
 	@rm $(TRASH) | true
-distclean: clean ##Clean all files including config
-	@rm $(DIRT) | true
-install: all ## Install NAME to DESTDIR
-	install $(NAME) $(DESTDIR)$(bindir)/$(NAME)
-uninstall: ## Uninstall NAME from DESTDIR
-	rm -f $(DESTDIR)$(bindir)/$(NAME)
-help: ## Show commented targets
-	@grep -hE '^\S[^:]*:[^#]*##.+' $(MAKEFILE_LIST) \
-		| sed 's/:[^#]*##\s*/#/' \
-		| sort -t '#' -k 1 \
-		| column -tN TARGET,COMMENT  -s '#'
+	@rm -r $(BUILDDIR) | true
+mkconf.mk:
+	./configure.sh
+compile_commands.json: $(SRC) mkconf.mk
+	bear -- make clean all
+
+-include $(DEPS)
 
 $(NAME): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $@
+$(BUILDDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+$(BUILDDIR)/%.d: %.c
+	@echo Resolving dependencies for $<
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -MM -MG -MT $(BUILDDIR)/$*.o -MF $@ $<
 %.vert.h: %.vert
 	@glslangValidator $<
 	util/bake $< $<.h
 %.frag.h: %.frag
 	@glslangValidator $<
 	util/bake $< $<.h
-
-src/wip_conf.o: include/baked/$(NAME)_config.h
-src/wip_gl.o: include/baked/shaders.h
-$(NAME).d/src/wip_render.o: include/baked/shaders.h
 include/baked/$(NAME)_config.h: $(CONF)
 	@echo Baking $@ from $<
 	util/bake $< $@
