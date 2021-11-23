@@ -3,6 +3,8 @@
 
 // Keymaps, Motions and other input
 
+#pragma once
+
 #define WIP_KEY_BUFFER 16
 #define WIP_MOTION
 
