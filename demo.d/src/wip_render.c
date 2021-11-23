@@ -17,7 +17,7 @@
 #include "wip_math.h"
 #include "lib/linmath.h"
 
-#include "baked/shaders.h"
+#include "include/baked/shaders.h"
 
 int wip_globalFramesPerSecond;
 

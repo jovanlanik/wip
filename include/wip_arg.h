@@ -3,7 +3,9 @@
 
 // Argument Parsing
 
-void showUsage(char *name);
-void showHelp(char *name);
-char *parseOptions(int argc, char *argv[]);
+#pragma once
+
+void wip_showUsage(char *name);
+void wip_showHelp(char *name);
+char *wip_parseOptions(int argc, char *argv[]);
 

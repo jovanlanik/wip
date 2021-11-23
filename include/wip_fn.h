@@ -39,6 +39,8 @@ typedef struct {
 	void *arg;
 } wip_timeout_t;
 
+int wip_atoi(char *s, int *i);
+int wip_atoui(char *s, unsigned int *i);
 void wip_log(enum wip_logType, const char *m, ...);
 void wip_sleep(double seconds);
 FILE *wip_openFile(const char *n);

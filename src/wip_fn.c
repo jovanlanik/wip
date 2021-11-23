@@ -57,6 +57,22 @@
 	return;
 }
 
+int wip_atoi(char *s, int *i) {
+	errno = 0;
+	*i = strtol(s, NULL, 10);
+	int r = errno;
+	if(r) wip_log(WIP_ERROR, "%s: %s", __func__, strerror(r));
+	return r;
+}
+
+int wip_atoui(char *s, unsigned int *i) {
+	errno = 0;
+	*i = strtoul(s, NULL, 10);
+	int r = errno;
+	if(r) wip_debug(WIP_ERROR, "%s: %s", __func__, strerror(r));
+	return r;
+}
+
 void wip_log(enum wip_logType type, const char *message, ...) {
 	FILE *out = type < WIP_WARN ? stdout : stderr;
 	va_list args;

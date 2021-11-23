@@ -69,14 +69,20 @@ dungeon_t *readDungeon(dungeon_t *dungeon, const char *filename) {
 
 	for(int i = 0; i < token_c; ++i) {
 		if(strcmp("room", token[i]) == 0) {
-			wip_debug(WIP_INFO, "%s: Found room with id %s", __func__, token[i+1]);
+			unsigned int id;
+			if(wip_atoui(token[i+1], &id)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected uint.", __func__, token[i+1]);
+				return dungeon;
+			}
+
+			wip_debug(WIP_INFO, "%s: Found room with id %d.", __func__, id);
 			i += 3;
 		}
 		else if(strcmp("deco", token[i]) == 0) {
-			wip_debug(WIP_INFO, "%s: Found deco for room %s, layer %s", __func__, token[i+1], token[i+2]);
+			wip_debug(WIP_INFO, "%s: Found deco for room %s, layer %s.", __func__, token[i+1], token[i+2]);
 			i += 2;
 		}
-		else wip_debug(WIP_ERROR, "%s: Unknown token: %s", __func__, token[i]);
+		//else wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);
 	}
 
 	if(dungeon->room_c == 0)
