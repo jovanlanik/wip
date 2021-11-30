@@ -39,7 +39,7 @@ room_t *testRoom(void) {
 	return room;
 }
 
-dungeon_t *readDungeon(dungeon_t *dungeon, const char *filename) {
+int readDungeon(dungeon_t *dungeon, const char *filename) {
 	wip_debug(WIP_INFO, "%s: Loading dungeon from %s...", __func__, filename);
 	dungeon->room_c = 0;
 	dungeon->room = NULL;
@@ -72,7 +72,21 @@ dungeon_t *readDungeon(dungeon_t *dungeon, const char *filename) {
 			unsigned int id;
 			if(wip_atoui(token[i+1], &id)) {
 				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected uint.", __func__, token[i+1]);
-				return dungeon;
+				return 1;
+			}
+
+			if(id >= dungeon->room_c) {
+				dungeon->room_c = id;
+				dungeon->room = wip_realloc(dungeon->room, (id+1)*sizeof(room_t), NULL);
+			}
+
+			if(wip_atoui(token[i+2], &dungeon->room[id].width)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected uint.", __func__, token[i+2]);
+				return 1;
+			}
+			if(wip_atoui(token[i+3], &dungeon->room[id].height)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected uint.", __func__, token[i+3]);
+				return 1;
 			}
 
 			wip_debug(WIP_INFO, "%s: Found room with id %d.", __func__, id);
@@ -88,5 +102,5 @@ dungeon_t *readDungeon(dungeon_t *dungeon, const char *filename) {
 	if(dungeon->room_c == 0)
 		wip_debug(WIP_WARN, "%s: Couldn't load any rooms from dungeon, may be missing.", __func__);
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
-	return dungeon;
+	return 0;
 }

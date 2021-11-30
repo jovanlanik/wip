@@ -28,7 +28,7 @@ struct tile_door {
 
 struct tile_gate {
 	tile_t type;
-	int key_id, room_id;
+	unsigned int key_id, room_id;
 };
 
 enum deco {
@@ -54,16 +54,16 @@ struct deco_room {
 };
 
 typedef struct {
-	int width, height;
+	unsigned int width, height;
 	tile_t ***tile;
 	deco_t ***deco;
 } room_t;
 
 typedef struct {
-	int room_c;
+	unsigned int room_c;
 	room_t *room;
 } dungeon_t;
 
 room_t *testRoom(void);
-dungeon_t *readDungeon(dungeon_t *dungeon, const char *filename);
+int readDungeon(dungeon_t *dungeon, const char *filename);
 //freeDungeon(dungeon_t *dungeon);
