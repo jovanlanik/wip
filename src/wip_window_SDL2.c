@@ -9,9 +9,9 @@
 #include <SDL2/SDL.h>
 
 #include "wip_fn.h"
-#include "wip_conf.h"
 #include "wip_window.h"
 #include "wip_input.h"
+#include "wip_conf.h"
 
 wip_window_t wip_globalWindow;
 pthread_mutex_t wip_globalWindow_m;
@@ -50,14 +50,18 @@ int unifyKey(SDL_Keysym key) {
 		case SDL_SCANCODE_DELETE: return WIP_DELETE;
 		default: break;
 	}
+	if(key.scancode == SDL_SCANCODE_0) return WIP_NUM;
+	if(key.scancode >= SDL_SCANCODE_1 && key.scancode <= SDL_SCANCODE_9) return key.scancode - SDL_SCANCODE_1 + WIP_NUM+1;
+	if(key.scancode >= SDL_SCANCODE_A && key.scancode <= SDL_SCANCODE_Z) return key.scancode + ('a' - SDL_SCANCODE_A);
 	if(key.scancode >= SDL_SCANCODE_F1 && key.scancode <= SDL_SCANCODE_F12) return key.scancode - SDL_SCANCODE_F1 + WIP_F+1;
-	//if(key.scancode >= SDL_SCANCODE_A && key.scancode <= SDL_SCANCODE_Z) return key.scancode + ('a' - SDL_SCANCODE_A);
+	if(key.scancode >= SDL_SCANCODE_F13 && key.scancode <= SDL_SCANCODE_F24) return key.scancode - SDL_SCANCODE_F13 + WIP_F+13;
 	wip_log(WIP_WARN, "SDL2: Couldn't unify scancode: %d", key.scancode);
 	return WIP_UNKNOWN;
 }
 
 
-// TODO: fix vsync
+// TODO: fix vsync (I don't remember what's broken, so I'll have to find out first...)
+// TODO: check msaa before setting and set closest possible value
 void wip_initWindow(void) {
 	wip_debug(WIP_INFO, "%s: Initializing window...", __func__);
 
@@ -92,7 +96,7 @@ void wip_swapWindow(void) {
 	SDL_GL_SwapWindow(wip_globalWindow.handle);
 }
 
-// TODO: input
+// TODO: input (I think I did this? I'm afraid to remove this comment in case I meant something else...)
 void wip_pollWindow(void) {
 	static SDL_Event event;
 	while(SDL_PollEvent(&event)) {
@@ -118,7 +122,7 @@ double wip_timeWindow(void) {
 	return SDL_GetTicks()/1000.0;
 }
 
-// TODO: if needed better cleanup
+// TODO: if needed, better cleanup
 void wip_termWindow(void) {
 	wip_debug(WIP_INFO, "%s: Terminating window...", __func__);
 	SDL_Quit();
