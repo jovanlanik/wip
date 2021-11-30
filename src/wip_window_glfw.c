@@ -51,9 +51,11 @@ int unifyKey(int key) {
 		case GLFW_KEY_DELETE: return WIP_DELETE;
 		default: break;
 	}
-	//if(key >= GLFW_KEY_0 && key <= GLFW_KEY_9) return key;
-	//if(key >= GLFW_KEY_A && key <= GLFW_KEY_Z) return key + ('a' - 'A');
+	if(key >= GLFW_KEY_0 && key <= GLFW_KEY_9) return key;
+	if(key >= GLFW_KEY_A && key <= GLFW_KEY_Z) return key + ('a' - 'A');
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F25) return key - GLFW_KEY_F1 + WIP_F+1;
+	// This works but it's wrong. Very wrong!
+	/*
 	const char *keyName = glfwGetKeyName(key, 0);
 	if(keyName) {
 		unsigned char keyVal = keyName[0];
@@ -65,6 +67,7 @@ int unifyKey(int key) {
 		}
 		if(keyName[1] == '\0') return keyVal;
 	}
+	*/
 	wip_log(WIP_WARN, "GLFW: Couldn't unify keycode: %d", key);
 	return WIP_UNKNOWN;
 }
@@ -149,6 +152,7 @@ double wip_timeWindow(void) {
 	return glfwGetTime();
 }
 
+// TODO: if needed, better cleanup
 void wip_termWindow(void) {
 	wip_debug(WIP_INFO, "%s: Terminating window...", __func__);
 	glfwTerminate();
