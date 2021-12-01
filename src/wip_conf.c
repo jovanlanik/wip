@@ -98,12 +98,13 @@ void wip_initConf(void) {
 	FILE *confFile = wip_openFile(confPath);
 	free(confPath);
 	int ret;
-	if(!confFile) {
+	if(confFile) {
+		ret = config_read(&wip_globalConf, confFile);
+		fclose(confFile);
+	} else {
 		wip_log(WIP_WARN, "%s: No config file found. Using default.", __func__);
 		ret = config_read_string(&wip_globalConf, wip_defaultConf);
 	}
-	else ret = config_read(&wip_globalConf, confFile);
-	fclose(confFile);
 	if(!ret) {
 		wip_log(
 			WIP_FATAL, "%s: Config error:\n%s:%d - %s\n", __func__,
