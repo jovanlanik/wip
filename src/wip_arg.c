@@ -15,7 +15,7 @@
 
 #define STR(x) #x
 #define NAME(x) STR(x)
-const char *wip_globalVersion ="WIP "NAME(WIP_NAME)" built "__DATE__" "__TIME__;
+const char *wip_globalVersion ="WIP "NAME(WIP_NAME)" built with "NAME(WIP_WINDOW_BACKEND)", "__DATE__" at "__TIME__;
 #undef STR
 #undef NAME
 const char *optstr = "-hVu";
