@@ -1,7 +1,7 @@
 # Todo list
 - FIX NODEATH SEGFAULT
 - build system
-	- switch to cmake
+	- switch to cmake (hmmmmmm)
 	+ configure script
 	+ install and uninstall target
 	- separate everything project specific
@@ -10,7 +10,7 @@
 	= obj:
 		= position
 		= rotation
-			- need quaternions
+			+ need quaternions
 		= scale
 		= momentum
 		= anglular momentum
@@ -25,7 +25,8 @@
 	- free
 	= seq
 		- figure this out;
-	- materials and textures
+	+ textures
+	- materials
 - image loading
 	+ choose library
 		= stb_image.h
@@ -40,17 +41,16 @@
 - window
 	- dynamic size
 - UI
-	- font rendering
-		? bitmap fonts
-		? freetype
-	- fps/frametime meter
+	+ font rendering
+		= bitmap fonts
+	+ fps/frametime meter
 	? wip_ui
 - input
 	+ handling
 	+ mapping
 	+ motions
 	+ rebinding
-	- SDL2 support
+	+ SDL2 support
 	- mouse inputs
 - settings
 	+ xdg config
@@ -70,7 +70,7 @@
 	- move init code from main
 	- decouple movement from tickrate (demo, possibly nodeath)
 - change some errors to warnings
-- commandline arguments
++ command-line arguments
 - audio
 	? openAL
 	? something simpler
