@@ -39,7 +39,8 @@
 	KEY(SPACE,		= ' '), \
 	KEY(CAPS_LOCK,		= 65), \
 	KEY(MENU,		= 90), \
-	KEY(DELETE,		= 127)
+	KEY(DELETE,		= 127), \
+	KEY(LOCKED,		= 255)
 
 #define WIP_KEY_ALT_LIST \
 	KEY(BS,			= WIP_BACKSPACE), \

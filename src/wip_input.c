@@ -11,6 +11,8 @@
 #include "wip_conf.h"
 #include "wip_game.h"
 
+int wip_globalKeyLock = 0;
+
 #define KEY(key, code) [WIP_##key] = { #key }
 char wip_globalKeyName[][64] = {
 	WIP_KEY_LIST
@@ -37,6 +39,7 @@ int wip_readMotion(enum wip_motion m) {
 }
 
 int wip_writeMotion(wip_key_t key) {
+	if(key.key == WIP_LOCKED) return 1;
 	wip_motion_t *motion = wip_globalKey[key.key];
 	if(!motion) return 0;
 	//wip_debug(WIP_INFO, "%s: Motion %s (%d) from key %s (%d).", __func__,
@@ -96,8 +99,9 @@ int wip_writeKey(wip_key_t key) {
 }
 
 wip_key_t wip_readKey(void) {
+	if(wip_globalKeyLock) return (const wip_key_t){ WIP_NONE, WIP_LOCKED };
 	if(wip_key.head == wip_key.tail)
-		return (wip_key_t){ WIP_NONE, WIP_UNKNOWN };
+		return (const wip_key_t){ WIP_NONE, WIP_UNKNOWN };
 	wip_key.tail = (wip_key.tail + 1) % WIP_KEY_BUFFER;
 	return wip_key.buffer[wip_key.tail];
 }
