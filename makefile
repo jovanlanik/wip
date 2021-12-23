@@ -30,7 +30,7 @@ CONF = res/conf/$(NAME).conf
 
 TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h)
 
-CFLAGS += -Wall -pedantic -std=c11 -I ./ -I include -I $(NAME).d/include -DWIP_NAME=$(NAME)
+CFLAGS += -pipe -Wall -pedantic -std=c11 -I ./ -I include -I $(NAME).d/include -DWIP_NAME=$(NAME)
 LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig
 
 ifndef NDEBUG
@@ -40,7 +40,7 @@ endif
 
 ifeq '$(NDEBUG)' '1'
 CFLAGS += -DNDEBUG -O2
-LDFLAGS += -Wl,-s
+LDFLAGS += -Wl,-S
 else
 CFLAGS += -g -pg
 LDFLAGS += -pg
