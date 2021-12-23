@@ -26,6 +26,9 @@
 
 #include "d_player.h"
 #include "d_format.h"
+#include "d_draw.h"
+#include "d_text.h"
+#include "d_menu.h"
 
 #include "include/baked/dungeon_config.h"
 #include "include/baked/shaders.h"
@@ -39,6 +42,8 @@ extern pthread_mutex_t wip_globalWindow_m;
 
 extern wip_scene_t wip_globalScene;
 
+extern int wip_globalKeyLock;
+
 unsigned int lightLocation;
 unsigned int mpvLocation;
 unsigned int transformLocation;
@@ -47,153 +52,28 @@ unsigned int materialLocation;
 
 GLuint program;
 
-float m[3] = { -1.5, 2.0, 0.4 };
+const float m[3] = { -1.5, 2.0, 0.4 };
 
-void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned int oy, float scale) {
-	// TODO: you're leaking memory here by allocating the model and losing the pointer...
-	static wip_glmdl_t *model = NULL;
-	static GLuint texture;
-	static unsigned int cLocation;
-	static unsigned int screenLocation;
-	static unsigned int positionLocation;
-	static unsigned int offsetLocation;
-	static unsigned int scaleLocation;
-	static GLuint textProgram;
-	if(!model) {
-		model = wip_openModel("char");
-		texture = wip_openTexture("font");
-		GLuint textVert = wip_loadShader(text_vert, GL_VERTEX_SHADER);
-		GLuint textFrag = wip_loadShader(text_frag, GL_FRAGMENT_SHADER);
-		textProgram = wip_loadProgram(textVert, textFrag);
-		glDeleteShader(textVert);
-		glDeleteShader(textFrag);
-		cLocation = glGetUniformLocation(textProgram, "c");
-		screenLocation = glGetUniformLocation(textProgram, "screen");
-		positionLocation = glGetUniformLocation(textProgram, "position");
-		offsetLocation = glGetUniformLocation(textProgram, "offset");
-		scaleLocation = glGetUniformLocation(textProgram, "scale");
-	}
+int started = 0;
+int paused = 0;
 
-	glBindVertexArray(model->vertex_a);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+wip_obj_t center, camera;
+player_t play;
+vec3 axis = {0.0f, 0.0f, 1.0f};
+wip_glmdl_t *sword_model;
+room_t *currentRoom = NULL;
+//dungeon_t d;
+wip_globj_t projection;
 
-	unsigned int s[] = { wip_getConfInt("video.width"), wip_getConfInt("video.height") };
-	unsigned int p[] = { x, y };
-	unsigned int o[] = { ox, oy };
+// Rendering variables
+double startTime, lastTime;
 
-	glUseProgram(textProgram);
-	glUniform1ui(cLocation, c);
-	glUniform2uiv(screenLocation, 1, s);
-	glUniform2uiv(positionLocation, 1, p);
-	glUniform2uiv(offsetLocation, 1, o);
-	glUniform1f(scaleLocation, scale);
-	glDrawElements(GL_TRIANGLES, model->element_c, GL_UNSIGNED_INT, 0);
-
-	glBindVertexArray(0);
-	return;
-}
-
-void drawStr(unsigned int x, unsigned int y, float scale, char *str) {
-	int i = 0, j = 0, k = 0;
-	while(str[i] != '\0') {
-		switch(str[i]) {
-			case '\n': i++; j = 0; k++; continue;
-			//TODO: handle tab
-			default: drawChar(isprint(str[i]) ? str[i] : 127, x, y, j, k, scale);
-		}
-		++i; ++j;
-	}
-}
-
-void drawFormatStr(unsigned int x, unsigned int y, float scale, char *format, ...) {
-	size_t len = 2*strlen(format);
-	char *str = wip_alloc(len);
-	va_list args;
-	va_start(args, format);
-	int n = vsnprintf(str, len, format, args);
-	if(n > len-1) {
-		va_end(args);
-		va_start(args, format);
-		wip_realloc(str, n+1, NULL);
-		vsnprintf(str, n+1, format, args);
-	}
-	va_end(args);
-	drawStr(x, y, scale, str);
-	wip_free(str);
-}
-
-void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t *light) {
-	// TODO: fix material;
-	static int init = 0;
-	static GLuint texture;
-	if(!init) {
-		init = 1;
-		texture = wip_openTexture("d_wall");
-	}
-
-	wip_globj_t mpv;
-	wip_globj_t transform;
-	wip_loadObject(&transform, object);
-	wip_globj_t normalTransform;
-	{
-		wip_globj_t go;
-		mat4x4_invert(go.m, transform.m);
-		mat4x4_transpose(normalTransform.m, go.m);
-	}
-	mat4x4_mul(mpv.m, pv.m, transform.m);
-	wip_loadObjectF(WIP_POS, &transform, object);
-
-	glBindVertexArray(model->vertex_a);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glUseProgram(program);
-	if(light) glUniform3fv(lightLocation, 1, light->position);
-	glUniformMatrix4fv(mpvLocation, 1, GL_FALSE, mpv.f);
-	glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transform.f);
-	glUniformMatrix4fv(normalTransformLocation, 1, GL_FALSE, normalTransform.f);
-	glUniform3fv(materialLocation, 1, m);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawElements(GL_TRIANGLES, model->element_c, GL_UNSIGNED_INT, 0);
-
-	glBindVertexArray(0);
-	return;
-}
-
-void drawRoom(room_t *room, wip_globj_t pv) {
-	for(int i = 0; i < room->width; ++i) {
-		for(int n = 0; n < room->height; ++n) {
-			wip_obj_t obj;
-			wip_makeObject(&obj);
-			obj.x = 2*i - 10;
-			obj.y = 2*n - 10;
-			if(*room->deco[i][n] == DECO_MODEL)
-				drawModel(&obj, ((struct deco_model*)room->deco[i][n])->model, pv, NULL);
-		}
-	}
-	return;
-}
-
-void *wip_renderThread(void *arg) {
-	wip_obj_t center, camera;
-	player_t play;
-	play.x = 0;
-	play.y = 0;
-	play.d = DIR_NORTH;
-
+void initGameLoop(void) {
 	wip_makeObject(&camera);
 	camera.y = 0.0f;
 	camera.z = 0.0f;
 
 	wip_makeObject(&center);
-
-	wip_setWindow();
-	wip_glInit();
-
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	GLuint vertShader = wip_loadShader((char *)d_texture_vert, GL_VERTEX_SHADER);
 	GLuint fragShader = wip_loadShader((char *)d_texture_frag, GL_FRAGMENT_SHADER);
@@ -202,9 +82,7 @@ void *wip_renderThread(void *arg) {
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
 
-	//wip_glmdl_t *wall_model = wip_openModel("d_wall");
-	//wip_glmdl_t *floor_model = wip_openModel("d_floor");
-	wip_glmdl_t *sword_model = wip_openModel("d_sword");
+	sword_model = wip_openModel("d_sword");
 
 	lightLocation = glGetUniformLocation(program, "light");
 	mpvLocation = glGetUniformLocation(program, "mpv");
@@ -212,78 +90,184 @@ void *wip_renderThread(void *arg) {
 	normalTransformLocation = glGetUniformLocation(program, "normalTransform");
 	materialLocation = glGetUniformLocation(program, "material");
 
-	room_t *fake = testRoom();
-	dungeon_t d;
-	readDungeon(&d, "./dungeon.d/example.df");
-
-	vec3 axis = {0.0f, 0.0f, 1.0f};
-	wip_globj_t projection, ui;
-	mat4x4_identity(ui.m);
 	float ratio = (float)wip_getConfInt("video.width")/(float)wip_getConfInt("video.height");
 	mat4x4_perspective(projection.m, TO_RAD(wip_getConfFloat("game.fov")), ratio, 0.1, 1000);
 
+	return;
+}
+
+void newGame(void) {
+	play.x = 0;
+	play.y = 0;
+	play.d = DIR_NORTH;
+
+	if(currentRoom) wip_free(currentRoom);
+	currentRoom = testRoom();
+	//readDungeon(&d, "./dungeon.d/example.df");
+
+	return;
+}
+
+void gameLoop(void) {
+	wip_key_t key;
+	while((key = wip_readKey()).action) {
+		if(key.key == WIP_LOCKED) break;
+		if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 1;
+		wip_writeMotion(key);
+	}
+
+	if(wip_readMotion(UP)) {
+		play.x += abs((int)play.d%4-2)-1;
+		play.y += abs((int)play.d+1%4-2)-1;
+	}
+	if(wip_readMotion(DOWN)) {
+		play.x -= abs((int)play.d%4-2)-1;
+		play.y -= abs((int)play.d+1%4-2)-1;
+	}
+	if(wip_readMotion(RIGHT)) play.d++;
+	if(wip_readMotion(LEFT)) play.d--;
+	play.d %= 4;
+
+	center.x = 2*play.x;
+	center.y = 2*play.y;
+	camera.x = center.x - abs((int)play.d%4-2)+1;
+	camera.y = center.y - abs((int)play.d+1%4-2)+1;
+
+	quat_rotate(camera.rotation, -TO_RAD(90*(play.d+1)), (float[]){0, 0, 1});
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	wip_globj_t pv, view;
+
+	mat4x4_look_at(view.m, camera.position, center.position, axis);
+	mat4x4_mul(pv.m, projection.m, view.m);
+
+	// Render here...
+	drawRoom(currentRoom, pv);
+	// Viewmodel
+	glClear(GL_DEPTH_BUFFER_BIT);
+	drawModel(&camera, sword_model, pv, NULL);
+	// HUD
+	glClear(GL_DEPTH_BUFFER_BIT);
+	drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
+
+	//wip_glError();
+	return;
+}
+
+#define MENU_NAME mainMenu
+#define MENU_HEADER "Dungeon"
+#define MENU_FUNC mainMenuFn
+#define MENU_LIST \
+	MENU_ITEM(M_NEW_GAME, "New Game", "Start a new game"), \
+	MENU_ITEM(M_LOAD_GAME, "Load Game", "Load a saved game"), \
+	MENU_ITEM(M_QUIT_GAME, "Quit Game", NULL)
+#include "d_menu_gen.h"
+#define MENU_NAME pauseMenu
+#define MENU_HEADER "Paused"
+#define MENU_FUNC pauseMenuFn
+#define MENU_LIST \
+	MENU_ITEM(P_CONTINUE, "Continue", "Continue current game"), \
+	MENU_ITEM(P_NEW_GAME, "New Game", "Start a new game"), \
+	MENU_ITEM(P_LOAD_GAME, "Load Game", "Load a saved game"), \
+	MENU_ITEM(P_QUIT_GAME, "Quit Game", NULL)
+#include "d_menu_gen.h"
+
+void mainMenuFn(unsigned int selected, void *p) {
+	switch(selected) {
+		case M_NEW_GAME:
+			newGame();
+			started = 1;
+			break;
+		case M_QUIT_GAME:
+			pthread_mutex_lock(&wip_globalWindow_m);
+			wip_globalWindow.close = 1;
+			pthread_mutex_unlock(&wip_globalWindow_m);
+		default:
+			break;
+	}
+}
+
+void pauseMenuFn(unsigned int selected, void *p) {
+	switch(selected) {
+		case P_NEW_GAME:
+			newGame();
+		case P_CONTINUE:
+			paused = 0;
+			break;
+		case P_QUIT_GAME:
+			pthread_mutex_lock(&wip_globalWindow_m);
+			wip_globalWindow.close = 1;
+			pthread_mutex_unlock(&wip_globalWindow_m);
+		default:
+			break;
+	}
+}
+
+void m_menuLoop(menu *menu) {
+	static int selected = 0;
+	wip_key_t key;
+	while((key = wip_readKey()).action) {
+		if(key.key == WIP_LOCKED) break;
+		if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 0;
+		wip_writeMotion(key);
+	}
+	if(wip_readMotion(DOWN)) selected++;
+	if(wip_readMotion(UP)) selected--;
+	selected = (selected + menu->item_c) % menu->item_c;
+	if(wip_readMotion(USE)) {
+		menu->func(selected, NULL);
+		selected = 0;
+	}
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	wip_sleep(0.01);
+	drawMenu(*menu, selected);
+}
+
+void p_menuLoop(menu *menu) {
+	static int selected = 0;
+	wip_key_t key;
+	while((key = wip_readKey()).action) {
+		if(key.key == WIP_LOCKED) break;
+		if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 0;
+		wip_writeMotion(key);
+	}
+	if(wip_readMotion(DOWN)) selected++;
+	if(wip_readMotion(UP)) selected--;
+	selected = (selected + menu->item_c) % menu->item_c;
+	if(wip_readMotion(USE)) {
+		menu->func(selected, NULL);
+		selected = 0;
+	}
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	wip_globalKeyLock = 1;
+	gameLoop();
+	wip_globalKeyLock = 0;
+
+	drawMenu(*menu, selected);
+}
+
+void *wip_renderThread(void *arg) {
+	wip_setWindow();
+	wip_glInit();
+
+	glClearColor(0.8f, 0.9f, 1.0f, 1.0f);
+
+	initGameLoop();
+
 	int fpsMax = wip_getConfInt("video.fpsMax");
-	double startTime, lastTime = wip_timeWindow();
+	lastTime = wip_timeWindow();
 
 	while(!wip_globalWindow.close) {
 		lastTime = startTime;
 		startTime = wip_timeWindow();
 
-		wip_key_t key;
-		while((key = wip_readKey()).action) {
-			if(key.key == WIP_ESC || key.key == 'q') {
-				pthread_mutex_lock(&wip_globalWindow_m);
-				wip_globalWindow.close = 1;
-				pthread_mutex_unlock(&wip_globalWindow_m);
-			}
-			//if(key.key == WIP_SPACE) wip_log(WIP_INFO, "%f %f %f", m[0], m[1], m[2]);
-			/*
-			if(key.key == WIP_SPACE && key.action == WIP_PRESS) {
-				wip_log(WIP_INFO, "%f, %f", camera.x, camera.y);
-				wip_log(WIP_INFO, "%f, %f", center.x, center.y);
-				wip_print("");
-			}
-			*/
-			wip_writeMotion(key);
-		}
-
-		if(wip_readMotion(UP)) {
-			play.x += abs((int)play.d%4-2)-1;
-			play.y += abs((int)play.d+1%4-2)-1;
-		}
-		if(wip_readMotion(DOWN)) {
-			play.x -= abs((int)play.d%4-2)-1;
-			play.y -= abs((int)play.d+1%4-2)-1;
-		}
-		if(wip_readMotion(RIGHT)) play.d++;
-		if(wip_readMotion(LEFT)) play.d--;
-		play.d = play.d % 4;
-
-		center.x = 2*play.x;
-		center.y = 2*play.y;
-		camera.x = center.x - abs((int)play.d%4-2)+1;
-		camera.y = center.y - abs((int)play.d+1%4-2)+1;
-
-		quat_rotate(camera.rotation, -TO_RAD(90*(play.d+1)), (float[]){0, 0, 1});
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		wip_globj_t pv, view;
-
-		mat4x4_look_at(view.m, camera.position, center.position, axis);
-		mat4x4_mul(pv.m, projection.m, view.m);
-
-		// Render here...
-		drawRoom(fake, pv);
-		// Viewmodel
-		glClear(GL_DEPTH_BUFFER_BIT);
-		drawModel(&camera, sword_model, pv, NULL);
-		// HUD
-		glClear(GL_DEPTH_BUFFER_BIT);
-		drawStr(10, 10, 3.0f, "Copyright (c) 2021 Jovan Lanik");
-		drawFormatStr(2*wip_getConfInt("video.width")-130, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
-		
-		//wip_glError();
+		if(started) {
+			if(paused) p_menuLoop(&pauseMenu);
+			else gameLoop();
+		} else m_menuLoop(&mainMenu);
 
 		do wip_swapWindow();
 		while(wip_timeWindow() - startTime < 1.0/fpsMax && fpsMax && !wip_globalWindow.close);
@@ -293,7 +277,6 @@ void *wip_renderThread(void *arg) {
 }
 
 void *wip_logicThread(void *arg) {
-	while(!wip_globalWindow.close);
 	pthread_exit(NULL);
 }
 
