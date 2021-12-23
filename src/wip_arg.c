@@ -13,11 +13,11 @@
 
 #define AUTHOR_EMAIL "jox969@gmail.com"
 
-#define STR(x) #x
-#define NAME(x) STR(x)
-const char *wip_globalVersion ="WIP "NAME(WIP_NAME)" built with "NAME(WIP_WINDOW_BACKEND)", "__DATE__" at "__TIME__;
-#undef STR
-#undef NAME
+#define _STR(x) __STR(x)
+#define __STR(x) #x
+const char *wip_globalVersion ="WIP "_STR(WIP_NAME)" built with "_STR(WIP_WINDOW_BACKEND)", "__DATE__" at "__TIME__;
+#undef __STR
+#undef _STR
 const char *optstr = "-hVu";
 
 void wip_showUsage(char *name) {

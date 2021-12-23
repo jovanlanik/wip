@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <GL/glew.h>
+
 typedef struct {
 	int width;
 	int height;

@@ -77,11 +77,11 @@ char *wip_getConfPath(void) {
 		strcat(c, dirname);
 		config = c;
 	}
-#define STR(x) #x
-#define NAME(x) STR(x)
-	char filename[] = "/wip/"NAME(WIP_NAME)".conf";
-#undef STR
-#undef NAME
+#define _STR(x) __STR(x)
+#define __STR(x) #x
+	char filename[] = "/wip/"_STR(WIP_NAME)".conf";
+#undef __STR
+#undef _STR
 	int ret;
 	char *c = wip_realloc(config, strlen(config)+sizeof(filename), &ret);
 	if(!ret) return NULL;
