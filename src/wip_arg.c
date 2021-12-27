@@ -50,8 +50,7 @@ char *wip_parseOptions(int argc, char *argv[]) {
 	while((opt = getopt_long(argc, argv, optstr, options, NULL)) != -1) {
 		switch(opt) {
 			case 1:
-				if(strcmp(argv[optind-1], "help") != 0)
-					return strdup(argv[optind-1]);
+				return strdup(argv[optind-1]);
 			case 'h':
 				wip_showHelp(argv[0]);
 				exit(EXIT_SUCCESS);
