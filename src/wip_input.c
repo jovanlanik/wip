@@ -31,6 +31,7 @@ enum wip_motion wip_findMotion(const char *name) {
 }
 
 int wip_readMotion(enum wip_motion m) {
+	if(wip_globalKeyLock) return 0;
 	wip_motion_t *motion = &wip_globalMotion[m];
 	int ret = motion->state;
 	if(motion->type == WIP_ONCE_PRESS || motion->type == WIP_ONCE_RELEASE)
