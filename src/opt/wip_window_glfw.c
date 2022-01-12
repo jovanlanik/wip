@@ -3,8 +3,6 @@
 
 // GLFW Window Functions
 
-#ifdef WIP_GLFW
-
 #include <pthread.h>
 #include <GLFW/glfw3.h>
 
@@ -158,6 +156,4 @@ void wip_termWindow(void) {
 	glfwTerminate();
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 }
-
-#endif
 

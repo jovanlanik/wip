@@ -3,8 +3,6 @@
 
 // SDL2 Window Functions
 
-#ifdef WIP_SDL2
-
 #include <pthread.h>
 #include <SDL2/SDL.h>
 
@@ -127,6 +125,4 @@ void wip_termWindow(void) {
 	wip_debug(WIP_INFO, "%s: Terminating window...", __func__);
 	SDL_Quit();
 }
-
-#endif
 

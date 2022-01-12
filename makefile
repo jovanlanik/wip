@@ -5,70 +5,58 @@
 
 include mkconf.mk
 
-MAKEFLAGS += --no-builtin-rules
-MAKEFLAGS += --no-builtin-variables
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
 NAME ?= demo
 BUILDDIR ?= build
 WINDOW_BACKEND ?= glfw
 
+LIBS := gl glew libconfig
+
 ifeq '$(WINDOW_BACKEND)' 'glfw'
-CFLAGS += -DWIP_GLFW -DWIP_WINDOW_BACKEND=glfw
-LDLIBS += -lglfw
-NWINDOW_BACKEND=SDL2
+    LIBS += glfw3
 else
-CFLAGS += -DWIP_SDL2 -DWIP_WINDOW_BACKEND=SDL2
-LDLIBS += -lSDL2
-NWINDOW_BACKEND=glfw
+    LIBS += sdl2
 endif
 
-SRC = $(filter-out src/wip_window_$(NWINDOW_BACKEND).c, $(wildcard src/*.c $(NAME).d/src/*.c))
+SRC = $(wildcard src/*.c $(NAME).d/src/*.c) src/opt/wip_window_$(WINDOW_BACKEND).c
 OBJ = $(addprefix $(BUILDDIR)/, $(SRC:%.c=%.o))
-DEPS = $(addprefix $(BUILDDIR)/, $(SRC:%.c=%.d))
 GLSL = $(wildcard glsl/*.vert glsl/*.frag $(NAME).d/glsl/*.vert $(NAME).d/glsl/*.frag)
 CONF = res/conf/$(NAME).conf
-
 TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h)
 
-CFLAGS += -pipe -Wall -pedantic -std=c11 -I ./ -I include -I $(NAME).d/include -DWIP_NAME=$(NAME)
-LDLIBS += -lm -lpthread -lGL -lGLEW -lconfig
+CFLAGS += -pipe -Wall -pedantic -std=c11
+CFLAGS += -I ./ -I include -I $(NAME).d/include
+CFLAGS += -DWIP_NAME=$(NAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND)
+CGLAGS += `pkg-config --cflags $(LIBS)`
+
+LDFLAGS += -lm -lpthread `pkg-config --libs $(LIBS)`
 
 ifndef NDEBUG
-$(warning NDEBUG not explicitly set.)
-NDEBUG := 0
+    $(warning NDEBUG not explicitly set.)
+    NDEBUG := 0
 endif
 
 ifeq '$(NDEBUG)' '1'
-CFLAGS += -DNDEBUG -O2
-LDFLAGS += -Wl,-S
+    CFLAGS += -DNDEBUG -O2
+    LDFLAGS += -Wl,-S
 else
-CFLAGS += -g -pg
-LDFLAGS += -pg
-TRASH += gmon.out
+    CFLAGS += -g -pg
+    LDFLAGS += -pg
+    TRASH += gmon.out
 endif
 
-.PHONY: all clean install uninstall help
+.PHONY: all clean
 
 all: $(NAME)
 clean:
 	@rm $(TRASH) | true
 	@rm -r $(BUILDDIR) | true
-mkconf.mk:
-	./configure.sh
-compile_commands.json: $(SRC) mkconf.mk
-	bear -- make clean all
-
--include $(DEPS)
-
 $(NAME): $(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $@
+	$(CC) $(LDFLAGS) $(OBJ) -o $@
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILDDIR)/%.d: %.c
-	@echo Resolving dependencies for $<
-	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -MM -MG -MT $(BUILDDIR)/$*.o -MF $@ $<
 %.vert.h: %.vert
 	@glslangValidator $<
 	util/bake $< $<.h
@@ -81,4 +69,4 @@ include/baked/$(NAME)_config.h: $(CONF)
 include/baked/shaders.h: $(GLSL:%=%.h)
 	@cat $(GLSL:%=%.h) > $@
 	@echo Baking $@ from $(GLSL)
-
+$(NAME).d/src/wip_game.c: include/baked/$(NAME)_config.h include/baked/shaders.h
