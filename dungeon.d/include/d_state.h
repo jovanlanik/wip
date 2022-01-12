@@ -12,3 +12,7 @@ typedef struct {
 	union WIP_NAMED_VEC_T(2, int, WIP_XY, position, );
 	union { enum direction d; enum direction direction; };
 } player_t;
+
+typedef struct {
+	player_t player;
+} state_t;

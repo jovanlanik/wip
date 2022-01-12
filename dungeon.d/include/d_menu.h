@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "wip_mdl.h"
+
 typedef struct {
 	int id;
 	char *name;
@@ -19,5 +21,5 @@ typedef struct {
 } menu;
 
 void drawMenuItem(menu_item item, unsigned int pos, unsigned int state);
-void drawMenu(menu menu, unsigned int selected);
+void drawMenu(menu menu, unsigned int selected, wip_glmdl_t *model);
 

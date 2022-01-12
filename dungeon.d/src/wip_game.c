@@ -24,7 +24,7 @@
 
 #include "lib/linmath.h"
 
-#include "d_player.h"
+#include "d_state.h"
 #include "d_format.h"
 #include "d_draw.h"
 #include "d_text.h"
@@ -33,40 +33,37 @@
 #include "include/baked/dungeon_config.h"
 #include "include/baked/shaders.h"
 
+// Engine internal
 const char *wip_defaultConf = dungeon_conf;
-
 int wip_globalTicksPerSecond;
-
+// Engine external
+extern int wip_globalKeyLock;
 extern wip_window_t wip_globalWindow;
 extern pthread_mutex_t wip_globalWindow_m;
 
-extern wip_scene_t wip_globalScene;
-
-extern int wip_globalKeyLock;
-
+// Rendering
+const float m[3] = { -1.5, 2.0, 0.4 };
+vec3 axis = {0.0f, 0.0f, 1.0f};
+GLuint program;
 unsigned int lightLocation;
 unsigned int mpvLocation;
 unsigned int transformLocation;
 unsigned int normalTransformLocation;
 unsigned int materialLocation;
+double startTime, lastTime;
 
-GLuint program;
-
-const float m[3] = { -1.5, 2.0, 0.4 };
-
+// Runtime
 int started = 0;
 int paused = 0;
-
 wip_obj_t center, camera;
-player_t play;
-vec3 axis = {0.0f, 0.0f, 1.0f};
 wip_glmdl_t *sword_model;
+wip_glmdl_t *snake_model;
 room_t *currentRoom = NULL;
 //dungeon_t d;
 wip_globj_t projection;
 
-// Rendering variables
-double startTime, lastTime;
+// Game
+state_t currentState;
 
 void initGameLoop(void) {
 	wip_makeObject(&camera);
@@ -83,6 +80,7 @@ void initGameLoop(void) {
 	glDeleteShader(fragShader);
 
 	sword_model = wip_openModel("d_sword");
+	snake_model = wip_openModel("d_snake");
 
 	lightLocation = glGetUniformLocation(program, "light");
 	mpvLocation = glGetUniformLocation(program, "mpv");
@@ -97,9 +95,9 @@ void initGameLoop(void) {
 }
 
 void newGame(void) {
-	play.x = 0;
-	play.y = 0;
-	play.d = DIR_NORTH;
+	currentState.player.x = 0;
+	currentState.player.y = 0;
+	currentState.player.d = DIR_NORTH;
 
 	if(currentRoom) wip_free(currentRoom);
 	currentRoom = testRoom();
@@ -109,31 +107,24 @@ void newGame(void) {
 }
 
 void gameLoop(void) {
-	wip_key_t key;
-	while((key = wip_readKey()).action) {
-		if(key.key == WIP_LOCKED) break;
-		if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 1;
-		wip_writeMotion(key);
-	}
-
 	if(wip_readMotion(UP)) {
-		play.x += abs((int)play.d%4-2)-1;
-		play.y += abs((int)play.d+1%4-2)-1;
+		currentState.player.x += abs((int)currentState.player.d%4-2)-1;
+		currentState.player.y += abs((int)currentState.player.d+1%4-2)-1;
 	}
 	if(wip_readMotion(DOWN)) {
-		play.x -= abs((int)play.d%4-2)-1;
-		play.y -= abs((int)play.d+1%4-2)-1;
+		currentState.player.x -= abs((int)currentState.player.d%4-2)-1;
+		currentState.player.y -= abs((int)currentState.player.d+1%4-2)-1;
 	}
-	if(wip_readMotion(RIGHT)) play.d++;
-	if(wip_readMotion(LEFT)) play.d--;
-	play.d %= 4;
+	if(wip_readMotion(RIGHT)) currentState.player.d++;
+	if(wip_readMotion(LEFT)) currentState.player.d--;
+	currentState.player.d %= 4;
 
-	center.x = 2*play.x;
-	center.y = 2*play.y;
-	camera.x = center.x - abs((int)play.d%4-2)+1;
-	camera.y = center.y - abs((int)play.d+1%4-2)+1;
+	center.x = 2*currentState.player.x;
+	center.y = 2*currentState.player.y;
+	camera.x = center.x - abs((int)currentState.player.d%4-2)+1;
+	camera.y = center.y - abs((int)currentState.player.d+1%4-2)+1;
 
-	quat_rotate(camera.rotation, -TO_RAD(90*(play.d+1)), (float[]){0, 0, 1});
+	quat_rotate(camera.rotation, -TO_RAD(90*(currentState.player.d+1)), (float[]){0, 0, 1});
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -147,7 +138,7 @@ void gameLoop(void) {
 	// Viewmodel
 	glClear(GL_DEPTH_BUFFER_BIT);
 	drawModel(&camera, sword_model, pv, NULL);
-	// HUD
+	// Interface
 	glClear(GL_DEPTH_BUFFER_BIT);
 	drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
 
@@ -206,12 +197,6 @@ void pauseMenuFn(unsigned int selected, void *p) {
 
 void m_menuLoop(menu *menu) {
 	static int selected = 0;
-	wip_key_t key;
-	while((key = wip_readKey()).action) {
-		if(key.key == WIP_LOCKED) break;
-		if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 0;
-		wip_writeMotion(key);
-	}
 	if(wip_readMotion(DOWN)) selected++;
 	if(wip_readMotion(UP)) selected--;
 	selected = (selected + menu->item_c) % menu->item_c;
@@ -222,17 +207,11 @@ void m_menuLoop(menu *menu) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	wip_sleep(0.01);
-	drawMenu(*menu, selected);
+	drawMenu(*menu, selected, NULL);
 }
 
 void p_menuLoop(menu *menu) {
 	static int selected = 0;
-	wip_key_t key;
-	while((key = wip_readKey()).action) {
-		if(key.key == WIP_LOCKED) break;
-		if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 0;
-		wip_writeMotion(key);
-	}
 	if(wip_readMotion(DOWN)) selected++;
 	if(wip_readMotion(UP)) selected--;
 	selected = (selected + menu->item_c) % menu->item_c;
@@ -246,7 +225,7 @@ void p_menuLoop(menu *menu) {
 	gameLoop();
 	wip_globalKeyLock = 0;
 
-	drawMenu(*menu, selected);
+	drawMenu(*menu, selected, NULL);
 }
 
 void *wip_renderThread(void *arg) {
@@ -264,6 +243,13 @@ void *wip_renderThread(void *arg) {
 		lastTime = startTime;
 		startTime = wip_timeWindow();
 
+		wip_key_t key;
+		while((key = wip_readKey()).action) {
+			if(key.key == WIP_LOCKED) break;
+			if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 1;
+			wip_writeMotion(key);
+		}
+
 		if(started) {
 			if(paused) p_menuLoop(&pauseMenu);
 			else gameLoop();
@@ -276,7 +262,5 @@ void *wip_renderThread(void *arg) {
 	pthread_exit(NULL);
 }
 
-void *wip_logicThread(void *arg) {
-	pthread_exit(NULL);
-}
+void *wip_logicThread(void *arg) { pthread_exit(NULL); }
 
