@@ -11,7 +11,6 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include <pthread.h>
 
 #include "wip_fn.h"
 
@@ -117,6 +116,7 @@ char *wip_readFile(void* file) {
 }
 */
 
+/*
 void *timeoutFunc(void *arg) {
 	wip_timeout_t *timeout = (wip_timeout_t *)arg;
 
@@ -145,4 +145,5 @@ int *wip_setTimeout(void *(*func)(void *), void *arg, double time) {
 	pthread_attr_destroy(&attr);
 	return timeout->done;
 }
+*/
 

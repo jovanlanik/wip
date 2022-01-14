@@ -8,7 +8,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
-#include <pthread.h>
 #include <GL/glew.h>
 
 #include "wip_fn.h"
@@ -39,7 +38,6 @@ int wip_globalTicksPerSecond;
 // Engine external
 extern int wip_globalKeyLock;
 extern wip_window_t wip_globalWindow;
-extern pthread_mutex_t wip_globalWindow_m;
 
 // Rendering
 const float m[3] = { -1.5, 2.0, 0.4 };
@@ -171,9 +169,7 @@ void mainMenuFn(unsigned int selected, void *p) {
 			started = 1;
 			break;
 		case M_QUIT_GAME:
-			pthread_mutex_lock(&wip_globalWindow_m);
 			wip_globalWindow.close = 1;
-			pthread_mutex_unlock(&wip_globalWindow_m);
 		default:
 			break;
 	}
@@ -187,9 +183,7 @@ void pauseMenuFn(unsigned int selected, void *p) {
 			paused = 0;
 			break;
 		case P_QUIT_GAME:
-			pthread_mutex_lock(&wip_globalWindow_m);
 			wip_globalWindow.close = 1;
-			pthread_mutex_unlock(&wip_globalWindow_m);
 		default:
 			break;
 	}
@@ -228,7 +222,7 @@ void p_menuLoop(menu *menu) {
 	drawMenu(*menu, selected, NULL);
 }
 
-void *wip_renderThread(void *arg) {
+void wip_renderThread(void) {
 	wip_setWindow();
 	wip_glInit();
 
@@ -255,12 +249,10 @@ void *wip_renderThread(void *arg) {
 			else gameLoop();
 		} else m_menuLoop(&mainMenu);
 
+		wip_pollWindow();
 		do wip_swapWindow();
 		while(wip_timeWindow() - startTime < 1.0/fpsMax && fpsMax && !wip_globalWindow.close);
 	}
-
-	pthread_exit(NULL);
+	return;
 }
-
-void *wip_logicThread(void *arg) { pthread_exit(NULL); }
 

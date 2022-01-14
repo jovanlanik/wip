@@ -30,7 +30,7 @@ CFLAGS += -I ./ -I include -I $(NAME).d/include
 CFLAGS += -DWIP_NAME=$(NAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND)
 CGLAGS += `pkg-config --cflags $(LIBS)`
 
-LDFLAGS += -lm -lpthread `pkg-config --libs $(LIBS)`
+LDFLAGS += -lm `pkg-config --libs $(LIBS)`
 
 ifndef NDEBUG
     $(warning NDEBUG not explicitly set.)

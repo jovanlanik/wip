@@ -1,9 +1,7 @@
 // WIP
 // Copyright (c) 2020 Jovan Lanik
 
-// Main Source
-
-#include <pthread.h>
+// WIP Source
 
 #include "wip_fn.h"
 #include "wip_arg.h"
@@ -13,47 +11,15 @@
 #include "wip_input.h"
 
 extern wip_window_t wip_globalWindow;
-extern pthread_mutex_t wip_globalWindow_m;
 
 int main(int argc, char *argv[]) {
 	wip_parseOptions(argc, argv);
-
-	pthread_t logic;
-	pthread_t render;
-
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
 	wip_initConf();
 	wip_loadBindings();
-
 	wip_initWindow();
-	pthread_mutex_init(&wip_globalWindow_m, NULL);
-
-	pthread_create(&logic, &attr, wip_logicThread, NULL);
-	pthread_create(&render, &attr, wip_renderThread, NULL);
-	pthread_attr_destroy(&attr);
-
-	double startTime;
-
-	while(!wip_globalWindow.close) {
-		startTime = wip_timeWindow();
-		pthread_mutex_lock(&wip_globalWindow_m);
-		wip_pollWindow();
-		pthread_mutex_unlock(&wip_globalWindow_m);
-		while(wip_timeWindow() - startTime < 1.0/WIP_TICKRATE && !wip_globalWindow.close)
-			wip_sleep(0.0001);
-	}
-
-	pthread_join(logic, NULL);
-	pthread_join(render, NULL);
-
+	wip_renderThread();
 	wip_termWindow();
-	pthread_mutex_destroy(&wip_globalWindow_m);
-
 	wip_termConf();
-
 	return 0;
 }
 

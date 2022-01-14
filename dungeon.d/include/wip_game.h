@@ -7,6 +7,6 @@
 
 #define WIP_TICKRATE 64
 
-void *wip_renderThread(void *arg);
-void *wip_logicThread(void *arg);
+void wip_renderThread(void);
+void wip_logicThread(void);
 

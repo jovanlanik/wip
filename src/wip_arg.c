@@ -7,7 +7,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include "lib/getopt.h"
+#else
 #include <getopt.h>
+#endif
 
 #include "wip_fn.h"
 

@@ -3,7 +3,6 @@
 
 // GLFW Window Functions
 
-#include <pthread.h>
 #include <GLFW/glfw3.h>
 
 #include "wip_fn.h"
@@ -12,7 +11,6 @@
 #include "wip_conf.h"
 
 wip_window_t wip_globalWindow;
-pthread_mutex_t wip_globalWindow_m;
 
 int unifyKey(int key) {
 	switch(key) {

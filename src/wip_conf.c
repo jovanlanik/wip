@@ -6,8 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <unistd.h>
 #include <pwd.h>
+#endif
 #include <libconfig.h>
 
 #include "wip_fn.h"
@@ -41,6 +43,9 @@ int wip_setConf##name(const char *path, type val) { \
 WIP_CONF_TYPE_LIST
 #undef CONF_TYPE
 
+#ifdef _WIN32
+char *wip_getConfPath(void) { return NULL; }
+#else
 char *wip_getConfPath(void) {
 	char *config = getenv("XDG_CONFIG_HOME");
 	if(config != NULL && *config != '\0') {
@@ -90,6 +95,7 @@ char *wip_getConfPath(void) {
 	config = c;
 	return config;
 }
+#endif
 
 void wip_initConf(void) {
 	config_init(&wip_globalConf);
