@@ -1,5 +1,5 @@
 # WIP
-This is work in progress.
+This is a work in progress game engine using OpenGL.
 ## Dependencies
 ### Build tools
 - GCC or Clang
