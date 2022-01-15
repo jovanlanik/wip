@@ -3,13 +3,11 @@
 
 // Drawing functions
 
-#include <GL/glew.h>
-
 #include "wip_mdl.h"
 #include "wip_obj.h"
 #include "wip_img.h"
-
-#include "lib/linmath.h"
+#include "external/glad/glad.h"
+#include "external/linmath.h"
 
 #include "d_format.h"
 

@@ -11,7 +11,6 @@ typedef struct {
 } wip_window_t;
 
 void wip_initWindow(void);
-void wip_setWindow(void);
 void wip_swapWindow(void);
 void wip_pollWindow(void);
 double wip_timeWindow(void);

@@ -3,10 +3,12 @@
 
 // GLFW Window Functions
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include "wip_fn.h"
 #include "wip_window.h"
+#include "wip_gl.h"
 #include "wip_input.h"
 #include "wip_conf.h"
 
@@ -50,20 +52,6 @@ int unifyKey(int key) {
 	if(key >= GLFW_KEY_0 && key <= GLFW_KEY_9) return key;
 	if(key >= GLFW_KEY_A && key <= GLFW_KEY_Z) return key + ('a' - 'A');
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F25) return key - GLFW_KEY_F1 + WIP_F+1;
-	// This works but it's wrong. Very wrong!
-	/*
-	const char *keyName = glfwGetKeyName(key, 0);
-	if(keyName) {
-		unsigned char keyVal = keyName[0];
-		if(key >= GLFW_KEY_KP_DECIMAL && key <= GLFW_KEY_KP_ADD)
-			keyVal -= '*' - WIP_KP;
-		else if(key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_9) {
-			keyVal -= '0';
-			keyVal += WIP_KP_NUM;
-		}
-		if(keyName[1] == '\0') return keyVal;
-	}
-	*/
 	wip_log(WIP_WARN, "GLFW: Couldn't unify keycode: %d", key);
 	return WIP_UNKNOWN;
 }
@@ -122,17 +110,12 @@ void wip_initWindow(void) {
 
 	glfwMakeContextCurrent(wip_globalWindow.handle);
 	glfwSwapInterval(wip_getConfBool("video.vsync"));
-	glfwMakeContextCurrent(NULL);
 
 	glfwSetWindowCloseCallback(wip_globalWindow.handle, window_close_callback);
 	glfwSetKeyCallback(wip_globalWindow.handle, key_callback);
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;
-}
-
-void wip_setWindow(void) {
-	glfwMakeContextCurrent(wip_globalWindow.handle);
 }
 
 void wip_swapWindow(void) {

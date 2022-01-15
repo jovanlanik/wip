@@ -3,15 +3,13 @@
 
 // Image Loading
 
-#include <GL/glew.h>
-
 #include "wip_fn.h"
 #include "wip_img.h"
 #define STBI_MALLOC(x) wip_alloc(x)
 #define STBI_REALLOC(x, y) wip_realloc(x, y, NULL)
 #define STBI_FREE(x) wip_free(x)
 #define STB_IMAGE_IMPLEMENTATION
-#include "lib/stb_image.h"
+#include "external/stb_image.h"
 
 wip_img_t *wip_openImage(wip_img_t *image, const char *filename) {
 	stbi_set_flip_vertically_on_load(1); // TODO: I wonder if this is the best place to do this...

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <GL/glew.h>
+#include "external/glad/glad.h"
 
 #ifdef NDEBUG
 #define wip_glError(...) /* nothing */

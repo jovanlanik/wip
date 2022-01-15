@@ -3,8 +3,6 @@
 
 // GL Functions
 
-#include <GL/glew.h>
-
 #include "wip_fn.h"
 #include "wip_conf.h"
 #include "wip_gl.h"
@@ -18,9 +16,10 @@ void _wip_glError(const char *func) {
 }
 
 void wip_glInit(void) {
-	wip_debug(WIP_INFO, "%s: Initializing GL...", __func__);
-	glewInit();
-	if(!GLEW_VERSION_3_3)
+	wip_debug(WIP_INFO, "%s: Initializing OpenGL...", __func__);
+	if(!gladLoadGL())
+		wip_log(WIP_FATAL, "%s: Couldn't initialize OpenGL.", __func__);
+	if(!GLAD_GL_VERSION_3_3)
 		wip_log(WIP_FATAL, "%s: OpenGL 3.3 not supported.", __func__);
 
 	glEnable(GL_DEPTH_TEST);

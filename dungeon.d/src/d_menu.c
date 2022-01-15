@@ -4,13 +4,12 @@
 // Menu code
 
 #include <string.h>
-#include <GL/glew.h>
 
 #include "wip_obj.h"
 #include "wip_conf.h"
 #include "wip_math.h"
-
-#include "lib/linmath.h"
+#include "external/glad/glad.h"
+#include "external/linmath.h"
 
 #include "d_menu.h"
 #include "d_text.h"

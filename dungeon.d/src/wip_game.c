@@ -8,7 +8,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
-#include <GL/glew.h>
 
 #include "wip_fn.h"
 #include "wip_conf.h"
@@ -20,8 +19,7 @@
 #include "wip_input.h"
 #include "wip_gl.h"
 #include "wip_math.h"
-
-#include "lib/linmath.h"
+#include "external/linmath.h"
 
 #include "d_state.h"
 #include "d_format.h"
@@ -223,9 +221,6 @@ void p_menuLoop(menu *menu) {
 }
 
 void wip_renderThread(void) {
-	wip_setWindow();
-	wip_glInit();
-
 	glClearColor(0.8f, 0.9f, 1.0f, 1.0f);
 
 	initGameLoop();

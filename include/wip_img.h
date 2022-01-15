@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <GL/glew.h>
+#include "external/glad/glad.h"
 
 typedef struct {
 	int width;

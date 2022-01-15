@@ -8,7 +8,7 @@
 #include "wip_fn.h"
 #include "wip_obj.h"
 #include "wip_math.h"
-#include "lib/linmath.h"
+#include "external/linmath.h"
 
 wip_obj_t *wip_makeObject(wip_obj_t *o) {
 	if(o) {

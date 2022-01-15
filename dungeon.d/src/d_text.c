@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <string.h>
-#include <GL/glew.h>
 
 #include "wip_fn.h"
 #include "wip_gl.h"

@@ -4,19 +4,18 @@
 // PLY model loading
 
 #include <stdlib.h>
-//#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <GL/glew.h>
 
 #include "wip_fn.h"
 #include "wip_mdl.h"
+#include "external/glad/glad.h"
 #define MSH_PLY_MALLOC(x) wip_alloc(x)
 #define MSH_PLY_REALLOC(x, y) wip_realloc(x, y, NULL)
 #define MSH_PLY_FREE(x) wip_free(x)
 #define MSH_PLY_IMPLEMENTATION
-#include "lib/msh_ply.h"
+#include "external/msh_ply.h"
 
 wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 	wip_debug(WIP_INFO, "%s: Loading model from %s...", __func__, file);

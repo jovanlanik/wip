@@ -11,7 +11,7 @@ NAME ?= demo
 BUILDDIR ?= build
 WINDOW_BACKEND ?= glfw
 
-LIBS := gl glew libconfig
+LIBS := gl libconfig
 
 ifeq '$(WINDOW_BACKEND)' 'glfw'
     LIBS += glfw3
@@ -19,18 +19,18 @@ else
     LIBS += sdl2
 endif
 
-SRC = $(wildcard src/*.c $(NAME).d/src/*.c) src/opt/wip_window_$(WINDOW_BACKEND).c
+SRC = $(wildcard src/*.c src/external/*.c $(NAME).d/src/*.c) src/optional/wip_window_$(WINDOW_BACKEND).c
 OBJ = $(addprefix $(BUILDDIR)/, $(SRC:%.c=%.o))
 GLSL = $(wildcard glsl/*.vert glsl/*.frag $(NAME).d/glsl/*.vert $(NAME).d/glsl/*.frag)
 CONF = res/conf/$(NAME).conf
 TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h)
 
-CFLAGS += -pipe -Wall -pedantic -std=c11
-CFLAGS += -I ./ -I include -I $(NAME).d/include
-CFLAGS += -DWIP_NAME=$(NAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND)
-CGLAGS += `pkg-config --cflags $(LIBS)`
+CFLAGS += -pipe -std=c11 -DWIP_NAME=$(NAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND) $(shell pkg-config --cflags $(LIBS))
 
-LDFLAGS += -lm `pkg-config --libs $(LIBS)`
+CFLAGS_SRC = $(CFLAGS) -Wall -Wpedantic -I ./ -I include -I $(NAME).d/include
+CFLAGS_EXT = $(CFLAGS) -I include/external
+
+LDFLAGS += -ldl -lm $(shell pkg-config --libs $(LIBS))
 
 ifndef NDEBUG
     $(warning NDEBUG not explicitly set.)
@@ -56,7 +56,10 @@ $(NAME): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS_SRC) -c $< -o $@
+$(BUILDDIR)/src/external/%.o: src/external/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS_EXT) -c $< -o $@
 %.vert.h: %.vert
 	@glslangValidator $<
 	util/bake $< $<.h

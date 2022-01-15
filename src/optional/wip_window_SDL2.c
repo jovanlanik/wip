@@ -77,15 +77,13 @@ void wip_initWindow(void) {
 		wip_log(WIP_FATAL, "%s: Couldn't create window: %s", __func__, SDL_GetError());
 	}
 
+	SDL_GL_CreateContext(wip_globalWindow.handle);
+
 	//SDL_GL_CreateContext(wip_globalWindow.handle);
 	SDL_GL_SetSwapInterval(wip_getConfBool("video.vsync"));
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;
-}
-
-void wip_setWindow(void) {
-	SDL_GL_CreateContext(wip_globalWindow.handle);
 }
 
 void wip_swapWindow(void) {
