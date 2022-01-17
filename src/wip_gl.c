@@ -7,7 +7,7 @@
 #include "wip_conf.h"
 #include "wip_gl.h"
 
-void _wip_glError(const char *func) {
+void _wip_printGlErrors(const char *func) {
 	GLenum error;
 	while((error = glGetError()) !=  GL_NO_ERROR) {
 		wip_log(WIP_ERROR, "%s: GL error: %x", func, error);
@@ -15,7 +15,7 @@ void _wip_glError(const char *func) {
 	return;
 }
 
-void wip_glInit(void) {
+void wip_initGl(void) {
 	wip_debug(WIP_INFO, "%s: Initializing OpenGL...", __func__);
 	if(!gladLoadGL())
 		wip_log(WIP_FATAL, "%s: Couldn't initialize OpenGL.", __func__);

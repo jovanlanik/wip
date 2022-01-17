@@ -5,9 +5,7 @@ This is a work in progress game engine using OpenGL.
 - GCC or Clang
 - GNU Make
 - pkg-config or pkgconf
-- xxd
 ### Libraries
-- GLEW
 - GLFW or SDL2
 - libconfig
 ## Building

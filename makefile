@@ -20,10 +20,15 @@ else
 endif
 
 SRC = $(wildcard src/*.c src/external/*.c $(NAME).d/src/*.c) src/optional/wip_window_$(WINDOW_BACKEND).c
-OBJ = $(addprefix $(BUILDDIR)/, $(SRC:%.c=%.o))
-GLSL = $(wildcard glsl/*.vert glsl/*.frag $(NAME).d/glsl/*.vert $(NAME).d/glsl/*.frag)
-CONF = res/conf/$(NAME).conf
-TRASH = $(wildcard include/baked/*.h) $(GLSL:%=%.h)
+GLSL_VERT = $(wildcard glsl/*.vert $(NAME).d/glsl/*.vert)
+GLSL_FRAG = $(wildcard glsl/*.frag $(NAME).d/glsl/*.frag)
+RES_CONF = res/conf/$(NAME).conf
+OBJ = $(addprefix $(BUILDDIR)/, \
+      $(SRC:%.c=%.o) \
+      $(GLSL_VERT:%.vert=%.vert.o) \
+      $(GLSL_FRAG:%.frag=%.frag.o) \
+      $(RES_CONF:%.conf=%.conf.o) \
+      )
 
 CFLAGS += -pipe -std=c11 -DWIP_NAME=$(NAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND) $(shell pkg-config --cflags $(LIBS))
 
@@ -60,16 +65,14 @@ $(BUILDDIR)/%.o: %.c
 $(BUILDDIR)/src/external/%.o: src/external/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_EXT) -c $< -o $@
-%.vert.h: %.vert
+$(BUILDDIR)/%.vert.o: %.vert
 	@glslangValidator $<
-	util/bake $< $<.h
-%.frag.h: %.frag
-	@glslangValidator $<
-	util/bake $< $<.h
-include/baked/$(NAME)_config.h: $(CONF)
-	@echo Baking $@ from $<
+	@mkdir -p $(dir $@)
 	util/bake $< $@
-include/baked/shaders.h: $(GLSL:%=%.h)
-	@cat $(GLSL:%=%.h) > $@
-	@echo Baking $@ from $(GLSL)
-$(NAME).d/src/wip_game.c: include/baked/$(NAME)_config.h include/baked/shaders.h
+$(BUILDDIR)/%.frag.o: %.frag
+	@glslangValidator $<
+	@mkdir -p $(dir $@)
+	util/bake $< $@
+$(BUILDDIR)/%.conf.o: %.conf
+	@mkdir -p $(dir $@)
+	util/bake $< $@

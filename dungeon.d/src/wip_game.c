@@ -27,11 +27,12 @@
 #include "d_text.h"
 #include "d_menu.h"
 
-#include "include/baked/dungeon_config.h"
-#include "include/baked/shaders.h"
+extern const char _binary_dungeon_conf_start[];
+extern const char _binary_d_texture_vert_start[];
+extern const char _binary_d_texture_frag_start[];
 
 // Engine internal
-const char *wip_defaultConf = dungeon_conf;
+const char *wip_defaultConf = _binary_dungeon_conf_start;
 int wip_globalTicksPerSecond;
 // Engine external
 extern int wip_globalKeyLock;
@@ -68,8 +69,8 @@ void initGameLoop(void) {
 
 	wip_makeObject(&center);
 
-	GLuint vertShader = wip_loadShader((char *)d_texture_vert, GL_VERTEX_SHADER);
-	GLuint fragShader = wip_loadShader((char *)d_texture_frag, GL_FRAGMENT_SHADER);
+	GLuint vertShader = wip_loadShader((char *)_binary_d_texture_vert_start, GL_VERTEX_SHADER);
+	GLuint fragShader = wip_loadShader((char *)_binary_d_texture_frag_start, GL_FRAGMENT_SHADER);
 	program = wip_loadProgram(vertShader, fragShader);
 
 	glDeleteShader(vertShader);
@@ -198,7 +199,6 @@ void m_menuLoop(menu *menu) {
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	wip_sleep(0.01);
 	drawMenu(*menu, selected, NULL);
 }
 
@@ -220,7 +220,7 @@ void p_menuLoop(menu *menu) {
 	drawMenu(*menu, selected, NULL);
 }
 
-void wip_renderThread(void) {
+void wip_gameLoop(void) {
 	glClearColor(0.8f, 0.9f, 1.0f, 1.0f);
 
 	initGameLoop();

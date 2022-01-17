@@ -3,8 +3,6 @@
 
 // Functions
 
-#define _POSIX_C_SOURCE 199309L
-
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
@@ -87,6 +85,13 @@ void wip_log(enum wip_logType type, const char *message, ...) {
 	return;
 }
 
+FILE *wip_openFile(const char *name) {
+	FILE *file = fopen(name, "r+");
+	if(!file) wip_log(WIP_ERROR, "%s: Couldn't open %s: %s", __func__, name, strerror(errno));
+	return file;
+}
+
+/*
 void wip_sleep(double seconds) {
 	double intpart;
 	struct timespec time;
@@ -97,12 +102,7 @@ void wip_sleep(double seconds) {
 	if(nanosleep(&time, NULL)) wip_log(WIP_ERROR, "%s: interupted.", __func__);
 	return;
 }
-
-FILE *wip_openFile(const char *name) {
-	FILE *file = fopen(name, "r+");
-	if(!file) wip_log(WIP_ERROR, "%s: Couldn't open %s: %s", __func__, name, strerror(errno));
-	return file;
-}
+*/
 
 /*
 char *wip_readFile(void* file) {

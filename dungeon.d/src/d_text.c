@@ -13,8 +13,8 @@
 #include "wip_img.h"
 #include "wip_conf.h"
 
-extern const char text_vert[];
-extern const char text_frag[];
+extern const char _binary_text_vert_start[];
+extern const char _binary_text_frag_start[];
 
 void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned int oy, float scale) {
 	// TODO: you're leaking memory here by allocating the model and losing the pointer...
@@ -29,8 +29,8 @@ void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned 
 	if(!model) {
 		model = wip_openModel("char");
 		texture = wip_openTexture("font");
-		GLuint textVert = wip_loadShader(text_vert, GL_VERTEX_SHADER);
-		GLuint textFrag = wip_loadShader(text_frag, GL_FRAGMENT_SHADER);
+		GLuint textVert = wip_loadShader(_binary_text_vert_start, GL_VERTEX_SHADER);
+		GLuint textFrag = wip_loadShader(_binary_text_frag_start, GL_FRAGMENT_SHADER);
 		textProgram = wip_loadProgram(textVert, textFrag);
 		glDeleteShader(textVert);
 		glDeleteShader(textFrag);

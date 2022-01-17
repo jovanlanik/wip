@@ -8,12 +8,12 @@
 #include "external/glad/glad.h"
 
 #ifdef NDEBUG
-#define wip_glError(...) /* nothing */
+#define wip_printGlErrors(...) /* nothing */
 #else
-#define wip_glError() _wip_glError(__func__)
+#define wip_printGlErrors() _wip_glError(__func__)
 #endif
-void _wip_glError(const char *func);
-void wip_glInit(void);
+void _wip_printGlErrors(const char *func);
+void wip_initGl(void);
 GLuint wip_loadShader(const GLchar *source, GLenum type);
 GLuint wip_loadProgram(GLuint vert, GLuint frag);
 

@@ -5,8 +5,5 @@
 
 #pragma once
 
-#define WIP_TICKRATE 64
-
-void wip_renderThread(void);
-void wip_logicThread(void);
+void wip_gameLoop(void);
 
