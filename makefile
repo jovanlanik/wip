@@ -48,15 +48,13 @@ ifeq '$(NDEBUG)' '1'
 else
     CFLAGS += -g -pg
     LDFLAGS += -pg
-    TRASH += gmon.out
 endif
 
 .PHONY: all clean
 
 all: $(NAME)
 clean:
-	@rm $(TRASH) | true
-	@rm -r $(BUILDDIR) | true
+	rm -r $(BUILDDIR)
 $(NAME): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 $(BUILDDIR)/%.o: %.c
