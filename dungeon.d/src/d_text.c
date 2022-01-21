@@ -75,17 +75,13 @@ void drawStr(unsigned int x, unsigned int y, float scale, char *str) {
 }
 
 void drawFormatStr(unsigned int x, unsigned int y, float scale, char *format, ...) {
-	size_t len = 2*strlen(format);
-	char *str = wip_alloc(len);
 	va_list args;
 	va_start(args, format);
-	int n = vsnprintf(str, len, format, args);
-	if(n > len-1) {
-		va_end(args);
-		va_start(args, format);
-		wip_realloc(str, n+1, NULL);
-		vsnprintf(str, n+1, format, args);
-	}
+	int n = vsnprintf(NULL, 0, format, args);
+	va_end(args);
+	va_start(args, format);
+	char *str = wip_alloc(n+1);
+	vsnprintf(str, n+1, format, args);
 	va_end(args);
 	drawStr(x, y, scale, str);
 	wip_free(str);
