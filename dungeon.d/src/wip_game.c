@@ -114,6 +114,7 @@ void gameLoop(void) {
 	}
 	if(wip_readMotion(RIGHT)) currentState.player.d++;
 	if(wip_readMotion(LEFT)) currentState.player.d--;
+	if(currentState.player.d < 0) currentState.player.d = 3;
 	currentState.player.d %= 4;
 
 	center.x = 2*currentState.player.x;
