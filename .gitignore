@@ -1,12 +1,9 @@
 /build/
 /.cache/
 /demo
-/nodeath
-/starfield
 /dungeon
 /gmon.out
 /mkconf.mk
-/include/baked/*.h
 compile_flags.txt
 compile_commands.json
 *.vert.h
