@@ -19,7 +19,8 @@ else
     LIBS += sdl2
 endif
 
-SRC = $(wildcard src/*.c src/external/*.c $(NAME).d/src/*.c) src/optional/wip_window_$(WINDOW_BACKEND).c
+SRC = $(filter-out src/wip_sad.c, $(wildcard src/*.c src/external/*.c $(NAME).d/src/*.c)) \
+      src/optional/wip_window_$(WINDOW_BACKEND).c
 GLSL_VERT = $(wildcard glsl/*.vert $(NAME).d/glsl/*.vert)
 GLSL_FRAG = $(wildcard glsl/*.frag $(NAME).d/glsl/*.frag)
 RES_CONF = res/conf/$(NAME).conf
@@ -32,7 +33,7 @@ OBJ = $(addprefix $(BUILDDIR)/, \
 
 CFLAGS += -pipe -std=c11 -DWIP_NAME=$(NAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND) $(shell pkg-config --cflags $(LIBS))
 
-CFLAGS_SRC = $(CFLAGS) -Wall -Wpedantic -I ./ -I include -I $(NAME).d/include
+CFLAGS_SRC = $(CFLAGS) -Wall -Wpedantic -I include -I $(NAME).d/include
 CFLAGS_EXT = $(CFLAGS) -I include/external
 
 LDFLAGS += -ldl -lm $(shell pkg-config --libs $(LIBS))
