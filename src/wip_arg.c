@@ -7,7 +7,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <getopt.h>
+#endif
 
 #include "wip_fn.h"
 
@@ -39,6 +41,9 @@ void wip_showHelp(char *name) {
 	return;
 }
 
+#ifdef _WIN32
+char *wip_parseOptions(int argc, char *argv[]) { if(argc-1) wip_log(WIP_WARN, "%s: Command-line arguments not supported under Windows.", __func__); return NULL; }
+#else
 char *wip_parseOptions(int argc, char *argv[]) {
 	char opt = 0;
 	static struct option options[] = {
@@ -66,4 +71,5 @@ char *wip_parseOptions(int argc, char *argv[]) {
 	}
 	return NULL;
 }
+#endif
 

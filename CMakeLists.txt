@@ -39,7 +39,7 @@ elseif(WINDOW_BACKEND STREQUAL "sdl2")
 	target_link_libraries(${GAME} PUBLIC SDL2::SDL2)
 endif()
 
-find_package(libconfig)
+find_package(libconfig QUIET)
 if(LIBCONFIG_FOUND)
 	target_include_directories(${GAME} PUBLIC ${LIBCONFIG_INCLUDE_DIRS})
 	target_link_libraries(${GAME} PUBLIC ${LIBCONFIG_LIBRARIES})

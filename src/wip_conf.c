@@ -3,11 +3,15 @@
 
 // Configuration Functions
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <unistd.h>
 #include <pwd.h>
+#endif
 #include <libconfig.h>
 
 #include "wip_fn.h"
@@ -41,6 +45,11 @@ int wip_setConf##name(const char *path, type val) { \
 WIP_CONF_TYPE_LIST
 #undef CONF_TYPE
 
+#define _STR(x) __STR(x)
+#define __STR(x) #x
+#ifdef _WIN32
+char *wip_getConfPath(void) { return strdup("./res/conf/"_STR(WIP_NAME)".conf"); }
+#else
 char *wip_getConfPath(void) {
 	char *config = getenv("XDG_CONFIG_HOME");
 	if(config != NULL && *config != '\0') {
@@ -77,11 +86,7 @@ char *wip_getConfPath(void) {
 		strcat(c, dirname);
 		config = c;
 	}
-#define _STR(x) __STR(x)
-#define __STR(x) #x
 	char filename[] = "/wip/"_STR(WIP_NAME)".conf";
-#undef __STR
-#undef _STR
 	int ret;
 	char *c = wip_realloc(config, strlen(config)+sizeof(filename), &ret);
 	if(!ret) return NULL;
@@ -90,6 +95,9 @@ char *wip_getConfPath(void) {
 	config = c;
 	return config;
 }
+#endif
+#undef __STR
+#undef _STR
 
 void wip_initConf(void) {
 	config_init(&wip_globalConf);
