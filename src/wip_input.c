@@ -43,10 +43,12 @@ int wip_writeMotion(wip_key_t key) {
 	if(key.key == WIP_LOCKED) return 1;
 	wip_motion_t *motion = wip_globalKey[key.key];
 	if(!motion) return 0;
-	//wip_debug(WIP_INFO, "%s: Motion %s (%d) from key %s (%d).", __func__,
-	//	wip_globalMotionName[motion->motion], motion->motion
-	//	wip_globalKeyName[key.key], key.key
-	//	);
+	/*
+	wip_debug(WIP_INFO, "%s: Motion %s (%d) from key %s (%d).", __func__,
+		wip_globalMotionName[motion->motion], motion->motion
+		wip_globalKeyName[key.key], key.key
+		);
+	*/
 	switch(motion->type) {
 		case WIP_HOLD:
 			if(key.action == WIP_RELEASE) motion->state = 0;

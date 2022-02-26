@@ -14,7 +14,7 @@
 
 wip_window_t wip_globalWindow;
 
-int unifyKey(int key) {
+static int unifyKey(int key) {
 	switch(key) {
 		case GLFW_KEY_UNKNOWN: return WIP_UNKNOWN;
 		case GLFW_KEY_NUM_LOCK: return WIP_KP_NUM_LOCK;
@@ -56,18 +56,18 @@ int unifyKey(int key) {
 	return WIP_UNKNOWN;
 }
 
-void error_callback(int error, const char *message) {
+static void error_callback(int error, const char *message) {
 	wip_log(WIP_ERROR, "GLFW: %s", message);
 	return;
 }
 
-void window_close_callback(GLFWwindow *window) {
+static void window_close_callback(GLFWwindow *window) {
 	wip_debug(WIP_INFO, "GLFW: Close requested by environment...");
 	//glfwSetWindowShouldClose(window, GLFW_FALSE);
 	return;
 }
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	if(action == GLFW_REPEAT) return;
 	wip_key_t nkey = { action == GLFW_PRESS ? WIP_PRESS : WIP_RELEASE, unifyKey(key) };
 	if(!wip_writeKey(nkey)) wip_log(WIP_WARN, "GLFW: Dropped input key.");

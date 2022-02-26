@@ -12,7 +12,7 @@
 
 wip_window_t wip_globalWindow;
 
-int unifyKey(SDL_Keysym key) {
+static int unifyKey(SDL_Keysym key) {
 	switch(key.scancode) {
 		case SDL_SCANCODE_UNKNOWN: return WIP_UNKNOWN;
 		case SDL_SCANCODE_NUMLOCKCLEAR: return WIP_KP_NUM_LOCK;
