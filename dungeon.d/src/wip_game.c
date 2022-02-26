@@ -19,6 +19,7 @@
 #include "wip_input.h"
 #include "wip_gl.h"
 #include "wip_math.h"
+#include "wip_event.h"
 #include "external/linmath.h"
 
 #include "d_state.h"
@@ -48,6 +49,11 @@ unsigned int transformLocation;
 unsigned int normalTransformLocation;
 unsigned int materialLocation;
 double startTime, lastTime;
+wip_event_t cameraEvent;
+enum direction oldDir;
+wip_event_t rotateEvent;
+wip_event_t moveEvent;
+int oldPos[2];
 
 // Runtime
 int started = 0;
@@ -94,35 +100,85 @@ void initGameLoop(void) {
 void newGame(void) {
 	currentState.player.x = 0;
 	currentState.player.y = 0;
-	currentState.player.d = DIR_NORTH;
+	oldPos[0] = 0;
+	oldPos[1] = 0;
+
+	currentState.player.d = DIR_SOUTH;
+	oldDir = currentState.player.d;
 
 	if(currentRoom) wip_free(currentRoom);
 	currentRoom = testRoom();
 	//readDungeon(&d, "./dungeon.d/example.df");
+	
+	wip_startEvent(&cameraEvent, 0.5);
+	wip_startEvent(&rotateEvent, 0.5);
+	wip_startEvent(&moveEvent, 0.25);
 
 	return;
 }
 
 void gameLoop(void) {
-	if(wip_readMotion(UP)) {
-		currentState.player.x += abs((int)currentState.player.d%4-2)-1;
-		currentState.player.y += abs((int)currentState.player.d+1%4-2)-1;
+	if(!wip_eventRemainder(&moveEvent)) {
+		if(wip_readMotion(UP)) {
+			wip_startEvent(&moveEvent, 0.25);
+			oldPos[0] = currentState.player.x;
+			oldPos[1] = currentState.player.y;
+			currentState.player.x += abs((int)currentState.player.d%4-2)-1;
+			currentState.player.y += abs((int)currentState.player.d+1%4-2)-1;
+		}
+		if(wip_readMotion(DOWN)) {
+			wip_startEvent(&moveEvent, 0.25);
+			oldPos[0] = currentState.player.x;
+			oldPos[1] = currentState.player.y;
+			currentState.player.x -= abs((int)currentState.player.d%4-2)-1;
+			currentState.player.y -= abs((int)currentState.player.d+1%4-2)-1;
+		}
 	}
-	if(wip_readMotion(DOWN)) {
-		currentState.player.x -= abs((int)currentState.player.d%4-2)-1;
-		currentState.player.y -= abs((int)currentState.player.d+1%4-2)-1;
+	if(!wip_eventRemainder(&rotateEvent)) {
+		if(wip_readMotion(RIGHT)) { 
+			wip_startEvent(&rotateEvent, 0.5);
+			oldDir = currentState.player.d;
+			currentState.player.d++;
+		}
+		if(wip_readMotion(LEFT)) {
+			wip_startEvent(&rotateEvent, 0.5);
+			oldDir = currentState.player.d;
+			currentState.player.d--;
+		}
 	}
-	if(wip_readMotion(RIGHT)) currentState.player.d++;
-	if(wip_readMotion(LEFT)) currentState.player.d--;
 	if(currentState.player.d < 0) currentState.player.d = 3;
 	currentState.player.d %= 4;
 
-	center.x = 2*currentState.player.x;
-	center.y = 2*currentState.player.y;
-	camera.x = center.x - abs((int)currentState.player.d%4-2)+1;
-	camera.y = center.y - abs((int)currentState.player.d+1%4-2)+1;
+	center.x = wip_interpolate(2*currentState.player.x, 2*oldPos[0], wip_eventPart(&moveEvent, wip_easeInOut));
+	center.y = wip_interpolate(2*currentState.player.y, 2*oldPos[1], wip_eventPart(&moveEvent, wip_easeInOut));
+	camera.x = 0;
+	camera.y = -1;
 
-	quat_rotate(camera.rotation, -TO_RAD(90*(currentState.player.d+1)), (float[]){0, 0, 1});
+	// TODO: clean this up...
+	float angle, oldAngle;
+	if(currentState.player.d == 0 && oldDir == 3) {
+		angle = TO_RAD(-90.0 * (currentState.player.d + 1));
+		oldAngle = TO_RAD(360.0 - 90.0 * (oldDir + 1));
+	}
+	else if(currentState.player.d == 3 && oldDir == 0) {
+		angle = TO_RAD(360.0 - 90.0 * (currentState.player.d + 1));
+		oldAngle = TO_RAD(-90.0 * (oldDir + 1));
+	}
+	else {
+		angle = TO_RAD(-90.0 * (currentState.player.d + 1));
+		oldAngle = TO_RAD(-90.0 * (oldDir + 1));
+	}
+
+	quat_rotate(camera.rotation,
+		wip_interpolate(angle, oldAngle, wip_eventPart(&rotateEvent, wip_easeInOut)),
+		(float[]){0, 0, 1}
+	);
+
+	vec3 camOld;
+	quat_mul_vec3(camOld, camera.rotation, camera.position);
+	vec3_add(camera.position, camOld, center.position);
+
+	camera.z = wip_eventPart(&cameraEvent, wip_easeInOut);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
