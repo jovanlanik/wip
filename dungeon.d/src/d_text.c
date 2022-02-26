@@ -17,7 +17,6 @@ extern const char _binary_text_vert_start[];
 extern const char _binary_text_frag_start[];
 
 void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned int oy, float scale) {
-	// TODO: you're leaking memory here by allocating the model and losing the pointer...
 	static wip_glmdl_t *model = NULL;
 	static GLuint texture;
 	static unsigned int cLocation;
