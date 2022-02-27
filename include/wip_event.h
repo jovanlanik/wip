@@ -16,7 +16,11 @@ typedef struct {
 
 wip_event_t *wip_startEvent(wip_event_t *event, double len);
 
-static inline double wip_interpolate(double start, double end, double part) { return part * (end - start) + start; }
+static inline double wip_interpolate(double start, double end, double part) {
+	if(part <= 0.0) return start;
+	if(part >= 1.0) return end;
+	return part * (end - start) + start;
+}
 
 static inline double wip_easeLinear(double val) { return val; }
 static inline double wip_easeIn(double val) { return val * val; }
@@ -25,7 +29,7 @@ static inline double wip_easeInOut(double val) { return wip_interpolate(wip_ease
 
 static inline double wip_eventRemainder(wip_event_t *event) {
 	double val =  event->length + event->start - wip_timeWindow();
-	return val < 0 ? 0 : val;
+	return val < 0.0 ? 0.0 : val;
 }
 
 static inline double wip_eventPart(wip_event_t *event, wip_easing_t fn) {
