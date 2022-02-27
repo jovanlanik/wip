@@ -7,7 +7,7 @@ include mkconf.mk
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
-NAME ?= demo
+GAME ?= dungeon
 BUILDDIR ?= build
 WINDOW_BACKEND ?= glfw
 
@@ -19,11 +19,11 @@ else
     LIBS += sdl2
 endif
 
-SRC = $(filter-out src/wip_sad.c, $(wildcard src/*.c src/external/*.c $(NAME).d/src/*.c)) \
+SRC = $(filter-out src/wip_sad.c, $(wildcard src/*.c src/external/*.c $(GAME).d/src/*.c)) \
       src/optional/wip_window_$(WINDOW_BACKEND).c
-GLSL_VERT = $(wildcard glsl/*.vert $(NAME).d/glsl/*.vert)
-GLSL_FRAG = $(wildcard glsl/*.frag $(NAME).d/glsl/*.frag)
-RES_CONF = res/conf/$(NAME).conf
+GLSL_VERT = $(wildcard glsl/*.vert $(GAME).d/glsl/*.vert)
+GLSL_FRAG = $(wildcard glsl/*.frag $(GAME).d/glsl/*.frag)
+RES_CONF = res/conf/$(GAME).conf
 OBJ = $(addprefix $(BUILDDIR)/, \
       $(SRC:%.c=%.o) \
       $(GLSL_VERT:%.vert=%.vert.o) \
@@ -31,9 +31,9 @@ OBJ = $(addprefix $(BUILDDIR)/, \
       $(RES_CONF:%.conf=%.conf.o) \
       )
 
-CFLAGS += -pipe -std=c11 -DWIP_NAME=$(NAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND) $(shell pkg-config --cflags $(LIBS))
+CFLAGS += -pipe -std=c11 -DWIP_GAME=$(GAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND) $(shell pkg-config --cflags $(LIBS))
 
-CFLAGS_SRC = $(CFLAGS) -Wall -Wpedantic -I include -I $(NAME).d/include
+CFLAGS_SRC = $(CFLAGS) -Wall -Wpedantic -I include -I $(GAME).d/include
 CFLAGS_EXT = $(CFLAGS) -I include/external
 
 LDFLAGS += -ldl -lm $(shell pkg-config --libs $(LIBS))
@@ -53,10 +53,10 @@ endif
 
 .PHONY: all clean
 
-all: $(NAME)
+all: $(GAME)
 clean:
 	rm -r $(BUILDDIR)
-$(NAME): $(OBJ)
+$(GAME): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)

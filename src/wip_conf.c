@@ -48,7 +48,7 @@ WIP_CONF_TYPE_LIST
 #define _STR(x) __STR(x)
 #define __STR(x) #x
 #ifdef _WIN32
-char *wip_getConfPath(void) { return strdup("./res/conf/"_STR(WIP_NAME)".conf"); }
+char *wip_getConfPath(void) { return strdup("./res/conf/"_STR(WIP_GAME)".conf"); }
 #else
 char *wip_getConfPath(void) {
 	char *config = getenv("XDG_CONFIG_HOME");
@@ -86,7 +86,7 @@ char *wip_getConfPath(void) {
 		strcat(c, dirname);
 		config = c;
 	}
-	char filename[] = "/wip/"_STR(WIP_NAME)".conf";
+	char filename[] = "/wip/"_STR(WIP_GAME)".conf";
 	int ret;
 	char *c = wip_realloc(config, strlen(config)+sizeof(filename), &ret);
 	if(!ret) return NULL;

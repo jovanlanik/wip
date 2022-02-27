@@ -7,7 +7,7 @@
 export LC_ALL=C
 
 DEFAULT='CC=gcc
-NAME=demo
+NAME=dungeon
 NDEBUG=0
 WINDOW_BACKEND=glfw
 prefix=/usr/local
@@ -36,10 +36,7 @@ echo "$DEFAULT" | sed 's/^/  /'
 exit 0
 }
 
-error() {
-	echo "$0: $1." >&2
-	exit 1
-}
+error() { echo "$0: $1." >&2; exit 1; }
 
 while getopts ":hqnio:" opt
 do

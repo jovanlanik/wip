@@ -17,7 +17,7 @@
 
 #define _STR(x) __STR(x)
 #define __STR(x) #x
-const char *wip_globalVersion ="WIP "_STR(WIP_NAME)" built with "_STR(WIP_WINDOW_BACKEND)", "__DATE__" at "__TIME__;
+const char *wip_globalVersion ="WIP "_STR(WIP_GAME)" built with "_STR(WIP_WINDOW_BACKEND)", "__DATE__" at "__TIME__;
 #undef __STR
 #undef _STR
 const char *optstr = "-hVu";

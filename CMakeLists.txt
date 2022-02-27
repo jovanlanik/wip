@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-set(GAME "demo" CACHE STRING "Game")
-set_property(CACHE GAME PROPERTY STRINGS "demo" "dungeon")
+set(GAME "dungeon" CACHE STRING "Game")
+set_property(CACHE GAME PROPERTY STRINGS "dungeon")
 
 set(WINDOW_BACKEND "glfw" CACHE STRING "Window backend")
 set_property(CACHE WINDOW_BACKEND PROPERTY STRINGS "glfw" "sdl2")
@@ -51,4 +51,4 @@ endif()
 target_include_directories(external PUBLIC "include/external")
 target_include_directories(${GAME} PUBLIC "include" "include/external" "${GAME}.d/include")
 
-target_compile_definitions(${GAME} PUBLIC WIP_NAME=${GAME} WIP_WINDOW_BACKEND=${WINDOW_BACKEND})
+target_compile_definitions(${GAME} PUBLIC WIP_GAME=${GAME} WIP_WINDOW_BACKEND=${WINDOW_BACKEND})
