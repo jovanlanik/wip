@@ -62,7 +62,7 @@ wip_obj_t center, camera;
 wip_glmdl_t *sword_model;
 wip_glmdl_t *snake_model;
 room_t *currentRoom = NULL;
-//dungeon_t d;
+dungeon_t d;
 wip_globj_t projection;
 
 // Game
@@ -108,7 +108,7 @@ void newGame(void) {
 
 	if(currentRoom) wip_free(currentRoom);
 	currentRoom = testRoom();
-	//readDungeon(&d, "./dungeon.d/example.df");
+	readDungeon(&d, "./dungeon.d/example.df");
 	
 	wip_startEvent(&cameraEvent, 0.5);
 	wip_startEvent(&rotateEvent, 0.5);

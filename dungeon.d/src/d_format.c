@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "wip_fn.h"
 
@@ -39,7 +40,36 @@ room_t *testRoom(void) {
 	return room;
 }
 
-/*
+
+
+#ifdef _WIN32
+int getline(char **lineptr, size_t *n, FILE *stream) {
+	if(!lineptr || !n || !stream) {
+		errno = EINVAL;
+		return -1;
+	}
+	if(!*lineptr) *lineptr = malloc(*n = 128);
+	int j = 0;
+	while(1) {
+		while(j < *n-1) {
+			char c = fgetc(stream);
+			if(c == EOF) return -1;
+			(*lineptr)[j] = c;
+			if(c == '\n') {
+				(*lineptr)[j+1] = '\0';
+				return j;
+			}
+			j++;
+		}
+		*n = *n * 2;
+		wip_debug(WIP_INFO, "%s: Reallocating buffer to %d bytes.", __func__, *n);
+		int ret = 0;
+		*lineptr = wip_realloc(*lineptr, *n, &ret);
+		if(!ret) return -1;
+	}
+}
+#endif
+
 int readDungeon(dungeon_t *dungeon, const char *filename) {
 	wip_debug(WIP_INFO, "%s: Loading dungeon from %s...", __func__, filename);
 	dungeon->room_c = 0;
@@ -50,17 +80,15 @@ int readDungeon(dungeon_t *dungeon, const char *filename) {
 
 	char *line = NULL;
 	size_t len;
-	ssize_t read;
+	int read;
 	FILE *file = wip_openFile(filename);
 	while((read = getline(&line, &len, file)) != -1) {
 		if(line[0] == '#') continue;
 		const char search[] = " \t\n";
-*/
 		/*
 			Who knew that C had a function for splitting strings into tokens?
 			Only took misspeling `man strtol` as `man strtok` to find out...
 		*/
-/*
 		for(char *word = strtok(line, search); word != NULL; word = strtok(NULL, search)) {
 			token = wip_realloc(token, (token_c+1)*sizeof(void *), NULL);
 			token[token_c] = strdup(word);
@@ -107,5 +135,4 @@ int readDungeon(dungeon_t *dungeon, const char *filename) {
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return 0;
 }
-*/
 
