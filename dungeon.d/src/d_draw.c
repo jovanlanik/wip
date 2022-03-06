@@ -60,14 +60,23 @@ void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t 
 }
 
 void drawRoom(room_t *room, wip_globj_t pv) {
-	for(int i = 0; i < room->width; ++i) {
-		for(int n = 0; n < room->height; ++n) {
-			wip_obj_t obj;
-			wip_makeObject(&obj);
-			obj.x = 2*i - 10;
-			obj.y = 2*n - 10;
-			if(*room->deco[i][n] == DECO_MODEL)
-				drawModel(&obj, ((struct deco_model*)room->deco[i][n])->model, pv, NULL);
+	static int init = 0;
+	static wip_obj_t obj;
+	if(!init) wip_makeObject(&obj);
+	unsigned int w = room->width;
+	for(int layer = 0; layer < room->deco_c; ++layer) {
+		for(int y = 0; y < room->height; ++y) {
+			for(int x = 0; x < room->width; ++x) {
+				obj.x = 2*x - 10;
+				obj.y = 2*y - 10;
+				if(*(room->deco[layer][w*y+x]) == DECO_MODEL)
+					drawModel(
+						&obj,
+						((struct deco_model*)room->deco[layer][w*y+x])->model,
+						pv,
+						NULL
+					);
+			}
 		}
 	}
 	return;

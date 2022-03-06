@@ -55,6 +55,7 @@ struct deco_room {
 
 typedef struct {
 	unsigned int width, height;
+	unsigned int deco_c;
 	tile_t ***tile;
 	deco_t ***deco;
 } room_t;

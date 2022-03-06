@@ -21,21 +21,23 @@ room_t *testRoom(void) {
 	room->width = 10;
 	room->height = 10;
 	room->tile = NULL;
-	room->deco = wip_alloc(sizeof(deco_t**[10]));
-	for(int i = 0; i < 10; ++i) {
-		room->deco[i] = wip_alloc(sizeof(deco_t*[10]));
-		for(int n = 0; n < 10; ++n) {
-			if(i % 9 == 0 || n % 9 == 0) {
-				room->deco[i][n] = wip_alloc(sizeof(struct deco_model));
-				((struct deco_model *)room->deco[i][n])->type = DECO_MODEL;
-				((struct deco_model *)room->deco[i][n])->model = wall_model;
+	room->deco_c = 1;
+	room->deco = wip_alloc(sizeof(deco_t**));
+	room->deco[0] = wip_alloc(sizeof(deco_t*[10*10]));
+	for(int y = 0; y < 10; ++y) {
+		for(int x = 0; x < 10; ++x) {
+			if(y % 9 == 0 || x % 9 == 0) {
+				room->deco[0][10*y+x] = wip_alloc(sizeof(struct deco_model));
+				((struct deco_model *)room->deco[0][10*y+x])->type = DECO_MODEL;
+				((struct deco_model *)room->deco[0][10*y+x])->model = wall_model;
 			}
 			else {
-				room->deco[i][n] = wip_alloc(sizeof(struct deco_model));
-				((struct deco_model *)room->deco[i][n])->type = DECO_MODEL;
-				((struct deco_model *)room->deco[i][n])->model = floor_model;
+				room->deco[0][10*y+x] = wip_alloc(sizeof(struct deco_model));
+				((struct deco_model *)room->deco[0][10*y+x])->type = DECO_MODEL;
+				((struct deco_model *)room->deco[0][10*y+x])->model = floor_model;
 			}
 		}
+		printf("\n");
 	}
 	return room;
 }
@@ -43,23 +45,23 @@ room_t *testRoom(void) {
 
 
 #ifdef _WIN32
-int getline(char **lineptr, size_t *n, FILE *stream) {
+static int getline(char **lineptr, size_t *n, FILE *stream) {
 	if(!lineptr || !n || !stream) {
 		errno = EINVAL;
 		return -1;
 	}
 	if(!*lineptr) *lineptr = malloc(*n = 128);
-	int j = 0;
+	int read = 0;
 	while(1) {
-		while(j < *n-1) {
+		while(read < *n-1) {
 			char c = fgetc(stream);
 			if(c == EOF) return -1;
-			(*lineptr)[j] = c;
+			(*lineptr)[read] = c;
 			if(c == '\n') {
-				(*lineptr)[j+1] = '\0';
-				return j;
+				(*lineptr)[read+1] = '\0';
+				return read;
 			}
-			j++;
+			read++;
 		}
 		*n = *n * 2;
 		wip_debug(WIP_INFO, "%s: Reallocating buffer to %d bytes.", __func__, *n);

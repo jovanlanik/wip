@@ -108,7 +108,7 @@ void newGame(void) {
 
 	if(currentRoom) wip_free(currentRoom);
 	currentRoom = testRoom();
-	readDungeon(&d, "./dungeon.d/example.df");
+	//readDungeon(&d, "./dungeon.d/example.df");
 	
 	wip_startEvent(&cameraEvent, 0.5);
 	wip_startEvent(&rotateEvent, 0.5);
