@@ -10,54 +10,28 @@
 #include "dungeon.h"
 
 enum tile {
-	TILE_WALL,
 	TILE_FLOOR,
+	TILE_WALL,
 	TILE_DOOR,
-	TILE_GATE
+	TILE_GATE,
 };
 
-typedef enum tile tile_t;
+typedef struct {
+	enum tile type;
+	unsigned int id;
+	void *data;
+} tile_t;
 
-struct tile_wall { tile_t type; };
-struct tile_floor { tile_t type; };
-
-struct tile_door {
-	tile_t type;
-	int key_id;
-};
-
-struct tile_gate {
-	tile_t type;
-	unsigned int key_id, room_id;
-};
-
-enum deco {
-	DECO_NONE,
-	DECO_MODEL,
-	DECO_ROOM,
-};
-
-typedef enum deco deco_t;
-
-struct deco_none { deco_t type; };
-
-struct deco_model {
-	deco_t type;
+typedef struct {
 	enum direction dir;
-	// TODO: is glmdl realy the type to be used?
 	wip_glmdl_t *model;
-};
-
-struct deco_room {
-	deco_t type;
-	// TODO: room deco struct definition
-};
+} deco_t;
 
 typedef struct {
 	unsigned int width, height;
 	unsigned int deco_c;
-	tile_t ***tile;
-	deco_t ***deco;
+	tile_t *tile;
+	deco_t **deco;
 } room_t;
 
 typedef struct {
@@ -65,6 +39,5 @@ typedef struct {
 	room_t *room;
 } dungeon_t;
 
-room_t *testRoom(void);
 int readDungeon(dungeon_t *dungeon, const char *filename);
 //freeDungeon(dungeon_t *dungeon);

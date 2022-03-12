@@ -14,36 +14,6 @@
 
 #include "d_format.h"
 
-room_t *testRoom(void) {
-	wip_glmdl_t *wall_model = wip_openModel("d_wall");
-	wip_glmdl_t *floor_model = wip_openModel("d_floor");
-	room_t *room = wip_alloc(sizeof(room_t));
-	room->width = 10;
-	room->height = 10;
-	room->tile = NULL;
-	room->deco_c = 1;
-	room->deco = wip_alloc(sizeof(deco_t**));
-	room->deco[0] = wip_alloc(sizeof(deco_t*[10*10]));
-	for(int y = 0; y < 10; ++y) {
-		for(int x = 0; x < 10; ++x) {
-			if(y % 9 == 0 || x % 9 == 0) {
-				room->deco[0][10*y+x] = wip_alloc(sizeof(struct deco_model));
-				((struct deco_model *)room->deco[0][10*y+x])->type = DECO_MODEL;
-				((struct deco_model *)room->deco[0][10*y+x])->model = wall_model;
-			}
-			else {
-				room->deco[0][10*y+x] = wip_alloc(sizeof(struct deco_model));
-				((struct deco_model *)room->deco[0][10*y+x])->type = DECO_MODEL;
-				((struct deco_model *)room->deco[0][10*y+x])->model = floor_model;
-			}
-		}
-		printf("\n");
-	}
-	return room;
-}
-
-
-
 #ifdef _WIN32
 static int getline(char **lineptr, size_t *n, FILE *stream) {
 	if(!lineptr || !n || !stream) {
@@ -72,27 +42,110 @@ static int getline(char **lineptr, size_t *n, FILE *stream) {
 }
 #endif
 
+// TODO: Door and Gate models
+// TODO: Custom tile types (using lua?)
+static int readRoom(char **token, room_t *room) {
+	static int init = 0;
+	static wip_glmdl_t *floor_model;
+	static wip_glmdl_t *wall_model;
+	static wip_glmdl_t *door_model;
+	if(!init) {
+		floor_model = wip_openModel("d_floor");
+		wall_model = wip_openModel("d_wall");
+		door_model = wip_openModel("d_door");
+	}
+
+	int i;
+	for(i = 0; i < room->width * room->height; ++i) {
+		switch(token[i][0]) {
+			case '-':
+				room->tile[i].type = TILE_FLOOR;
+				room->deco[0][i].model = floor_model;
+				break;
+			case '#':
+				room->tile[i].type = TILE_WALL;
+				room->deco[0][i].model = wall_model;
+				break;
+			case 'D':
+				room->tile[i].type = TILE_DOOR;
+				room->deco[0][i].model = door_model;
+				if(wip_atoui(&token[i][1], &room->tile[i].id)) {
+					wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected key id (uint).", __func__, &token[i][1]);
+					return -1;
+				}
+				break;
+			case 'G':
+				room->tile[i].type = TILE_GATE;
+				room->deco[0][i].model = floor_model;
+				if(wip_atoui(&token[i][1], &room->tile[i].id)) {
+					wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, &token[i][1]);
+					return -1;
+				}
+				break;
+			default:
+				wip_log(WIP_ERROR, "%s: Unknown tile: %s.", __func__, token[i]);
+				return -1;
+		}
+	}
+	return i;
+}
+
+// TODO: Custom models
+static int readDeco(char **token, room_t *room, unsigned int layer) {
+	static int init = 0;
+	static wip_glmdl_t *floor_model;
+	static wip_glmdl_t *wall_model;
+	if(!init) {
+		floor_model = wip_openModel("d_floor");
+		wall_model = wip_openModel("d_wall");
+	}
+
+	int i;
+	for(i = 0; i < room->width * room->height; ++i) {
+		switch(token[i][0]) {
+			case '=':
+				if(layer == 0) break;
+			case '.':
+				room->deco[layer][i].model = NULL;
+				break;
+			case '-':
+				room->deco[layer][i].model = floor_model;
+				break;
+			case '#':
+				room->deco[layer][i].model = wall_model;
+				break;
+			default:
+				wip_log(WIP_ERROR, "%s: Unknown tile: %s.", __func__, token[i]);
+				return -1;
+		}
+	}
+	return i;
+}
+
 int readDungeon(dungeon_t *dungeon, const char *filename) {
 	wip_debug(WIP_INFO, "%s: Loading dungeon from %s...", __func__, filename);
-	dungeon->room_c = 0;
-	dungeon->room = NULL;
 
+	size_t size = 128;
 	int token_c = 0;
-	char **token = wip_alloc(sizeof(void *));
+	char **token = wip_alloc(sizeof(void *) * size);
 
 	char *line = NULL;
 	size_t len;
 	int read;
 	FILE *file = wip_openFile(filename);
 	while((read = getline(&line, &len, file)) != -1) {
-		if(line[0] == '#') continue;
+		if(line[0] == '!') continue;
 		const char search[] = " \t\n";
 		/*
 			Who knew that C had a function for splitting strings into tokens?
 			Only took misspeling `man strtol` as `man strtok` to find out...
 		*/
 		for(char *word = strtok(line, search); word != NULL; word = strtok(NULL, search)) {
-			token = wip_realloc(token, (token_c+1)*sizeof(void *), NULL);
+			if(token_c > size) {
+				size *= 2;
+				token = wip_realloc(token, sizeof(void *) * size, NULL);
+				wip_debug(WIP_INFO, "%s: Reallocating buffer to %d bytes.", __func__, size);
+			}
 			token[token_c] = strdup(word);
 			token_c++;
 		}
@@ -100,36 +153,90 @@ int readDungeon(dungeon_t *dungeon, const char *filename) {
 	wip_free(line);
 	wip_debug(WIP_INFO, "%s: Found %d tokens in dungeon file.", __func__, token_c);
 
+	dungeon->room_c = 0;
+	dungeon->room = NULL;
+
 	for(int i = 0; i < token_c; ++i) {
 		if(strcmp("room", token[i]) == 0) {
 			unsigned int id;
 			if(wip_atoui(token[i+1], &id)) {
-				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected uint.", __func__, token[i+1]);
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
 				return 1;
 			}
-
 			if(id >= dungeon->room_c) {
-				dungeon->room_c = id;
-				dungeon->room = wip_realloc(dungeon->room, (id+1)*sizeof(room_t), NULL);
+				dungeon->room_c = id+1;
+				dungeon->room = wip_realloc(dungeon->room, sizeof(room_t) * dungeon->room_c, NULL);
+				dungeon->room[id].deco_c = 1;
+				dungeon->room[id].deco = wip_alloc(sizeof(deco_t*));
+				dungeon->room[id].deco[0] = NULL;
 			}
+			wip_debug(WIP_INFO, "%s: Found room with id %d.", __func__, id);
+			i += 4;
+		} else if(strcmp("deco", token[i]) == 0) {
+			unsigned int id, layer;
+			if(wip_atoui(token[i+1], &id)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
+				return 1;
+			}
+			if(id >= dungeon->room_c) {
+				dungeon->room_c = id+1;
+				dungeon->room = wip_realloc(dungeon->room, sizeof(room_t) * dungeon->room_c, NULL);
+				dungeon->room[id].deco_c = 1;
+				dungeon->room[id].deco = wip_alloc(sizeof(deco_t*));
+				dungeon->room[id].deco[0] = NULL;
+			}
+			if(wip_atoui(token[i+2], &layer)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
+			}
+			if(layer >= dungeon->room[id].deco_c) {
+				dungeon->room[id].deco_c = layer+1;
+				dungeon->room[id].deco = wip_realloc(dungeon->room[id].deco, sizeof(deco_t*) * dungeon->room[id].deco_c, NULL);
+				dungeon->room[id].deco[layer] = NULL;
+			}
+			wip_debug(WIP_INFO, "%s: Found deco for room %d, layer %d.", __func__, id, layer);
+			i += 3;
+		}
+	}
 
+	for(int i = 0; i < token_c; ++i) {
+		if(strcmp("room", token[i]) == 0) {
+			unsigned int id;
+			if(wip_atoui(token[i+1], &id)) return 1;
 			if(wip_atoui(token[i+2], &dungeon->room[id].width)) {
-				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected uint.", __func__, token[i+2]);
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected width (uint).", __func__, token[0]);
 				return 1;
 			}
 			if(wip_atoui(token[i+3], &dungeon->room[id].height)) {
-				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected uint.", __func__, token[i+3]);
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected height (uint).", __func__, token[1]);
 				return 1;
 			}
+			i += 4;
 
-			wip_debug(WIP_INFO, "%s: Found room with id %d.", __func__, id);
-			i += 3;
+			dungeon->room[id].tile = wip_alloc(sizeof(tile_t) * dungeon->room[id].width * dungeon->room[id].height);
+			if(dungeon->room[id].deco[0] == NULL)
+				dungeon->room[id].deco[0] = wip_alloc(sizeof(deco_t) * dungeon->room[id].width * dungeon->room[id].height);
+
+			int ret = readRoom(&token[i], &dungeon->room[id]);
+			if(ret == -1) return 1;
+			i += ret-1;
 		}
 		else if(strcmp("deco", token[i]) == 0) {
-			wip_debug(WIP_INFO, "%s: Found deco for room %s, layer %s.", __func__, token[i+1], token[i+2]);
-			i += 2;
+			unsigned int id, layer;
+			if(wip_atoui(token[i+1], &id)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
+				return 1;
+			}
+			if(wip_atoui(token[i+2], &layer)) return 1;
+			i += 3;
+
+			if(dungeon->room[id].deco[layer] == NULL)
+				dungeon->room[id].deco[layer] = wip_alloc(sizeof(deco_t) * dungeon->room[id].width * dungeon->room[id].height);
+
+			int ret = readDeco(&token[i], &dungeon->room[id], layer);
+			if(ret == -1) return 1;
+			i += ret-1;
 		}
-		//else wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);
+		else wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);
 	}
 
 	if(dungeon->room_c == 0)

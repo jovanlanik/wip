@@ -3,7 +3,6 @@
 
 // Functions
 
-#include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
@@ -12,11 +11,8 @@
 
 #include "wip_fn.h"
 
-#ifdef NDEBUG
-void *wip_alloc(size_t size)
-#else
-void *_wip_alloc(size_t size, const char *caller)
-#endif
+#ifndef NDEBUG
+inline void *_wip_alloc(size_t size, const char *caller)
 {
 	//wip_debug(WIP_INFO, "%s: allocating %zu bytes from %s", __func__, size, caller);
 	void *o = malloc(size);
@@ -24,11 +20,12 @@ void *_wip_alloc(size_t size, const char *caller)
 	//else wip_debug(WIP_INFO, "%s: allocated at %p", __func__, o);
 	return o;
 }
+#endif
 
 #ifdef NDEBUG
-void *wip_realloc(void *pointer, size_t size, int *ret)
+inline void *wip_realloc(void *pointer, size_t size, int *ret)
 #else
-void *_wip_realloc(void *pointer, size_t size, int *ret, const char *caller)
+inline void *_wip_realloc(void *pointer, size_t size, int *ret, const char *caller)
 #endif
 {
 	//wip_debug(WIP_INFO, "%s: reallocating %p to %zu bytes from %s", __func__, pointer, size, caller);
@@ -43,16 +40,14 @@ void *_wip_realloc(void *pointer, size_t size, int *ret, const char *caller)
 	return o;
 }
 
-#ifdef NDEBUG
-void wip_free(void *pointer)
-#else
-void _wip_free(void *pointer, const char *caller)
-#endif
+#ifndef NDEBUG
+inline void _wip_free(void *pointer, const char *caller)
 {
 	//wip_debug(WIP_INFO, "%s: freeing %p from %s", __func__, pointer, caller);
 	free(pointer);
 	return;
 }
+#endif
 
 int wip_atoi(char *s, int *i) {
 	char *end = NULL;
@@ -102,21 +97,7 @@ void wip_sleep(double seconds) {
 	if(nanosleep(&time, NULL)) wip_log(WIP_ERROR, "%s: interupted.", __func__);
 	return;
 }
-*/
 
-/*
-char *wip_readFile(void* file) {
-	if(!file) return NULL;
-	fseek(file, 0, SEEK_END);
-	long int size = ftell(file);
-	rewind(file);
-	char *buff = wip_alloc(size+1);
-	fread(buff, 1, size, file);
-	return buff;
-}
-*/
-
-/*
 void *timeoutFunc(void *arg) {
 	wip_timeout_t *timeout = (wip_timeout_t *)arg;
 

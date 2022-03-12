@@ -5,9 +5,11 @@
 
 #include "wip_fn.h"
 #include "wip_img.h"
+#ifndef NDEBUG
 #define STBI_MALLOC(x) wip_alloc(x)
 #define STBI_REALLOC(x, y) wip_realloc(x, y, NULL)
 #define STBI_FREE(x) wip_free(x)
+#endif
 #define STB_IMAGE_IMPLEMENTATION
 #include "external/stb_image.h"
 

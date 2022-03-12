@@ -34,7 +34,6 @@ extern const char _binary_d_texture_frag_start[];
 
 // Engine internal
 const char *wip_defaultConf = _binary_dungeon_conf_start;
-int wip_globalTicksPerSecond;
 // Engine external
 extern int wip_globalKeyLock;
 extern wip_window_t wip_globalWindow;
@@ -107,8 +106,9 @@ void newGame(void) {
 	oldDir = currentState.player.d;
 
 	if(currentRoom) wip_free(currentRoom);
-	currentRoom = testRoom();
-	//readDungeon(&d, "./dungeon.d/example.df");
+	//currentRoom = testRoom();
+	if(readDungeon(&d, "./dungeon.d/example.df") != 0) wip_log(WIP_FATAL, "%s: Couldn't load dungeon.", __func__);
+	currentRoom = &d.room[0];
 	
 	wip_startEvent(&cameraEvent, 0.5);
 	wip_startEvent(&rotateEvent, 0.5);
@@ -155,6 +155,7 @@ void gameLoop(void) {
 	camera.y = -1;
 
 	// TODO: clean this up...
+	// I forgot how I wanted to clean this up...
 	float angle, oldAngle;
 	if(currentState.player.d == 0 && oldDir == 3) {
 		angle = TO_RAD(-90.0 * (currentState.player.d + 1));
@@ -282,9 +283,7 @@ void wip_gameLoop(void) {
 
 	initGameLoop();
 
-	int fpsMax = wip_getConfInt("video.fpsMax");
 	lastTime = wip_timeWindow();
-
 	while(!wip_globalWindow.close) {
 		lastTime = startTime;
 		startTime = wip_timeWindow();
@@ -302,8 +301,7 @@ void wip_gameLoop(void) {
 		} else m_menuLoop(&mainMenu);
 
 		wip_pollWindow();
-		do wip_swapWindow();
-		while(wip_timeWindow() - startTime < 1.0/fpsMax && fpsMax && !wip_globalWindow.close);
+		wip_swapWindow();
 	}
 	return;
 }

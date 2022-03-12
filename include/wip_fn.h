@@ -6,12 +6,13 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef NDEBUG
-#define wip_debug(...) /* nothing */
-void *wip_alloc(size_t);
+#define wip_debug(...)  /* nop */
+#define wip_alloc(p) malloc(p)
 void *wip_realloc(void *, size_t, int*);
-void wip_free(void *);
+#define wip_free(p) free(p)
 #else
 #define wip_debug(...) wip_log(__VA_ARGS__)
 #define wip_alloc(s) _wip_alloc(s, __func__)
@@ -22,8 +23,7 @@ void *_wip_realloc(void *, size_t, int *, const char *);
 void _wip_free(void *, const char *);
 #endif
 
-//#define WIP_ALLOCTYPE(t) wip_alloc(sizeof(t))
-#define wip_print(s) wip_log(WIP_INFO, "%s", s);
+#define wip_print(s) printf("%s\n", s);
 
 enum wip_logType {
 	WIP_INFO,
@@ -44,6 +44,5 @@ int wip_atoui(char *s, unsigned int *i);
 void wip_log(enum wip_logType, const char *m, ...);
 void wip_sleep(double seconds);
 FILE *wip_openFile(const char *n);
-//char *wip_readFile(void *f);
 int *wip_setTimeout(void *(*func)(void *), void *arg, double time);
 

@@ -67,15 +67,11 @@ void drawRoom(room_t *room, wip_globj_t pv) {
 	for(int layer = 0; layer < room->deco_c; ++layer) {
 		for(int y = 0; y < room->height; ++y) {
 			for(int x = 0; x < room->width; ++x) {
-				obj.x = 2*x - 10;
-				obj.y = 2*y - 10;
-				if(*(room->deco[layer][w*y+x]) == DECO_MODEL)
-					drawModel(
-						&obj,
-						((struct deco_model*)room->deco[layer][w*y+x])->model,
-						pv,
-						NULL
-					);
+				if(room->deco[layer][w*y+x].model) {
+					obj.x = 2*x - 10;
+					obj.y = 2*y - 10;
+					drawModel(&obj, room->deco[layer][w*y+x].model, pv, NULL);
+				}
 			}
 		}
 	}
