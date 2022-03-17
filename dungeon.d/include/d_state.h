@@ -14,5 +14,7 @@ typedef struct {
 } player_t;
 
 typedef struct {
+	char *dungeon;
+	unsigned int room;
 	player_t player;
 } state_t;

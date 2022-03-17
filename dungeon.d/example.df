@@ -3,22 +3,30 @@
 
 ! Dungeon format example file
 
+! `model` load a model
+! accepts capital letter and model filename
+model T d_torch
+model S d_snake
+
 ! `room` starts a room definition
 ! accepts room id, width and height
 room 0 5 5
 ! following lines define tiles in the room
 ! whitespace is not ignored
 ! first char of tile is tile type
-! second char is data as an int (usually to change model or texture)
-! in the case of doors, data is the id of the key needed to unlock (0 if unlocked)
-! in the case of gates, data targets room
+! second char is data
+! for doors, data is key id (0 if unlocked)
+! for gates, data is room id
 ## ## ## ## ## 
 ## -- -- -- ## 
 ## -- -- -- D0 
 ## -- -- -- ## 
 ## ## ## ## ## 
 
-! `deco` starts a decoration definition for room id and layer number
+! `player` sets the starting room, pos and dir
+player 0 1 2 >
+
+! `deco` starts a decoration definition for room id and layer
 ! the decoration layers has the same size as the room
 ! the layers are rendered from lowest (0) to hightest
 ! first layer (0) is autofilled from room definition but can be overwritten
@@ -27,14 +35,15 @@ deco 0 0
 ! second char is direction (one letter cardinal, numeric or arrow)
 == == == == ==
 == == == == ==
-== == ## == ==
+== == == == D<
 == == == == ==
 == == == == ==
+
 deco 0 1
 .. .. .. .. ..
-.. .. .S .. ..
+.. .. TS .. ..
 .. .. .. .. ..
-.. .. .N .. ..
+.. .. S> .. ..
 .. .. .. .. ..
 
 room 1 3 3

@@ -6,6 +6,7 @@
 #include "wip_mdl.h"
 #include "wip_obj.h"
 #include "wip_img.h"
+#include "wip_math.h"
 #include "external/glad/glad.h"
 #include "external/linmath.h"
 
@@ -24,7 +25,7 @@ extern float m[3];
 void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t *light) {
 	static int init = 0;
 	static GLuint texture;
-	if(!init) {
+	if(init == 0) {
 		init = 1;
 		texture = wip_openTexture("d_wall");
 	}
@@ -61,16 +62,25 @@ void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t 
 
 void drawRoom(room_t *room, wip_globj_t pv) {
 	static int init = 0;
-	static wip_obj_t obj;
-	if(!init) wip_makeObject(&obj);
+	static wip_obj_t object[4];
+	if(init == 0) {
+		init = 1;
+		for(int i = 0; i < 4; ++i) {
+			wip_makeObject(&object[i]);
+			quat_rotate(object[i].rotation, TO_RAD(i * 90.0), (float[]){0, 0, 1});
+		}
+	}
 	unsigned int w = room->width;
 	for(int layer = 0; layer < room->deco_c; ++layer) {
 		for(int y = 0; y < room->height; ++y) {
 			for(int x = 0; x < room->width; ++x) {
 				if(room->deco[layer][w*y+x].model) {
-					obj.x = 2*x - 10;
-					obj.y = 2*y - 10;
-					drawModel(&obj, room->deco[layer][w*y+x].model, pv, NULL);
+					object[room->deco[layer][w*y+x].dir].x = 2*x;
+					object[room->deco[layer][w*y+x].dir].y = 2*y;
+					drawModel(
+						&object[room->deco[layer][w*y+x].dir],
+						room->deco[layer][w*y+x].model, pv, NULL
+					);
 				}
 			}
 		}

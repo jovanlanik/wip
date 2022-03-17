@@ -8,6 +8,7 @@
 #include "wip_mdl.h"
 
 #include "dungeon.h"
+#include "d_state.h"
 
 enum tile {
 	TILE_FLOOR,
@@ -39,5 +40,5 @@ typedef struct {
 	room_t *room;
 } dungeon_t;
 
-int readDungeon(dungeon_t *dungeon, const char *filename);
+int readDungeon(dungeon_t *dungeon, state_t *state, char *filename);
 //freeDungeon(dungeon_t *dungeon);

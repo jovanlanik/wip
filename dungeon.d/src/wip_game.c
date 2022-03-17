@@ -60,7 +60,6 @@ int paused = 0;
 wip_obj_t center, camera;
 wip_glmdl_t *sword_model;
 wip_glmdl_t *snake_model;
-room_t *currentRoom = NULL;
 dungeon_t d;
 wip_globj_t projection;
 
@@ -97,18 +96,12 @@ void initGameLoop(void) {
 }
 
 void newGame(void) {
-	currentState.player.x = 0;
-	currentState.player.y = 0;
-	oldPos[0] = 0;
-	oldPos[1] = 0;
+	if(readDungeon(&d, &currentState,"./dungeon.d/example.df") != 0)
+		wip_log(WIP_FATAL, "%s: Couldn't load dungeon.", __func__);
 
-	currentState.player.d = DIR_SOUTH;
+	oldPos[0] = currentState.player.x;
+	oldPos[1] = currentState.player.y;
 	oldDir = currentState.player.d;
-
-	if(currentRoom) wip_free(currentRoom);
-	//currentRoom = testRoom();
-	if(readDungeon(&d, "./dungeon.d/example.df") != 0) wip_log(WIP_FATAL, "%s: Couldn't load dungeon.", __func__);
-	currentRoom = &d.room[0];
 	
 	wip_startEvent(&cameraEvent, 0.5);
 	wip_startEvent(&rotateEvent, 0.5);
@@ -123,27 +116,27 @@ void gameLoop(void) {
 			wip_startEvent(&moveEvent, 0.25);
 			oldPos[0] = currentState.player.x;
 			oldPos[1] = currentState.player.y;
-			currentState.player.x += abs((int)currentState.player.d%4-2)-1;
-			currentState.player.y += abs((int)currentState.player.d+1%4-2)-1;
+			currentState.player.y -= abs((int)currentState.player.d - 2) - 1;
+			currentState.player.x -= abs((int)currentState.player.d - 1) - 1;
 		}
 		if(wip_readMotion(DOWN)) {
 			wip_startEvent(&moveEvent, 0.25);
 			oldPos[0] = currentState.player.x;
 			oldPos[1] = currentState.player.y;
-			currentState.player.x -= abs((int)currentState.player.d%4-2)-1;
-			currentState.player.y -= abs((int)currentState.player.d+1%4-2)-1;
+			currentState.player.y += abs((int)currentState.player.d - 2) - 1;
+			currentState.player.x += abs((int)currentState.player.d - 1) - 1;
 		}
 	}
 	if(!wip_eventRemainder(&rotateEvent)) {
 		if(wip_readMotion(RIGHT)) { 
 			wip_startEvent(&rotateEvent, 0.5);
 			oldDir = currentState.player.d;
-			currentState.player.d++;
+			currentState.player.d--;
 		}
 		if(wip_readMotion(LEFT)) {
 			wip_startEvent(&rotateEvent, 0.5);
 			oldDir = currentState.player.d;
-			currentState.player.d--;
+			currentState.player.d++;
 		}
 	}
 	if(currentState.player.d < 0) currentState.player.d = 3;
@@ -154,21 +147,13 @@ void gameLoop(void) {
 	camera.x = 0;
 	camera.y = -1;
 
-	// TODO: clean this up...
-	// I forgot how I wanted to clean this up...
-	float angle, oldAngle;
-	if(currentState.player.d == 0 && oldDir == 3) {
-		angle = TO_RAD(-90.0 * (currentState.player.d + 1));
-		oldAngle = TO_RAD(360.0 - 90.0 * (oldDir + 1));
-	}
-	else if(currentState.player.d == 3 && oldDir == 0) {
-		angle = TO_RAD(360.0 - 90.0 * (currentState.player.d + 1));
-		oldAngle = TO_RAD(-90.0 * (oldDir + 1));
-	}
-	else {
-		angle = TO_RAD(-90.0 * (currentState.player.d + 1));
-		oldAngle = TO_RAD(-90.0 * (oldDir + 1));
-	}
+	float angle = 0.0, oldAngle = 0.0;
+	if(currentState.player.d == 0 && oldDir == 3)
+		angle = TO_RAD(360.0);
+	else if(currentState.player.d == 3 && oldDir == 0)
+		oldAngle = TO_RAD(360.0);
+	angle += TO_RAD(90.0 * (currentState.player.d+2));
+	oldAngle += TO_RAD(90.0 * (oldDir+2));
 
 	quat_rotate(camera.rotation,
 		wip_interpolate(angle, oldAngle, wip_eventPart(&rotateEvent, wip_easeInOut)),
@@ -189,7 +174,7 @@ void gameLoop(void) {
 	mat4x4_mul(pv.m, projection.m, view.m);
 
 	// Render here...
-	drawRoom(currentRoom, pv);
+	drawRoom(&d.room[currentState.room], pv);
 	// Viewmodel
 	glClear(GL_DEPTH_BUFFER_BIT);
 	drawModel(&camera, sword_model, pv, NULL);

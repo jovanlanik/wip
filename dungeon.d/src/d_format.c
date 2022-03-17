@@ -42,18 +42,39 @@ static int getline(char **lineptr, size_t *n, FILE *stream) {
 }
 #endif
 
-// TODO: Door and Gate models
-// TODO: Custom tile types (using lua?)
-static int readRoom(char **token, room_t *room) {
-	static int init = 0;
-	static wip_glmdl_t *floor_model;
-	static wip_glmdl_t *wall_model;
-	static wip_glmdl_t *door_model;
-	if(!init) {
+static const enum direction direction_map[] = {
+	['0'] = DIR_NORTH,
+	['1'] = DIR_EAST,
+	['2'] = DIR_SOUTH,
+	['4'] = DIR_WEST,
+	['N'] = DIR_NORTH,
+	['E'] = DIR_EAST,
+	['S'] = DIR_SOUTH,
+	['W'] = DIR_WEST,
+	['^'] = DIR_NORTH,
+	['>'] = DIR_EAST,
+	['v'] = DIR_SOUTH,
+	['<'] = DIR_WEST,
+};
+
+static int model_init = 0;
+static wip_glmdl_t *floor_model;
+static wip_glmdl_t *wall_model;
+static wip_glmdl_t *door_model;
+static wip_glmdl_t *model['Z'-'A'];
+
+static void modelInit(void) {
+		model_init = 1;
 		floor_model = wip_openModel("d_floor");
 		wall_model = wip_openModel("d_wall");
 		door_model = wip_openModel("d_door");
-	}
+}
+
+
+// TODO: Door and Gate models
+// TODO: Custom tile types (using lua?)
+static int readRoom(char **token, room_t *room) {
+	if(model_init == 0) modelInit();
 
 	int i;
 	for(i = 0; i < room->width * room->height; ++i) {
@@ -61,14 +82,17 @@ static int readRoom(char **token, room_t *room) {
 			case '-':
 				room->tile[i].type = TILE_FLOOR;
 				room->deco[0][i].model = floor_model;
+				room->deco[0][i].dir = DIR_NORTH;
 				break;
 			case '#':
 				room->tile[i].type = TILE_WALL;
 				room->deco[0][i].model = wall_model;
+				room->deco[0][i].dir = DIR_NORTH;
 				break;
 			case 'D':
 				room->tile[i].type = TILE_DOOR;
 				room->deco[0][i].model = door_model;
+				room->deco[0][i].dir = DIR_NORTH;
 				if(wip_atoui(&token[i][1], &room->tile[i].id)) {
 					wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected key id (uint).", __func__, &token[i][1]);
 					return -1;
@@ -77,6 +101,7 @@ static int readRoom(char **token, room_t *room) {
 			case 'G':
 				room->tile[i].type = TILE_GATE;
 				room->deco[0][i].model = floor_model;
+				room->deco[0][i].dir = DIR_NORTH;
 				if(wip_atoui(&token[i][1], &room->tile[i].id)) {
 					wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, &token[i][1]);
 					return -1;
@@ -92,13 +117,7 @@ static int readRoom(char **token, room_t *room) {
 
 // TODO: Custom models
 static int readDeco(char **token, room_t *room, unsigned int layer) {
-	static int init = 0;
-	static wip_glmdl_t *floor_model;
-	static wip_glmdl_t *wall_model;
-	if(!init) {
-		floor_model = wip_openModel("d_floor");
-		wall_model = wip_openModel("d_wall");
-	}
+	if(model_init == 0) modelInit();
 
 	int i;
 	for(i = 0; i < room->width * room->height; ++i) {
@@ -110,19 +129,29 @@ static int readDeco(char **token, room_t *room, unsigned int layer) {
 				break;
 			case '-':
 				room->deco[layer][i].model = floor_model;
+				room->deco[0][i].dir = DIR_NORTH;
 				break;
 			case '#':
 				room->deco[layer][i].model = wall_model;
+				room->deco[0][i].dir = DIR_NORTH;
+				break;
+			case 'D':
+				room->deco[layer][i].model = door_model;
+				room->deco[0][i].dir = DIR_NORTH;
 				break;
 			default:
-				wip_log(WIP_ERROR, "%s: Unknown tile: %s.", __func__, token[i]);
-				return -1;
+				if(model[(int)token[i][0]-'A']) room->deco[layer][i].model = model[(int)token[i][0]-'A'];
+				else {
+					wip_log(WIP_ERROR, "%s: Unknown deco: %s.", __func__, token[i]);
+					return -1;
+				}
 		}
+		if(token[i][0] != token[i][1]) room->deco[layer][i].dir = direction_map[(int)token[i][1]];
 	}
 	return i;
 }
 
-int readDungeon(dungeon_t *dungeon, const char *filename) {
+int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 	wip_debug(WIP_INFO, "%s: Loading dungeon from %s...", __func__, filename);
 
 	size_t size = 128;
@@ -153,6 +182,12 @@ int readDungeon(dungeon_t *dungeon, const char *filename) {
 	wip_free(line);
 	wip_debug(WIP_INFO, "%s: Found %d tokens in dungeon file.", __func__, token_c);
 
+	state->dungeon = filename;
+	state->room = 0;
+	state->player.x = 0;
+	state->player.y = 0;
+	state->player.direction = DIR_NORTH;
+
 	dungeon->room_c = 0;
 	dungeon->room = NULL;
 
@@ -172,7 +207,8 @@ int readDungeon(dungeon_t *dungeon, const char *filename) {
 			}
 			wip_debug(WIP_INFO, "%s: Found room with id %d.", __func__, id);
 			i += 4;
-		} else if(strcmp("deco", token[i]) == 0) {
+		}
+		else if(strcmp("deco", token[i]) == 0) {
 			unsigned int id, layer;
 			if(wip_atoui(token[i+1], &id)) {
 				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
@@ -196,6 +232,11 @@ int readDungeon(dungeon_t *dungeon, const char *filename) {
 			wip_debug(WIP_INFO, "%s: Found deco for room %d, layer %d.", __func__, id, layer);
 			i += 3;
 		}
+		else if(strcmp("model", token[i]) == 0 && token[i+1][1] == '\0' && token[i+1][0] > 'A' && token[i+1][0] < 'Z') {
+			model[(int)token[i+1][0]-'A'] = wip_openModel(token[i+2]);
+			i += 2;
+		}
+		else if(strcmp("player", token[i]) == 0) i += 4;
 	}
 
 	for(int i = 0; i < token_c; ++i) {
@@ -236,7 +277,29 @@ int readDungeon(dungeon_t *dungeon, const char *filename) {
 			if(ret == -1) return 1;
 			i += ret-1;
 		}
-		else wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);
+		else if(strcmp("model", token[i]) == 0) i += 2;
+		else if(strcmp("player", token[i]) == 0) { 
+			unsigned int id;
+			if(wip_atoui(token[i+1], &id)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
+				return 1;
+			}
+			else if(id < dungeon->room_c) state->room = id;
+			if(wip_atoi(token[i+2], &state->player.x)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected X pos (int).", __func__, token[i+1]);
+				return 1;
+			}
+			if(wip_atoi(token[i+3], &state->player.y)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected Y pos (int).", __func__, token[i+1]);
+				return 1;
+			}
+			state->player.direction = direction_map[(int)token[i+4][0]];
+			i += 4;
+		}
+		else {
+			wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);
+			return 1;
+		}
 	}
 
 	if(dungeon->room_c == 0)

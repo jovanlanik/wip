@@ -38,7 +38,7 @@ void drawMenu(menu menu, unsigned int selected, wip_glmdl_t *model) {
 	static wip_globj_t projection;
 	static wip_glmdl_t *default_model;
 
-	if(!init) {
+	if(init == 0) {
 		init = 1;
 		wip_makeObject(&center);
 		wip_makeObject(&camera);
