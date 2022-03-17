@@ -10,18 +10,18 @@ model S d_snake
 
 ! `room` starts a room definition
 ! accepts room id, width and height
-room 0 5 5
+room 0 7 5
 ! following lines define tiles in the room
 ! whitespace is not ignored
 ! first char of tile is tile type
 ! second char is data
 ! for doors, data is key id (0 if unlocked)
 ! for gates, data is room id
-## ## ## ## ## 
-## -- -- -- ## 
-## -- -- -- D0 
-## -- -- -- ## 
-## ## ## ## ## 
+## ## ## ## ## G1 ##
+## -- -- -- ## -- ##
+## -- -- -- -0 -- ##
+## -- -- -- ## -- ##
+## ## ## ## ## ## ##
 
 ! `player` sets the starting room, pos and dir
 player 0 1 2 >
@@ -33,20 +33,20 @@ player 0 1 2 >
 deco 0 0
 ! first char is deco type
 ! second char is direction (one letter cardinal, numeric or arrow)
-== == == == ==
-== == == == ==
-== == == == D<
-== == == == ==
-== == == == ==
+== == == == == == ==
+== == == == == == ==
+== == == == D< == ==
+== == == == == == ==
+== == == == == == ==
 
 deco 0 1
-.. .. .. .. ..
-.. .. TS .. ..
-.. .. .. .. ..
-.. .. S> .. ..
-.. .. .. .. ..
+.. .. .. .. .. .. ..
+.. .. TS .. .. .. ..
+.. .. .. .. .. .. ..
+.. .. S^ .. .. T^ ..
+.. .. .. .. .. .. ..
 
 room 1 3 3
 ## ## ##
-G0 -- ##
-## ## ##
+## -- ##
+## G0 ##

@@ -52,7 +52,8 @@ wip_event_t cameraEvent;
 enum direction oldDir;
 wip_event_t rotateEvent;
 wip_event_t moveEvent;
-int oldPos[2];
+wip_event_t bumpEvent;
+struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } oldPos;
 
 // Runtime
 int started = 0;
@@ -99,34 +100,43 @@ void newGame(void) {
 	if(readDungeon(&d, &currentState,"./dungeon.d/example.df") != 0)
 		wip_log(WIP_FATAL, "%s: Couldn't load dungeon.", __func__);
 
-	oldPos[0] = currentState.player.x;
-	oldPos[1] = currentState.player.y;
+	oldPos.x = currentState.player.x;
+	oldPos.y = currentState.player.y;
 	oldDir = currentState.player.d;
 	
 	wip_startEvent(&cameraEvent, 0.5);
 	wip_startEvent(&rotateEvent, 0.5);
 	wip_startEvent(&moveEvent, 0.25);
+	wip_startEvent(&bumpEvent, 0.125);
 
 	return;
 }
 
-void gameLoop(void) {
-	if(!wip_eventRemainder(&moveEvent)) {
-		if(wip_readMotion(UP)) {
-			wip_startEvent(&moveEvent, 0.25);
-			oldPos[0] = currentState.player.x;
-			oldPos[1] = currentState.player.y;
-			currentState.player.y -= abs((int)currentState.player.d - 2) - 1;
-			currentState.player.x -= abs((int)currentState.player.d - 1) - 1;
-		}
-		if(wip_readMotion(DOWN)) {
-			wip_startEvent(&moveEvent, 0.25);
-			oldPos[0] = currentState.player.x;
-			oldPos[1] = currentState.player.y;
-			currentState.player.y += abs((int)currentState.player.d - 2) - 1;
-			currentState.player.x += abs((int)currentState.player.d - 1) - 1;
-		}
+void action(void) {
+	struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } target;
+	target.x = currentState.player.x - abs((int)currentState.player.d - 1) + 1;
+	target.y = currentState.player.y - abs((int)currentState.player.d - 2) + 1;
+	room_t *room = &d.room[currentState.room];
+	if(target.x == room->width || target.y == room->height) return;
+	switch(room->tile[room->width*target.y+target.x].type) {
+		case TILE_WALL:
+			wip_startEvent(&bumpEvent, 0.125);
+			return;
+		case TILE_DOOR:
+		case TILE_GATE:
+			return;
+		default:
+			break;
 	}
+	wip_startEvent(&moveEvent, 0.25);
+	oldPos.x = currentState.player.x;
+	oldPos.y = currentState.player.y;
+	currentState.player.x = target.x;
+	currentState.player.y = target.y;
+}
+
+void gameLoop(void) {
+	if(!wip_eventRemainder(&moveEvent) && wip_readMotion(UP)) action();
 	if(!wip_eventRemainder(&rotateEvent)) {
 		if(wip_readMotion(RIGHT)) { 
 			wip_startEvent(&rotateEvent, 0.5);
@@ -142,8 +152,8 @@ void gameLoop(void) {
 	if(currentState.player.d < 0) currentState.player.d = 3;
 	currentState.player.d %= 4;
 
-	center.x = wip_interpolate(2*currentState.player.x, 2*oldPos[0], wip_eventPart(&moveEvent, wip_easeInOut));
-	center.y = wip_interpolate(2*currentState.player.y, 2*oldPos[1], wip_eventPart(&moveEvent, wip_easeInOut));
+	center.x = wip_interpolate(2*currentState.player.x, 2*oldPos.x, wip_eventPart(&moveEvent, wip_easeInOut));
+	center.y = wip_interpolate(2*currentState.player.y, 2*oldPos.y, wip_eventPart(&moveEvent, wip_easeInOut));
 	camera.x = 0;
 	camera.y = -1;
 
@@ -164,7 +174,9 @@ void gameLoop(void) {
 	quat_mul_vec3(camOld, camera.rotation, camera.position);
 	vec3_add(camera.position, camOld, center.position);
 
-	camera.z = wip_eventPart(&cameraEvent, wip_easeInOut);
+	camera.z = wip_eventPart(&cameraEvent, wip_easeInOut)
+		- wip_eventPart(&bumpEvent, wip_easeInOut)/25.0
+		+ 1.0/25.0;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

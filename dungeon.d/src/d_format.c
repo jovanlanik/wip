@@ -61,6 +61,7 @@ static int model_init = 0;
 static wip_glmdl_t *floor_model;
 static wip_glmdl_t *wall_model;
 static wip_glmdl_t *door_model;
+static wip_glmdl_t *gate_model;
 static wip_glmdl_t *model['Z'-'A'];
 
 static void modelInit(void) {
@@ -68,10 +69,11 @@ static void modelInit(void) {
 		floor_model = wip_openModel("d_floor");
 		wall_model = wip_openModel("d_wall");
 		door_model = wip_openModel("d_door");
+		gate_model = wip_openModel("d_gate");
 }
 
 
-// TODO: Door and Gate models
+// TODO: Door and Gate model rotation
 // TODO: Custom tile types (using lua?)
 static int readRoom(char **token, room_t *room) {
 	if(model_init == 0) modelInit();
@@ -100,7 +102,7 @@ static int readRoom(char **token, room_t *room) {
 				break;
 			case 'G':
 				room->tile[i].type = TILE_GATE;
-				room->deco[0][i].model = floor_model;
+				room->deco[0][i].model = gate_model;
 				room->deco[0][i].dir = DIR_NORTH;
 				if(wip_atoui(&token[i][1], &room->tile[i].id)) {
 					wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, &token[i][1]);
