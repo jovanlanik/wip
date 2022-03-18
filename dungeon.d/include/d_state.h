@@ -16,5 +16,6 @@ typedef struct {
 typedef struct {
 	char *dungeon;
 	unsigned int room;
+	unsigned int keyring[9];
 	player_t player;
 } state_t;

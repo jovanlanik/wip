@@ -8,7 +8,7 @@
 #define _CAT(x, y) __CAT(x, y)
 #define __CAT(x, y) x##y
 
-void MENU_FUNC(unsigned int selected, void *p);
+static void MENU_FUNC(unsigned int selected, void *p);
 
 #define MENU_ITEM(x, y, z) x
 enum _CAT(MENU_NAME, _item) { MENU_LIST, _CAT(MENU_NAME, _END) };

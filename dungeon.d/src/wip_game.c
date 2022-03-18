@@ -3,6 +3,8 @@
 
 // Rendering Functions
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
@@ -53,11 +55,14 @@ enum direction oldDir;
 wip_event_t rotateEvent;
 wip_event_t moveEvent;
 wip_event_t bumpEvent;
+wip_event_t toastEvent;
 struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } oldPos;
 
 // Runtime
 int started = 0;
 int paused = 0;
+char *message = NULL;
+char *toast = NULL;
 wip_obj_t center, camera;
 wip_glmdl_t *sword_model;
 wip_glmdl_t *snake_model;
@@ -67,7 +72,7 @@ wip_globj_t projection;
 // Game
 state_t currentState;
 
-void initGameLoop(void) {
+static void initGameLoop(void) {
 	wip_makeObject(&camera);
 	camera.y = 0.0f;
 	camera.z = 0.0f;
@@ -96,9 +101,15 @@ void initGameLoop(void) {
 	return;
 }
 
-void newGame(void) {
+void makeToast(char *toastMsg, float time) {
+	wip_startEvent(&toastEvent, time);
+	if(toast) wip_free(toast);
+	toast = toastMsg;
+}
+
+static void newGame(void) {
 	if(readDungeon(&d, &currentState,"./dungeon.d/example.df") != 0)
-		wip_log(WIP_FATAL, "%s: Couldn't load dungeon.", __func__);
+		wip_log(WIP_FATAL, "%s: Couldn't load dungeon from %s.", __func__, currentState.dungeon);
 
 	oldPos.x = currentState.player.x;
 	oldPos.y = currentState.player.y;
@@ -108,23 +119,71 @@ void newGame(void) {
 	wip_startEvent(&rotateEvent, 0.5);
 	wip_startEvent(&moveEvent, 0.25);
 	wip_startEvent(&bumpEvent, 0.125);
+	makeToast(strdup("Welcome to the dungeon!"), 2.0);
+
+	currentState.keyring[1] = 1;
 
 	return;
 }
 
-void action(void) {
+static void action(void) {
 	struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } target;
 	target.x = currentState.player.x - abs((int)currentState.player.d - 1) + 1;
 	target.y = currentState.player.y - abs((int)currentState.player.d - 2) + 1;
 	room_t *room = &d.room[currentState.room];
+	tile_t *tile = &room->tile[room->width*target.y+target.x];
 	if(target.x == room->width || target.y == room->height) return;
-	switch(room->tile[room->width*target.y+target.x].type) {
+	switch(tile->type) {
+		case TILE_DOOR:
+			if(tile->id == 0) break;
+			else if(currentState.keyring[tile->id]) {
+				makeToast(strdup("Unlocked door"), 2.0);
+				room->deco[0][room->width*target.y+target.x].model = tile->data;
+				tile->id = 0;
+				return;
+			}
+			else {
+				char *door_toast = strdup("This door is locked! You need key X");
+				door_toast[strlen(door_toast)-1] = '0' + tile->id;
+				makeToast(door_toast, 2.0);
+			}
 		case TILE_WALL:
 			wip_startEvent(&bumpEvent, 0.125);
 			return;
-		case TILE_DOOR:
 		case TILE_GATE:
-			return;
+			{
+				char *gate_toast = strdup("Gate to room X");
+				unsigned int id = currentState.room;
+				currentState.room = tile->id;
+				room_t *t = &d.room[tile->id];
+				unsigned int w = t->width;
+				struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } fail;
+				for(int y = 0; y < t->height; ++y) {
+					for(int x = 0; x < t->width; ++x) {
+						if(t->tile[w*y+x].type == TILE_FLOOR) {
+							fail.x = x;
+							fail.y = y;
+						}
+						else if(t->tile[w*y+x].type == TILE_GATE && t->tile[w*y+x].id == id) {
+							gate_toast[strlen(gate_toast)-1] = '0' + currentState.room;
+							makeToast(gate_toast, 2.0);
+							currentState.player.x = x;
+							currentState.player.y = y;
+							currentState.player.direction = t->deco[0][w*y+x].dir;
+							return;
+						}
+					}
+				}
+				wip_debug(
+					WIP_WARN,
+					"%s: Couldn't find gate with id %u in room %u, using first floor tile.",
+					__func__,
+					id,
+					currentState.room
+				);
+				currentState.player.x = fail.x;
+				currentState.player.y = fail.y;
+			}
 		default:
 			break;
 	}
@@ -135,7 +194,24 @@ void action(void) {
 	currentState.player.y = target.y;
 }
 
-void gameLoop(void) {
+static void gameLoop(void) {
+	if(wip_readMotion(HELP)) message =
+		"# Help\n"
+		"## Controls\n"
+		"- WIP_UP = Forward/Attack/Use\n"
+		"- WIP_LEFT = Turn left\n"
+		"- WIP_RIGHT = Turn right\n"
+		"- WIP_ENTER = Show inventory\n"
+		"- 'H' = Show help message\n"
+		"- WIP_ESC = Pause game";
+	if(wip_readMotion(USE)) {
+		char *msg = "# Inventory\n"
+			"## Keyring\n"
+			"[1]  2   3 \n"
+			" 4   5   6 \n"
+			" 7   8   9 ";
+		makeToast(strdup(msg), 2.0);
+	}
 	if(!wip_eventRemainder(&moveEvent) && wip_readMotion(UP)) action();
 	if(!wip_eventRemainder(&rotateEvent)) {
 		if(wip_readMotion(RIGHT)) { 
@@ -193,6 +269,8 @@ void gameLoop(void) {
 	// Interface
 	glClear(GL_DEPTH_BUFFER_BIT);
 	drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
+	if(toast != NULL && wip_eventPart(&toastEvent, wip_easeLinear))
+		drawStr(10, 20 + 2.0*CHAR_SIZE, 4.0f, toast);
 
 	//wip_glError();
 	return;
@@ -216,7 +294,7 @@ void gameLoop(void) {
 	MENU_ITEM(P_QUIT_GAME, "Quit Game", NULL)
 #include "d_menu_gen.h"
 
-void mainMenuFn(unsigned int selected, void *p) {
+static void mainMenuFn(unsigned int selected, void *p) {
 	switch(selected) {
 		case M_NEW_GAME:
 			newGame();
@@ -229,7 +307,7 @@ void mainMenuFn(unsigned int selected, void *p) {
 	}
 }
 
-void pauseMenuFn(unsigned int selected, void *p) {
+static void pauseMenuFn(unsigned int selected, void *p) {
 	switch(selected) {
 		case P_NEW_GAME:
 			newGame();
@@ -243,7 +321,7 @@ void pauseMenuFn(unsigned int selected, void *p) {
 	}
 }
 
-void m_menuLoop(menu *menu) {
+static void m_menuLoop(menu *menu) {
 	static int selected = 0;
 	if(wip_readMotion(DOWN)) selected++;
 	if(wip_readMotion(UP)) selected--;
@@ -257,7 +335,9 @@ void m_menuLoop(menu *menu) {
 	drawMenu(*menu, selected, NULL);
 }
 
-void p_menuLoop(menu *menu) {
+static void p_menuLoop(menu *menu) {
+	message = NULL;
+
 	static int selected = 0;
 	if(wip_readMotion(DOWN)) selected++;
 	if(wip_readMotion(UP)) selected--;
@@ -273,6 +353,18 @@ void p_menuLoop(menu *menu) {
 	wip_globalKeyLock = 0;
 
 	drawMenu(*menu, selected, NULL);
+}
+
+static void messageLoop() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(started && !paused) {
+		wip_globalKeyLock = 1;
+		gameLoop();
+		wip_globalKeyLock = 0;
+	}
+	drawStr(10, 10, 4, message);
+
+	if(wip_readMotion(USE) || wip_readMotion(HELP)) message = NULL;
 }
 
 void wip_gameLoop(void) {
@@ -294,6 +386,7 @@ void wip_gameLoop(void) {
 
 		if(started) {
 			if(paused) p_menuLoop(&pauseMenu);
+			else if(message != NULL) messageLoop();
 			else gameLoop();
 		} else m_menuLoop(&mainMenu);
 

@@ -11,11 +11,11 @@
 /*		Type		Name		Default Key	*/
 #define MOTION_LIST \
 	MOTION(WIP_ONCE,	UP,	WIP_UP), \
-	MOTION(WIP_ONCE,	DOWN,	WIP_DOWN), \
+	MOTION(WIP_ONCE,        DOWN,     WIP_DOWN), \
 	MOTION(WIP_ONCE,	LEFT,	WIP_LEFT), \
 	MOTION(WIP_ONCE,	RIGHT,	WIP_RIGHT), \
 	MOTION(WIP_ONCE,	USE,	WIP_ENTER), \
-	MOTION(WIP_ONCE,	ATTACK,	WIP_SPACE)
+	MOTION(WIP_ONCE,	HELP,	WIP_ALPHA-'a'+'h')
 
 #define MOTION(type, motion, key) motion
 enum wip_motion {

@@ -60,7 +60,8 @@ static const enum direction direction_map[] = {
 static int model_init = 0;
 static wip_glmdl_t *floor_model;
 static wip_glmdl_t *wall_model;
-static wip_glmdl_t *door_model;
+static wip_glmdl_t *door_closed_model;
+static wip_glmdl_t *door_open_model;
 static wip_glmdl_t *gate_model;
 static wip_glmdl_t *model['Z'-'A'];
 
@@ -68,7 +69,8 @@ static void modelInit(void) {
 		model_init = 1;
 		floor_model = wip_openModel("d_floor");
 		wall_model = wip_openModel("d_wall");
-		door_model = wip_openModel("d_door");
+		door_closed_model = wip_openModel("d_door_closed");
+		door_open_model = wip_openModel("d_door_open");
 		gate_model = wip_openModel("d_gate");
 }
 
@@ -93,12 +95,16 @@ static int readRoom(char **token, room_t *room) {
 				break;
 			case 'D':
 				room->tile[i].type = TILE_DOOR;
-				room->deco[0][i].model = door_model;
+				room->tile[i].data = door_open_model;
 				room->deco[0][i].dir = DIR_NORTH;
 				if(wip_atoui(&token[i][1], &room->tile[i].id)) {
 					wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected key id (uint).", __func__, &token[i][1]);
 					return -1;
 				}
+				if(room->tile[i].id == 0)
+					room->deco[0][i].model = door_open_model;
+				else
+					room->deco[0][i].model = door_closed_model;
 				break;
 			case 'G':
 				room->tile[i].type = TILE_GATE;
@@ -138,7 +144,12 @@ static int readDeco(char **token, room_t *room, unsigned int layer) {
 				room->deco[0][i].dir = DIR_NORTH;
 				break;
 			case 'D':
-				room->deco[layer][i].model = door_model;
+				// TODO: fix this
+				room->deco[layer][i].model = door_closed_model;
+				room->deco[0][i].dir = DIR_NORTH;
+				break;
+			case 'G':
+				room->deco[layer][i].model = gate_model;
 				room->deco[0][i].dir = DIR_NORTH;
 				break;
 			default:
@@ -304,8 +315,10 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 		}
 	}
 
-	if(dungeon->room_c == 0)
-		wip_debug(WIP_WARN, "%s: Couldn't load any rooms from dungeon, may be missing.", __func__);
+	if(dungeon->room_c == 0) {
+		wip_log(WIP_ERROR, "%s: No found rooms in dungeon.", __func__);
+		return 1;
+	}
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return 0;
 }
