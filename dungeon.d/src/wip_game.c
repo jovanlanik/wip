@@ -564,7 +564,7 @@ static void messageLoop() {
 		gameLoop();
 		wip_globalKeyLock = 0;
 	}
-	drawStr(10, 10, 4, message);
+	drawStr(10, 10, 4.0, message);
 
 	if(wip_readMotion(USE) || wip_readMotion(HELP)) {
 		wip_clearMotions();

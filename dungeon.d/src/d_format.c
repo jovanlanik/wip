@@ -189,7 +189,7 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 			Only took misspeling `man strtol` as `man strtok` to find out...
 		*/
 		for(char *word = strtok(line, search); word != NULL; word = strtok(NULL, search)) {
-			if(token_c > size) {
+			if(token_c > size-1) {
 				size *= 2;
 				token = wip_realloc(token, sizeof(void *) * size, NULL);
 				wip_debug(WIP_INFO, "%s: Reallocating buffer to %d bytes.", __func__, size);
@@ -264,7 +264,6 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 				return 1;
 			}
 			file = wip_openFile(token[i+2]);
-			if(!file) wip_log(WIP_ERROR, "%s: Message not found: %s.", __func__, token[i+2]);
 			msg[id] = wip_readFile(file);
 			i += 2;
 		}

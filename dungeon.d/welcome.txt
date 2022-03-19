@@ -1,4 +1,4 @@
-# Welcome to the dungeon!
+# Welcome
 
 If you are unsure about the controls, press H for help.
 The door in front of you is locked, you must find a key

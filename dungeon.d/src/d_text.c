@@ -65,9 +65,15 @@ void drawStr(unsigned int x, unsigned int y, float scale, char *str) {
 	int i = 0, j = 0, k = 0;
 	while(str[i] != '\0') {
 		switch(str[i]) {
-			case '\n': i++; j = 0; k++; continue;
+			case '\n':
+				i++;
+				j = 0;
+				k++;
+				continue;
 			//TODO: handle tab
-			default: drawChar(isprint(str[i]) ? str[i] : 127, x, y, j, k, scale);
+			default:
+				drawChar(isprint(str[i]) ? str[i] : 127, x, y, j, k, scale);
+				break;
 		}
 		++i; ++j;
 	}
