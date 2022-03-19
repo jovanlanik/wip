@@ -92,24 +92,36 @@ void drawRoom(room_t *room, wip_globj_t pv) {
 
 static wip_glmdl_t *getEntModel(entity_t *ent) {
 	static int init = 0;
+	static wip_glmdl_t *book_model;
 	static wip_glmdl_t *snake_model;
+	static wip_glmdl_t *cobra_model;
 	static wip_glmdl_t *key_model;
+	static wip_glmdl_t *heal_model;
 	if(init == 0) {
 		init = 1;
 		snake_model = wip_openModel("d_snake");
 		key_model = wip_openModel("d_key");
+		book_model = wip_openModel("d_book");
+		cobra_model = wip_openModel("d_cobra");
+		heal_model = wip_openModel("d_heal");
 	}
 	switch(ent->type) {
+		case ENT_BOOK:
+			return book_model;
 		case ENT_KEY:
 			return key_model;
-		case ENT_ENEMY:
+		case ENT_COBRA:
+			return cobra_model;
+		case ENT_SNAKE:
 			return snake_model;
+		case ENT_HEAL:
+			return heal_model;
 		default:
 			return NULL;
 	}
 }
 
-void drawEnts(entity_t *ent, wip_globj_t pv) {
+void drawEnts(unsigned int room, entity_t *ent, wip_globj_t pv) {
 	static int init = 0;
 	static wip_obj_t object[4];
 	if(init == 0) {
@@ -120,7 +132,7 @@ void drawEnts(entity_t *ent, wip_globj_t pv) {
 		}
 	}
 	for(int i = 0; i < ENT_MAX; ++i) {
-		if(ent[i].type == ENT_NONE) continue;
+		if(ent[i].type == ENT_NONE || ent[i].room != room) continue;
 		object[ent[i].direction].x = 2 * ent[i].x;
 		object[ent[i].direction].y = 2 * ent[i].y;
 		wip_glmdl_t *model = getEntModel(&ent[i]);

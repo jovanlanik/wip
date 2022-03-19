@@ -20,8 +20,11 @@ typedef struct {
 
 enum entity {
 	ENT_NONE,
+	ENT_BOOK,
 	ENT_KEY,
-	ENT_ENEMY,
+	ENT_HEAL,
+	ENT_COBRA,
+	ENT_SNAKE,
 };
 
 typedef struct {

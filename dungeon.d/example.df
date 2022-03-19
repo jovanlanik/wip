@@ -18,20 +18,25 @@ room 0 7 5
 ! for gates, data is room id
 ## ## ## ## ## G1 ##
 ## -- -- -- ## -- ##
-## -- -- -- D2 -- ##
+## -- -- -- D1 -- ##
 ## -- -- -- ## -- ##
 ## ## ## ## ## ## ##
 
 ! `entity` spawns an entity
 ! accepts:
-! type (`S` is snake, `K` is key)
-! data (health for snakes and key id for keys)
+! type (`B` is book, `S` snake, `K` key)
+! data (message id for books, health for snakes and key id for keys)
 ! room, x, y and dir
-entity S 8 0 3 2 <
-entity K 2 0 2 3 v
+entity K 1 0 1 2 >
+
+entity B 0 0 3 2 <
+! `msg` loads a message from file
+! accepts message id, filename
+msg 0 ./dungeon.d/welcome.txt
 
 ! `player` sets the starting room, pos and dir
-player 0 1 2 >
+player 0 2 2 >
+! player 1 1 9 ^
 
 ! `deco` starts a decoration definition for room id and layer
 ! the decoration layers has the same size as the room
@@ -45,7 +50,6 @@ deco 0 0
 == == == == =< == ==
 == == == == == == ==
 == == == == == == ==
-
 deco 0 1
 .. .. .. .. .. .. ..
 .. .. Tv .. .. .. ..
@@ -53,12 +57,47 @@ deco 0 1
 .. .. .. .. .. T^ ..
 .. .. .. .. .. .. ..
 
-room 1 3 3
-## G1 ##
-## -- ##
-## G0 ##
+room 1 10 10
+## ## ## ## ## ## ## ## G1 ##
+## -- -- -- -- -- -- ## -- ##
+## -- -- ## -- -- -- ## -- ##
+## -- -- ## -- -- -- ## -- ##
+## -- -- ## -- -- -- ## -- ##
+## -- -- ## ## D0 ## ## -- ##
+## -- -- ## -- -- -- ## -- ##
+## -- -- ## -- -- -- ## -- ##
+## -- -- ## -- -- -- -- -- ##
+## G0 ## ## ## ## ## ## ## ##
 
 deco 1 0
-== =v ==
-== == ==
-== =^ ==
+== == == == == == == == =v ==
+== == == == == == == == == ==
+== == == == == == == == == ==
+== == == == == == == == == ==
+== == == == == == == == == ==
+== == == == == == == == == ==
+== == == == == == == == == ==
+== == == == == == == == == ==
+== == == == == == == == == ==
+== =^ == == == == == == == ==
+deco 1 1
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. T^ .. T^ .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+.. .. .. .. .. .. .. .. .. ..
+
+entity S 4 1 1 1 <
+entity B 1 1 1 8 v
+msg 1 ./dungeon.d/snake.txt
+
+entity C 6 1 5 4 ^
+entity B 2 1 5 2 ^
+msg 2 ./dungeon.d/cobra.txt
+entity H 4 1 5 7 ^
+

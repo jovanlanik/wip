@@ -49,7 +49,7 @@ void drawMenu(menu menu, unsigned int selected, wip_glmdl_t *model) {
 		mat4x4_perspective(projection.m, TO_RAD(90.0), ratio, 0.1, 1000);
 		mat4x4_look_at(view.m, camera.position, center.position, (float *)axis);
 		mat4x4_mul(pv.m, projection.m, view.m);
-		default_model = wip_openModel("d_snake");
+		default_model = wip_openModel("d_cobra");
 	}
 
 	glClear(GL_DEPTH_BUFFER_BIT);

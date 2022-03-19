@@ -63,6 +63,7 @@ struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } oldPos;
 // Runtime
 int started = 0;
 int paused = 0;
+char *msg[128];
 char *message = NULL;
 char *toast = NULL;
 wip_obj_t center, camera;
@@ -115,6 +116,7 @@ void makeToast(char *toastMsg, float time) {
 }
 
 static void newGame(void) {
+	memset(&currentState, 0, sizeof(state_t));
 	if(readDungeon(&d, &currentState,"./dungeon.d/example.df") != 0)
 		wip_log(WIP_FATAL, "%s: Couldn't load dungeon from %s.", __func__, currentState.dungeon);
 
@@ -131,6 +133,83 @@ static void newGame(void) {
 
 	currentState.player.health = 10;
 
+	return;
+}
+
+static float distance(int a[2], int b[2]) {
+	vec2 af = { a[0], a[1] };
+	vec2 bf = { b[0], b[1] };
+	vec2 r;
+	vec2_sub(r, af, bf);
+	return vec2_len(r);
+}
+
+static void entityAct(unsigned int chance) {
+	struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } target;
+	for(int i = 0; i < ENT_MAX; ++i) {
+		if(currentState.entity[i].type == ENT_NONE
+			|| currentState.entity[i].room != currentState.room
+			|| rand() % chance != 0
+			) continue;
+		target.x = currentState.entity[i].x - abs((int)currentState.entity[i].d - 1) + 1;
+		target.y = currentState.entity[i].y - abs((int)currentState.entity[i].d - 2) + 1;
+		unsigned int dmg = rand() % 2;
+		switch(currentState.entity[i].type) {
+			case ENT_BOOK:
+			case ENT_KEY:
+			case ENT_HEAL:
+				break;
+			case ENT_COBRA:
+				dmg++;
+			case ENT_SNAKE:
+				{
+					float currentDist = distance(currentState.entity[i].position, currentState.player.position);
+					float targetDist = distance(target.position, currentState.player.position);
+					if(targetDist == 0) {
+						if(dmg) {
+							wip_startEvent(&bumpEvent, 0.25);
+							currentState.player.health -= dmg;
+						}
+					}
+					else if(targetDist < currentDist && currentState.entity[i].type == ENT_SNAKE) {
+						currentState.entity[i].x = target.x;
+						currentState.entity[i].y = target.y;
+					}
+					else {
+						currentState.entity[i].d++;
+						if(currentState.entity[i].d < 0) currentState.entity[i].d = 3;
+						currentState.entity[i].d %= 4;
+						target.x = currentState.entity[i].x - abs((int)currentState.entity[i].d - 1) + 1;
+						target.y = currentState.entity[i].y - abs((int)currentState.entity[i].d - 2) + 1;
+						float plusDist = distance(target.position, currentState.player.position);
+
+						currentState.entity[i].d--;
+						if(currentState.entity[i].d < 0) currentState.entity[i].d = 3;
+						currentState.entity[i].d %= 4;
+						currentState.entity[i].d--;
+						if(currentState.entity[i].d < 0) currentState.entity[i].d = 3;
+						currentState.entity[i].d %= 4;
+						target.x = currentState.entity[i].x - abs((int)currentState.entity[i].d - 1) + 1;
+						target.y = currentState.entity[i].y - abs((int)currentState.entity[i].d - 2) + 1;
+						float minusDist = distance(target.position, currentState.player.position);
+
+						currentState.entity[i].d++;
+						if(currentState.entity[i].d < 0) currentState.entity[i].d = 3;
+						currentState.entity[i].d %= 4;
+						if(plusDist < minusDist)
+							currentState.entity[i].d++;
+						else
+							currentState.entity[i].d--;
+						if(currentState.entity[i].d < 0) currentState.entity[i].d = 3;
+						currentState.entity[i].d %= 4;
+					}
+				}
+				break;
+			default:
+				wip_debug(WIP_WARN, "%s: Unknown entity %d.", __func__, currentState.entity[i].type);
+				break;
+		}
+	}
 	return;
 }
 
@@ -210,24 +289,16 @@ static void action(void) {
 			break;
 	}
 	for(int i = 0; i < ENT_MAX; ++i) {
-		if(currentState.entity[i].room != currentState.room
+		if(currentState.entity[i].type == ENT_NONE
+			|| currentState.entity[i].room != currentState.room
 			|| currentState.entity[i].x != target.x
 			|| currentState.entity[i].y != target.y
 			) continue;
 		switch(currentState.entity[i].type) {
-			case ENT_ENEMY:
-				{
-					wip_startEvent(&bumpEvent, 0.125);
-					unsigned int dmg = rand() % 4 + 1;
-					char *attack_toast = strdup("You dealt X damage!");
-					attack_toast[10] = '0' + dmg;
-					makeToast(attack_toast, 2.0);
-					wip_startEvent(&attkEvent, 0.10);
-					currentState.entity[i].id -= dmg;
-					if(currentState.entity[i].id <= 0)
-						currentState.entity[i].type = ENT_NONE;
-					return;
-				}
+			case ENT_BOOK:
+				message = msg[currentState.entity[i].id];
+				currentState.entity[i].type = ENT_NONE;
+				break;
 			case ENT_KEY:
 				{
 					char *key_toast = strdup("You found key X");
@@ -237,7 +308,26 @@ static void action(void) {
 					currentState.entity[i].type = ENT_NONE;
 				}
 				break;
+			case ENT_HEAL:
+				makeToast("The potion refreshes your body", 2.0);
+				currentState.player.health += currentState.entity[i].id;
+				currentState.entity[i].type = ENT_NONE;
+				break;
+			case ENT_COBRA:
+			case ENT_SNAKE:
+				{
+					unsigned int dmg = rand() % currentState.room + 1;
+					char *attack_toast = strdup("You dealt X damage!");
+					attack_toast[10] = '0' + dmg;
+					makeToast(attack_toast, 2.0);
+					wip_startEvent(&attkEvent, 0.10);
+					currentState.entity[i].id -= dmg;
+					if(currentState.entity[i].id <= 0)
+						currentState.entity[i].type = ENT_NONE;
+				}
+				return;
 			default:
+				wip_debug(WIP_WARN, "%s: Unknown entity %d.", __func__, currentState.entity[i].type);
 				break;
 		}
 	}
@@ -254,6 +344,9 @@ static void gameLoop(void) {
 		message =
 			"# YOU LOST!\n"
 			"\n"
+			"You were defeated by dungeon snakes! Most of your body\n"
+			"will soon be devoured and the rest will rot forever in\n"
+			"this dungeon... Beter luck next time."
 			;
 	}
 	if(wip_readMotion(HELP)) message =
@@ -295,17 +388,22 @@ static void gameLoop(void) {
 		);
 		makeToast(strdup(msg), 2.0);
 	}
-	if(!wip_eventRemainder(&moveEvent) && wip_readMotion(UP)) action();
+	if(!wip_eventRemainder(&moveEvent) && wip_readMotion(UP)) {
+		action();
+		entityAct(1);
+	}
 	if(!wip_eventRemainder(&rotateEvent)) {
 		if(wip_readMotion(RIGHT)) { 
 			wip_startEvent(&rotateEvent, 0.5);
 			oldDir = currentState.player.d;
 			currentState.player.d--;
+			entityAct(2);
 		}
 		if(wip_readMotion(LEFT)) {
 			wip_startEvent(&rotateEvent, 0.5);
 			oldDir = currentState.player.d;
 			currentState.player.d++;
+			entityAct(2);
 		}
 	}
 	if(currentState.player.d < 0) currentState.player.d = 3;
@@ -346,7 +444,7 @@ static void gameLoop(void) {
 
 	// Render here...
 	drawRoom(&d.room[currentState.room], pv);
-	drawEnts(currentState.entity, pv);
+	drawEnts(currentState.room, currentState.entity, pv);
 	// Viewmodel
 	glClear(GL_DEPTH_BUFFER_BIT);
 	if(wip_eventPart(&attkEvent, wip_easeLinear)) drawModel(&camera, swing_model, pv, NULL);
@@ -462,6 +560,7 @@ static void p_menuLoop(menu *menu) {
 }
 
 static void messageLoop() {
+	toastEvent.length = 0;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if(started && !paused) {
 		wip_globalKeyLock = 1;

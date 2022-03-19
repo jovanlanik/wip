@@ -44,5 +44,6 @@ int wip_atoui(char *s, unsigned int *i);
 void wip_log(enum wip_logType, const char *m, ...);
 void wip_sleep(double seconds);
 FILE *wip_openFile(const char *n);
+char *wip_readFile(FILE* file);
 int *wip_setTimeout(void *(*func)(void *), void *arg, double time);
 

@@ -26,6 +26,7 @@ inline double wip_eventRemainder(wip_event_t *event) {
 }
 
 inline double wip_eventPart(wip_event_t *event, wip_easing_t fn) {
-	return fn(wip_eventRemainder(event)/event->length);
+	if(event->length == 0.0) return 0.0;
+	else return fn(wip_eventRemainder(event)/event->length);
 }
 

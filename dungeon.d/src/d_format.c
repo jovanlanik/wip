@@ -13,6 +13,8 @@
 
 #include "d_format.h"
 
+extern char *msg[];
+
 #ifdef _WIN32
 static int getline(char **lineptr, size_t *n, FILE *stream) {
 	if(!lineptr || !n || !stream) {
@@ -255,6 +257,17 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 		}
 		else if(strcmp("player", token[i]) == 0) i += 4;
 		else if(strcmp("entity", token[i]) == 0) i += 6;
+		else if(strcmp("msg", token[i]) == 0) {
+			unsigned int id;
+			if(wip_atoui(token[i+1], &id)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected message id (uint).", __func__, token[i+1]);
+				return 1;
+			}
+			file = wip_openFile(token[i+2]);
+			if(!file) wip_log(WIP_ERROR, "%s: Message not found: %s.", __func__, token[i+2]);
+			msg[id] = wip_readFile(file);
+			i += 2;
+		}
 	}
 
 	for(int i = 0; i < token_c; ++i) {
@@ -317,11 +330,20 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 		else if(strcmp("entity", token[i]) == 0) {
 			entity_t *ent = getEnt(state->entity);
 			switch(token[i+1][0]) {
+				case 'B':
+					ent->type = ENT_BOOK;
+					break;
 				case 'K':
 					ent->type = ENT_KEY;
 					break;
+				case 'H':
+					ent->type = ENT_HEAL;
+					break;
+				case 'C':
+					ent->type = ENT_COBRA;
+					break;
 				case 'S':
-					ent->type = ENT_ENEMY;
+					ent->type = ENT_SNAKE;
 					break;
 				default:
 					break;
@@ -345,6 +367,7 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 			ent->direction = direction_map[(int)token[i+6][0]];
 			i += 6;
 		}
+		else if(strcmp("msg", token[i]) == 0) i += 2;
 		else {
 			wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);
 			return 1;

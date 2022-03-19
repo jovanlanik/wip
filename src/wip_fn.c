@@ -86,6 +86,16 @@ FILE *wip_openFile(const char *name) {
 	return file;
 }
 
+char *wip_readFile(FILE* file) {
+	if(!file) return NULL;
+	fseek(file, 0, SEEK_END);
+	long int size = ftell(file);
+	rewind(file);
+	char *buff = wip_alloc(size+1);
+	fread(buff, 1, size, file);
+	return buff;
+}
+
 /*
 void wip_sleep(double seconds) {
 	double intpart;
