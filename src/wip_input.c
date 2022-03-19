@@ -24,6 +24,11 @@ extern wip_motion_t wip_globalMotion[WIP_MOTION_END];
 extern wip_motion_t *wip_globalKey[WIP_KEY_END];
 extern char wip_globalMotionName[WIP_MOTION_END][64];
 
+inline void wip_clearMotions(void) {
+	for(int i = 0; i < WIP_MOTION_END; ++i)
+		wip_globalMotion[i].state = 0;
+}
+
 enum wip_motion wip_findMotion(const char *name) {
 	for(int i = 0; i < WIP_MOTION_END; ++i)
 		if(strcmp(name, wip_globalMotionName[i]) == 0) return i;

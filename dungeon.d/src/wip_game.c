@@ -109,10 +109,14 @@ static void initGameLoop(void) {
 	return;
 }
 
-void makeToast(char *toastMsg, float time) {
-	wip_startEvent(&toastEvent, time);
+static void makeToast(char *toastMsg) {
+	wip_startEvent(&toastEvent, 2.0);
 	if(toast) wip_free(toast);
 	toast = toastMsg;
+}
+
+static void makeStaticToast(char *toast) {
+	makeToast(strdup(toast));
 }
 
 static void newGame(void) {
@@ -129,9 +133,9 @@ static void newGame(void) {
 	wip_startEvent(&moveEvent, 0.25);
 	wip_startEvent(&bumpEvent, 0.125);
 	wip_startEvent(&attkEvent, 0.001);
-	makeToast(strdup("Welcome to the dungeon!"), 2.0);
+	makeStaticToast("Welcome to the dungeon!");
 
-	currentState.player.health = 10;
+	currentState.player.health = 12;
 
 	return;
 }
@@ -224,7 +228,7 @@ static void action(void) {
 		case TILE_DOOR:
 			if(tile->id == 0) break;
 			else if(currentState.keyring[tile->id]) {
-				makeToast(strdup("Unlocked door"), 2.0);
+				makeStaticToast("Unlocked door");
 				room->deco[0][room->width*target.y+target.x].model = tile->data;
 				tile->id = 0;
 				return;
@@ -232,7 +236,7 @@ static void action(void) {
 			else {
 				char *door_toast = strdup("This door is locked! You need key X");
 				door_toast[strlen(door_toast)-1] = '0' + tile->id;
-				makeToast(door_toast, 2.0);
+				makeToast(door_toast);
 			}
 		case TILE_WALL:
 			wip_startEvent(&bumpEvent, 0.125);
@@ -266,7 +270,7 @@ static void action(void) {
 						}
 						else if(t->tile[w*y+x].type == TILE_GATE && t->tile[w*y+x].id == id) {
 							gate_toast[strlen(gate_toast)-1] = '0' + currentState.room;
-							makeToast(gate_toast, 2.0);
+							makeToast(gate_toast);
 							currentState.player.x = x;
 							currentState.player.y = y;
 							currentState.player.direction = t->deco[0][w*y+x].dir;
@@ -303,13 +307,13 @@ static void action(void) {
 				{
 					char *key_toast = strdup("You found key X");
 					key_toast[strlen(key_toast)-1] = '0' + currentState.entity[i].id;
-					makeToast(key_toast, 2.0);
+					makeToast(key_toast);
 					currentState.keyring[currentState.entity[i].id] = 1;
 					currentState.entity[i].type = ENT_NONE;
 				}
 				break;
 			case ENT_HEAL:
-				makeToast("The potion refreshes your body", 2.0);
+				makeStaticToast("The potion refreshes your body");
 				currentState.player.health += currentState.entity[i].id;
 				currentState.entity[i].type = ENT_NONE;
 				break;
@@ -319,7 +323,7 @@ static void action(void) {
 					unsigned int dmg = rand() % currentState.room + 1;
 					char *attack_toast = strdup("You dealt X damage!");
 					attack_toast[10] = '0' + dmg;
-					makeToast(attack_toast, 2.0);
+					makeToast(attack_toast);
 					wip_startEvent(&attkEvent, 0.10);
 					currentState.entity[i].id -= dmg;
 					if(currentState.entity[i].id <= 0)
@@ -361,21 +365,13 @@ static void gameLoop(void) {
 	if(wip_readMotion(USE)) {
 		const char y[] = "[]";
 		const char n[] = "  ";
-		char msg[
-			sizeof(
-				"# Inventory\n"
-				"## Keyring\n"
-				"[1]  2   3 \n"
-				" 4   5   6 \n"
-				" 7   8   9 "
-				)
-		];
-		sprintf(msg,
-			"# Inventory\n"
-			"## Keyring\n"
+		const char format[] =
+			"# Keyring\n"
 			"%c1%c %c2%c %c3%c\n"
 			"%c4%c %c5%c %c6%c\n"
-			"%c7%c %c8%c %c9%c",
+			"%c7%c %c8%c %c9%c";
+		char inv[sizeof(format)];
+		sprintf(inv, format,
 			currentState.keyring[1] ? y[0] : n[0], currentState.keyring[1] ? y[1] : n[1],
 			currentState.keyring[2] ? y[0] : n[0], currentState.keyring[2] ? y[1] : n[1],
 			currentState.keyring[3] ? y[0] : n[0], currentState.keyring[3] ? y[1] : n[1],
@@ -386,7 +382,7 @@ static void gameLoop(void) {
 			currentState.keyring[8] ? y[0] : n[0], currentState.keyring[8] ? y[1] : n[1],
 			currentState.keyring[9] ? y[0] : n[0], currentState.keyring[9] ? y[1] : n[1]
 		);
-		makeToast(strdup(msg), 2.0);
+		makeStaticToast(inv);
 	}
 	if(!wip_eventRemainder(&moveEvent) && wip_readMotion(UP)) {
 		action();
@@ -442,21 +438,22 @@ static void gameLoop(void) {
 	mat4x4_look_at(view.m, camera.position, center.position, axis);
 	mat4x4_mul(pv.m, projection.m, view.m);
 
-	// Render here...
+	// Rendering
 	drawRoom(&d.room[currentState.room], pv);
 	drawEnts(currentState.room, currentState.entity, pv);
 	// Viewmodel
 	glClear(GL_DEPTH_BUFFER_BIT);
 	if(wip_eventPart(&attkEvent, wip_easeLinear)) drawModel(&camera, swing_model, pv, NULL);
 	else drawModel(&camera, sword_model, pv, NULL);
-	// Interface
-	glClear(GL_DEPTH_BUFFER_BIT);
-	//drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
-	drawFormatStr(10, 10, 2.0f, "Health: %d", currentState.player.health);
-	if(toast != NULL && wip_eventPart(&toastEvent, wip_easeLinear))
-		drawStr(10, 20 + 2.0*CHAR_SIZE, 4.0f, toast);
+	if(!paused) {
+		// Interface
+		glClear(GL_DEPTH_BUFFER_BIT);
+		//drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
+		drawFormatStr(10, 10, 2.0f, "Health: %d", currentState.player.health);
+		if(toast != NULL && wip_eventPart(&toastEvent, wip_easeLinear))
+			drawStr(10, 20 + 2.0*CHAR_SIZE, 4.0f, toast);
+	}
 
-	//wip_glError();
 	return;
 }
 
@@ -569,7 +566,10 @@ static void messageLoop() {
 	}
 	drawStr(10, 10, 4, message);
 
-	if(wip_readMotion(USE) || wip_readMotion(HELP)) message = NULL;
+	if(wip_readMotion(USE) || wip_readMotion(HELP)) {
+		wip_clearMotions();
+		message = NULL;
+	}
 }
 
 void wip_gameLoop(void) {

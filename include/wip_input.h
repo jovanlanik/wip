@@ -100,6 +100,7 @@ typedef struct {
 	unsigned int key : 8;
 } wip_motion_t;
 
+void wip_clearMotions(void);
 enum wip_motion wip_findMotion(const char *name);
 int wip_readMotion(enum wip_motion m);
 int wip_writeMotion(wip_key_t key);
