@@ -1,0 +1,4 @@
+# Snakes
+
+Watch out for snakes! These creatures live in the
+dungeon and feed of unfortunate adventurers.

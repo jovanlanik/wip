@@ -12,7 +12,7 @@
 #include "wip_fn.h"
 
 #ifndef NDEBUG
-inline void *_wip_alloc(size_t size, const char *caller)
+void *_wip_alloc(size_t size, const char *caller)
 {
 	//wip_debug(WIP_INFO, "%s: allocating %zu bytes from %s", __func__, size, caller);
 	void *o = malloc(size);
@@ -23,9 +23,9 @@ inline void *_wip_alloc(size_t size, const char *caller)
 #endif
 
 #ifdef NDEBUG
-inline void *wip_realloc(void *pointer, size_t size, int *ret)
+void *wip_realloc(void *pointer, size_t size, int *ret)
 #else
-inline void *_wip_realloc(void *pointer, size_t size, int *ret, const char *caller)
+void *_wip_realloc(void *pointer, size_t size, int *ret, const char *caller)
 #endif
 {
 	//wip_debug(WIP_INFO, "%s: reallocating %p to %zu bytes from %s", __func__, pointer, size, caller);
@@ -41,7 +41,7 @@ inline void *_wip_realloc(void *pointer, size_t size, int *ret, const char *call
 }
 
 #ifndef NDEBUG
-inline void _wip_free(void *pointer, const char *caller)
+void _wip_free(void *pointer, const char *caller)
 {
 	//wip_debug(WIP_INFO, "%s: freeing %p from %s", __func__, pointer, caller);
 	free(pointer);

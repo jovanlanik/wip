@@ -1,0 +1,7 @@
+# Welcome to the dungeon!
+
+If you are unsure about the controls, press H for help.
+The door in front of you is locked, you must find a key
+and unlock it. But be prepared, in the next room you
+will encounter enemies! Slay them and reach the end of
+the dungeon to win.

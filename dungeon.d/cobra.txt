@@ -1,0 +1,5 @@
+# Cobra
+
+A Cobra is a more powerful snake but it doesn't move.
+It usualy guards doors and gates. Be careful, it never
+misses and can deal up to 2 damage!

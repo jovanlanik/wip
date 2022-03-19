@@ -3,7 +3,11 @@
 
 // Configuration Functions
 
+#ifdef __STDC_ALLOC_LIB__
+#define __STDC_WANT_LIB_EXT2__ 1
+#else
 #define _POSIX_C_SOURCE 200809L
+#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -23,18 +27,18 @@ config_t wip_globalConf;
 
 // TODO: Add unknown setting to config if not found.
 #define CONF_TYPE(type, name, lib, mac, def) \
-inline int wip_findConf##name(const char*path) { \
+int wip_findConf##name(const char*path) { \
 	config_setting_t *s = config_lookup(&wip_globalConf, path); \
 	if(s && config_setting_type(s) == mac) return 1; \
 	return 0; \
 } \
-inline type wip_getConf##name(const char *path) { \
+type wip_getConf##name(const char *path) { \
 	type x = def; \
 	if(!config_lookup_##lib(&wip_globalConf, path, &x)) \
 		wip_log(WIP_WARN, "%s: Can't find '%s' in config.", __func__, path); \
 	return x; \
 } \
-inline int wip_setConf##name(const char *path, type val) { \
+int wip_setConf##name(const char *path, type val) { \
 	config_setting_t *setting = config_lookup(&wip_globalConf, path); \
 	if(!setting || !config_setting_set_##lib(setting, val)) { \
 		wip_log(WIP_WARN, "%s: Can't set '%s': Not in config.", __func__, path); \
