@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 
 #include "wip_fn.h"
 #include "wip_conf.h"
@@ -472,6 +473,7 @@ static void gameLoop(void) {
 #define MENU_LIST \
 	MENU_ITEM(P_CONTINUE, "Continue", "Continue current game"), \
 	MENU_ITEM(P_NEW_GAME, "New Game", "Start a new game"), \
+	MENU_ITEM(P_SAVE_GAME, "Save Game", "Save your progress"), \
 	MENU_ITEM(P_LOAD_GAME, "Load Game", "Load a saved game"), \
 	MENU_ITEM(P_QUIT_GAME, "Quit Game", NULL)
 #include "d_menu_gen.h"
@@ -481,6 +483,25 @@ static void mainMenuFn(unsigned int selected, void *p) {
 		case M_NEW_GAME:
 			newGame();
 			started = 1;
+			break;
+		case M_LOAD_GAME:
+			{
+				FILE *save = fopen("./save.bin", "rb");
+				if(!save) {
+					wip_log(
+						WIP_ERROR,
+						"%s: Couldn't open ./save.bin: %s",
+						__func__,
+						strerror(errno)
+					);
+					message = "# Error\n\nFailed to load, check console output.";
+					return;
+				}
+				newGame();
+				fread(&currentState, sizeof(state_t), 1, save);
+				fclose(save);
+				started = 1;
+			}
 			break;
 		case M_CREDITS:
 			// TODO: finish credits
@@ -503,9 +524,9 @@ static void mainMenuFn(unsigned int selected, void *p) {
 			break;
 		case M_QUIT_GAME:
 			wip_globalWindow.close = 1;
-		default:
 			break;
 	}
+	return;
 }
 
 static void pauseMenuFn(unsigned int selected, void *p) {
@@ -515,11 +536,54 @@ static void pauseMenuFn(unsigned int selected, void *p) {
 		case P_CONTINUE:
 			paused = 0;
 			break;
+		case P_SAVE_GAME:
+			{
+				FILE *save = fopen("./save.bin", "wb");
+				if(!save) {
+					wip_log(
+						WIP_ERROR,
+						"%s: Couldn't open ./save.bin: %s",
+						__func__,
+						strerror(errno)
+					);
+					message = "# Error\n\nFailed to save, check console output.";
+				}
+				fwrite(&currentState, sizeof(state_t), 1, save);
+				fflush(save);
+				fclose(save);
+				message =
+					"# Save\n"
+					"\n"
+					"Your progress has been saved to ./save.bin\n"
+					"Keep in mind this file is binary and may or\n"
+					"may not load on another system."
+					;
+			}
+			break;
+		case P_LOAD_GAME:
+			{
+				FILE *save = fopen("./save.bin", "rb");
+				if(!save) {
+					wip_log(
+						WIP_ERROR,
+						"%s: Couldn't open ./save.bin: %s",
+						__func__,
+						strerror(errno)
+					);
+					message = "# Error\n\nFailed to load, check console output.";
+					return;
+				}
+				newGame();
+				fread(&currentState, sizeof(state_t), 1, save);
+				fclose(save);
+				paused = 0;
+			}
+			break;
 		case P_QUIT_GAME:
 			wip_globalWindow.close = 1;
-		default:
 			break;
 	}
+	return;
 }
 
 static void m_menuLoop(menu *menu) {

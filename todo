@@ -10,6 +10,7 @@
 	+ enemy
 		+ movement
 		+ attacks
-- saving
++ saving
 - enemy animation
 	- enemy events
+- fix animations on load

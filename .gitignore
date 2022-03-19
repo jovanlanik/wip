@@ -4,6 +4,7 @@
 /dungeon
 /gmon.out
 /mkconf.mk
+/save.bin
 compile_flags.txt
 compile_commands.json
 *.vert.h
