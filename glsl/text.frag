@@ -2,7 +2,6 @@
 // Copyright (c) 2021 Jovan Lanik
 
 // Text Fragment Shader
-// vim: filetype=c
 
 #version 330
 

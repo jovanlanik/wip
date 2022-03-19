@@ -10,6 +10,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
+#include <time.h>
 
 #include "wip_fn.h"
 #include "wip_conf.h"
@@ -56,6 +57,7 @@ wip_event_t rotateEvent;
 wip_event_t moveEvent;
 wip_event_t bumpEvent;
 wip_event_t toastEvent;
+wip_event_t attkEvent;
 struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } oldPos;
 
 // Runtime
@@ -65,6 +67,7 @@ char *message = NULL;
 char *toast = NULL;
 wip_obj_t center, camera;
 wip_glmdl_t *sword_model;
+wip_glmdl_t *swing_model;
 wip_glmdl_t *snake_model;
 dungeon_t d;
 wip_globj_t projection;
@@ -73,6 +76,9 @@ wip_globj_t projection;
 state_t currentState;
 
 static void initGameLoop(void) {
+	time_t t;
+	srand((unsigned) time(&t));
+
 	wip_makeObject(&camera);
 	camera.y = 0.0f;
 	camera.z = 0.0f;
@@ -87,6 +93,7 @@ static void initGameLoop(void) {
 	glDeleteShader(fragShader);
 
 	sword_model = wip_openModel("d_sword");
+	swing_model = wip_openModel("d_sword_swing");
 	snake_model = wip_openModel("d_snake");
 
 	lightLocation = glGetUniformLocation(program, "light");
@@ -119,9 +126,10 @@ static void newGame(void) {
 	wip_startEvent(&rotateEvent, 0.5);
 	wip_startEvent(&moveEvent, 0.25);
 	wip_startEvent(&bumpEvent, 0.125);
+	wip_startEvent(&attkEvent, 0.001);
 	makeToast(strdup("Welcome to the dungeon!"), 2.0);
 
-	currentState.keyring[1] = 1;
+	currentState.player.health = 10;
 
 	return;
 }
@@ -152,6 +160,19 @@ static void action(void) {
 			return;
 		case TILE_GATE:
 			{
+				if(currentState.room == tile->id) {
+					started = 0;
+					message =
+						"# YOU WON!\n"
+						"\n"
+						"You reached the end of the dungeon and slain all foes.\n"
+						"This adventure ends here but don't worry, you can\n"
+						"always start again. See if you can find any secrets.\n"
+						"\n"
+						"This game was made in a custom engine by Jovan Lanik\n"
+						"from scratch. Credits can be accessed from the menu."
+						;
+				}
 				char *gate_toast = strdup("Gate to room X");
 				unsigned int id = currentState.room;
 				currentState.room = tile->id;
@@ -184,8 +205,41 @@ static void action(void) {
 				currentState.player.x = fail.x;
 				currentState.player.y = fail.y;
 			}
+			return;
 		default:
 			break;
+	}
+	for(int i = 0; i < ENT_MAX; ++i) {
+		if(currentState.entity[i].room != currentState.room
+			|| currentState.entity[i].x != target.x
+			|| currentState.entity[i].y != target.y
+			) continue;
+		switch(currentState.entity[i].type) {
+			case ENT_ENEMY:
+				{
+					wip_startEvent(&bumpEvent, 0.125);
+					unsigned int dmg = rand() % 4 + 1;
+					char *attack_toast = strdup("You dealt X damage!");
+					attack_toast[10] = '0' + dmg;
+					makeToast(attack_toast, 2.0);
+					wip_startEvent(&attkEvent, 0.10);
+					currentState.entity[i].id -= dmg;
+					if(currentState.entity[i].id <= 0)
+						currentState.entity[i].type = ENT_NONE;
+					return;
+				}
+			case ENT_KEY:
+				{
+					char *key_toast = strdup("You found key X");
+					key_toast[strlen(key_toast)-1] = '0' + currentState.entity[i].id;
+					makeToast(key_toast, 2.0);
+					currentState.keyring[currentState.entity[i].id] = 1;
+					currentState.entity[i].type = ENT_NONE;
+				}
+				break;
+			default:
+				break;
+		}
 	}
 	wip_startEvent(&moveEvent, 0.25);
 	oldPos.x = currentState.player.x;
@@ -195,6 +249,13 @@ static void action(void) {
 }
 
 static void gameLoop(void) {
+	if(currentState.player.health <= 0) {
+		started = 0;
+		message =
+			"# YOU LOST!\n"
+			"\n"
+			;
+	}
 	if(wip_readMotion(HELP)) message =
 		"# Help\n"
 		"## Controls\n"
@@ -205,11 +266,33 @@ static void gameLoop(void) {
 		"- 'H' = Show help message\n"
 		"- WIP_ESC = Pause game";
 	if(wip_readMotion(USE)) {
-		char *msg = "# Inventory\n"
+		const char y[] = "[]";
+		const char n[] = "  ";
+		char msg[
+			sizeof(
+				"# Inventory\n"
+				"## Keyring\n"
+				"[1]  2   3 \n"
+				" 4   5   6 \n"
+				" 7   8   9 "
+				)
+		];
+		sprintf(msg,
+			"# Inventory\n"
 			"## Keyring\n"
-			"[1]  2   3 \n"
-			" 4   5   6 \n"
-			" 7   8   9 ";
+			"%c1%c %c2%c %c3%c\n"
+			"%c4%c %c5%c %c6%c\n"
+			"%c7%c %c8%c %c9%c",
+			currentState.keyring[1] ? y[0] : n[0], currentState.keyring[1] ? y[1] : n[1],
+			currentState.keyring[2] ? y[0] : n[0], currentState.keyring[2] ? y[1] : n[1],
+			currentState.keyring[3] ? y[0] : n[0], currentState.keyring[3] ? y[1] : n[1],
+			currentState.keyring[4] ? y[0] : n[0], currentState.keyring[4] ? y[1] : n[1],
+			currentState.keyring[5] ? y[0] : n[0], currentState.keyring[5] ? y[1] : n[1],
+			currentState.keyring[6] ? y[0] : n[0], currentState.keyring[6] ? y[1] : n[1],
+			currentState.keyring[7] ? y[0] : n[0], currentState.keyring[7] ? y[1] : n[1],
+			currentState.keyring[8] ? y[0] : n[0], currentState.keyring[8] ? y[1] : n[1],
+			currentState.keyring[9] ? y[0] : n[0], currentState.keyring[9] ? y[1] : n[1]
+		);
 		makeToast(strdup(msg), 2.0);
 	}
 	if(!wip_eventRemainder(&moveEvent) && wip_readMotion(UP)) action();
@@ -263,12 +346,15 @@ static void gameLoop(void) {
 
 	// Render here...
 	drawRoom(&d.room[currentState.room], pv);
+	drawEnts(currentState.entity, pv);
 	// Viewmodel
 	glClear(GL_DEPTH_BUFFER_BIT);
-	drawModel(&camera, sword_model, pv, NULL);
+	if(wip_eventPart(&attkEvent, wip_easeLinear)) drawModel(&camera, swing_model, pv, NULL);
+	else drawModel(&camera, sword_model, pv, NULL);
 	// Interface
 	glClear(GL_DEPTH_BUFFER_BIT);
-	drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
+	//drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
+	drawFormatStr(10, 10, 2.0f, "Health: %d", currentState.player.health);
 	if(toast != NULL && wip_eventPart(&toastEvent, wip_easeLinear))
 		drawStr(10, 20 + 2.0*CHAR_SIZE, 4.0f, toast);
 
@@ -282,6 +368,7 @@ static void gameLoop(void) {
 #define MENU_LIST \
 	MENU_ITEM(M_NEW_GAME, "New Game", "Start a new game"), \
 	MENU_ITEM(M_LOAD_GAME, "Load Game", "Load a saved game"), \
+	MENU_ITEM(M_CREDITS, "Credits", "Show game credits"), \
 	MENU_ITEM(M_QUIT_GAME, "Quit Game", NULL)
 #include "d_menu_gen.h"
 #define MENU_NAME pauseMenu
@@ -299,6 +386,25 @@ static void mainMenuFn(unsigned int selected, void *p) {
 		case M_NEW_GAME:
 			newGame();
 			started = 1;
+			break;
+		case M_CREDITS:
+			// TODO: finish credits
+			message =
+				"# Credits\n"
+				"Programming - Jovan Lanik\n"
+				"All assets not mentioned below - Jovan Lanik\n"
+				"\n"
+				"# Assets\n"
+				"Dina Programming Font - Jorgen Ibsen\n"
+				"\n"
+				"# Open-source libraries\n"
+				"linmath.h written by Wolfgang Draxinger,\n"
+				"    Do What The F*ck You Want To Public Licence\n"
+				"msh_ply.h written by Maciej Halber, MIT Licence\n"
+				"stb_image.h written by Sean Barrett, MIT Licence\n"
+				"glad written by David Herberth, MIT Licence\n"
+				"khrplatform.h, licence as specified in the file itself\n"
+				;
 			break;
 		case M_QUIT_GAME:
 			wip_globalWindow.close = 1;
@@ -384,9 +490,9 @@ void wip_gameLoop(void) {
 			wip_writeMotion(key);
 		}
 
-		if(started) {
+		if(message != NULL) messageLoop();
+		else if(started) {
 			if(paused) p_menuLoop(&pauseMenu);
-			else if(message != NULL) messageLoop();
 			else gameLoop();
 		} else m_menuLoop(&mainMenu);
 

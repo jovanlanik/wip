@@ -6,7 +6,6 @@
 ! `model` load a model
 ! accepts capital letter and model filename
 model T d_torch
-model S d_snake
 
 ! `room` starts a room definition
 ! accepts room id, width and height
@@ -19,9 +18,17 @@ room 0 7 5
 ! for gates, data is room id
 ## ## ## ## ## G1 ##
 ## -- -- -- ## -- ##
-## -- -- -- D1 -- ##
+## -- -- -- D2 -- ##
 ## -- -- -- ## -- ##
 ## ## ## ## ## ## ##
+
+! `entity` spawns an entity
+! accepts:
+! type (`S` is snake, `K` is key)
+! data (health for snakes and key id for keys)
+! room, x, y and dir
+entity S 8 0 3 2 <
+entity K 2 0 2 3 v
 
 ! `player` sets the starting room, pos and dir
 player 0 1 2 >
@@ -41,17 +48,17 @@ deco 0 0
 
 deco 0 1
 .. .. .. .. .. .. ..
-.. .. TS .. .. .. ..
+.. .. Tv .. .. .. ..
 .. .. .. .. .. .. ..
-.. .. S^ .. .. T^ ..
+.. .. .. .. .. T^ ..
 .. .. .. .. .. .. ..
 
 room 1 3 3
-## ## ##
+## G1 ##
 ## -- ##
 ## G0 ##
 
 deco 1 0
+== =v ==
 == == ==
-== == ==
-== G^ ==
+== =^ ==

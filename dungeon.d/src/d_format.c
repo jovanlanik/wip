@@ -6,7 +6,6 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
@@ -164,6 +163,11 @@ static int readDeco(char **token, room_t *room, unsigned int layer) {
 	return i;
 }
 
+static entity_t *getEnt(entity_t *ent) {
+	for(int i = 0; i < ENT_MAX; ++i) if(ent[i].type == ENT_NONE) return &ent[i];
+	return NULL;
+}
+
 int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 	wip_debug(WIP_INFO, "%s: Loading dungeon from %s...", __func__, filename);
 
@@ -195,7 +199,7 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 	wip_free(line);
 	wip_debug(WIP_INFO, "%s: Found %d tokens in dungeon file.", __func__, token_c);
 
-	state->dungeon = filename;
+	strcpy(state->dungeon, filename);
 	state->room = 0;
 	state->player.x = 0;
 	state->player.y = 0;
@@ -250,6 +254,7 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 			i += 2;
 		}
 		else if(strcmp("player", token[i]) == 0) i += 4;
+		else if(strcmp("entity", token[i]) == 0) i += 6;
 	}
 
 	for(int i = 0; i < token_c; ++i) {
@@ -308,6 +313,37 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 			}
 			state->player.direction = direction_map[(int)token[i+4][0]];
 			i += 4;
+		}
+		else if(strcmp("entity", token[i]) == 0) {
+			entity_t *ent = getEnt(state->entity);
+			switch(token[i+1][0]) {
+				case 'K':
+					ent->type = ENT_KEY;
+					break;
+				case 'S':
+					ent->type = ENT_ENEMY;
+					break;
+				default:
+					break;
+			}
+			if(wip_atoi(token[i+2], &ent->id)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
+				return 1;
+			}
+			if(wip_atoui(token[i+3], &ent->room)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected room id (uint).", __func__, token[i+1]);
+				return 1;
+			}
+			if(wip_atoi(token[i+4], &ent->x)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected X pos (int).", __func__, token[i+1]);
+				return 1;
+			}
+			if(wip_atoi(token[i+5], &ent->y)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected Y pos (int).", __func__, token[i+1]);
+				return 1;
+			}
+			ent->direction = direction_map[(int)token[i+6][0]];
+			i += 6;
 		}
 		else {
 			wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);

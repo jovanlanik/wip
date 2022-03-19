@@ -30,6 +30,8 @@ void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t 
 		texture = wip_openTexture("d_wall");
 	}
 
+	if(!model) return;
+
 	wip_globj_t mpv;
 	wip_globj_t transform;
 	wip_loadObject(&transform, object);
@@ -88,4 +90,44 @@ void drawRoom(room_t *room, wip_globj_t pv) {
 	return;
 }
 
+static wip_glmdl_t *getEntModel(entity_t *ent) {
+	static int init = 0;
+	static wip_glmdl_t *snake_model;
+	static wip_glmdl_t *key_model;
+	if(init == 0) {
+		init = 1;
+		snake_model = wip_openModel("d_snake");
+		key_model = wip_openModel("d_key");
+	}
+	switch(ent->type) {
+		case ENT_KEY:
+			return key_model;
+		case ENT_ENEMY:
+			return snake_model;
+		default:
+			return NULL;
+	}
+}
+
+void drawEnts(entity_t *ent, wip_globj_t pv) {
+	static int init = 0;
+	static wip_obj_t object[4];
+	if(init == 0) {
+		init = 1;
+		for(int i = 0; i < 4; ++i) {
+			wip_makeObject(&object[i]);
+			quat_rotate(object[i].rotation, TO_RAD(i * 90.0), (float[]){0, 0, 1});
+		}
+	}
+	for(int i = 0; i < ENT_MAX; ++i) {
+		if(ent[i].type == ENT_NONE) continue;
+		object[ent[i].direction].x = 2 * ent[i].x;
+		object[ent[i].direction].y = 2 * ent[i].y;
+		wip_glmdl_t *model = getEntModel(&ent[i]);
+		drawModel(
+			&object[ent[i].direction],
+			model, pv, NULL
+		);
+	}
+}
 
