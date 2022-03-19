@@ -10,7 +10,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
 
 #include "wip_fn.h"
@@ -78,9 +77,6 @@ wip_globj_t projection;
 state_t currentState;
 
 static void initGameLoop(void) {
-	time_t t;
-	srand((unsigned) time(&t));
-
 	wip_makeObject(&camera);
 	camera.y = 0.0f;
 	camera.z = 0.0f;
@@ -121,6 +117,8 @@ static void makeStaticToast(char *toast) {
 }
 
 static void newGame(void) {
+	srand((unsigned)wip_timeWindow());
+
 	memset(&currentState, 0, sizeof(state_t));
 	if(readDungeon(&d, &currentState,"./dungeon.d/example.df") != 0)
 		wip_log(WIP_FATAL, "%s: Couldn't load dungeon from %s.", __func__, currentState.dungeon);
