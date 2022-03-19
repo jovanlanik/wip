@@ -93,6 +93,7 @@ char *wip_readFile(FILE* file) {
 	rewind(file);
 	char *buff = wip_alloc(size+1);
 	fread(buff, 1, size, file);
+	buff[size] = '\0';
 	return buff;
 }
 
