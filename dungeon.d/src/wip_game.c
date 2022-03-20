@@ -121,7 +121,7 @@ static void newGame(void) {
 	srand((unsigned)wip_timeWindow());
 
 	memset(&currentState, 0, sizeof(state_t));
-	if(readDungeon(&d, &currentState,"./dungeon.d/example.df") != 0)
+	if(readDungeon(&d, &currentState,"./res/map/main.df") != 0)
 		wip_log(WIP_FATAL, "%s: Couldn't load dungeon from %s.", __func__, currentState.dungeon);
 
 	oldPos.x = currentState.player.x;
