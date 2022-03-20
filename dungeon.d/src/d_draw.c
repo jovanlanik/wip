@@ -10,6 +10,7 @@
 #include "external/glad/glad.h"
 #include "external/linmath.h"
 
+#include "d_draw.h"
 #include "d_format.h"
 
 extern unsigned int lightLocation;
@@ -121,23 +122,32 @@ static wip_glmdl_t *getEntModel(entity_t *ent) {
 	}
 }
 
+extern struct anim entity_anim[];
+
 void drawEnts(unsigned int room, entity_t *ent, wip_globj_t pv) {
-	static int init = 0;
-	static wip_obj_t object[4];
-	if(init == 0) {
-		init = 1;
-		for(int i = 0; i < 4; ++i) {
-			wip_makeObject(&object[i]);
-			quat_rotate(object[i].rotation, TO_RAD(i * 90.0), (float[]){0, 0, 1});
-		}
-	}
+	static wip_obj_t object;
 	for(int i = 0; i < ENT_MAX; ++i) {
 		if(ent[i].type == ENT_NONE || ent[i].room != room) continue;
-		object[ent[i].direction].x = 2 * ent[i].x;
-		object[ent[i].direction].y = 2 * ent[i].y;
+		wip_makeObject(&object);
+		
+		float angle = 0.0, oldAngle = 0.0;
+		if(ent[i].d == 0 && entity_anim[i].d == 3)
+			angle = TO_RAD(360.0);
+		else if(ent[i].d == 3 && entity_anim[i].d == 0)
+			oldAngle = TO_RAD(360.0);
+		angle += TO_RAD(90.0 * ent[i].d);
+		oldAngle += TO_RAD(90.0 * entity_anim[i].d);
+
+		quat_rotate(
+			object.rotation,
+			wip_interpolate(angle, oldAngle, wip_eventPart(&entity_anim[i].rotateEvent, wip_easeInOut)),
+			(float[]){0, 0, 1}
+		);
+		object.x = wip_interpolate(2 * ent[i].x, 2 * entity_anim[i].x, wip_eventPart(&entity_anim[i].moveEvent, wip_easeInOut));
+		object.y = wip_interpolate(2 * ent[i].y, 2 * entity_anim[i].y, wip_eventPart(&entity_anim[i].moveEvent, wip_easeInOut));
 		wip_glmdl_t *model = getEntModel(&ent[i]);
 		drawModel(
-			&object[ent[i].direction],
+			&object,
 			model, pv, NULL
 		);
 	}

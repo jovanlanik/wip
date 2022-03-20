@@ -11,6 +11,6 @@
 		+ movement
 		+ attacks
 + saving
-- enemy animation
-	- enemy events
-- fix animations on load
++ enemy events
++ fix animations on load
++ enemy animation

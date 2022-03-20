@@ -72,6 +72,7 @@ wip_glmdl_t *swing_model;
 wip_glmdl_t *snake_model;
 dungeon_t d;
 wip_globj_t projection;
+struct anim entity_anim[ENT_MAX];
 
 // Game
 state_t currentState;
@@ -139,6 +140,19 @@ static void newGame(void) {
 	return;
 }
 
+static void setUp(void) {
+	oldDir = currentState.player.d;
+	oldPos.x = currentState.player.x;
+	oldPos.y = currentState.player.y;
+	for(int i = 0; i < ENT_MAX; ++i) {
+		entity_anim[i].d = currentState.entity[i].d;
+		entity_anim[i].x = currentState.entity[i].x;
+		entity_anim[i].y = currentState.entity[i].y;
+		wip_startEvent(&entity_anim[i].rotateEvent, 0.5);
+		wip_startEvent(&entity_anim[i].moveEvent, 0.5);
+	}
+}
+
 static float distance(int a[2], int b[2]) {
 	vec2 af = { a[0], a[1] };
 	vec2 bf = { b[0], b[1] };
@@ -175,10 +189,14 @@ static void entityAct(unsigned int chance) {
 						}
 					}
 					else if(targetDist < currentDist && currentState.entity[i].type == ENT_SNAKE) {
+						entity_anim[i].x = currentState.entity[i].x;
+						entity_anim[i].y = currentState.entity[i].y;
 						currentState.entity[i].x = target.x;
 						currentState.entity[i].y = target.y;
+						wip_startEvent(&entity_anim[i].moveEvent, 0.5);
 					}
 					else {
+						entity_anim[i].d = currentState.entity[i].d;
 						currentState.entity[i].d++;
 						if(currentState.entity[i].d < 0) currentState.entity[i].d = 3;
 						currentState.entity[i].d %= 4;
@@ -205,6 +223,7 @@ static void entityAct(unsigned int chance) {
 							currentState.entity[i].d--;
 						if(currentState.entity[i].d < 0) currentState.entity[i].d = 3;
 						currentState.entity[i].d %= 4;
+						wip_startEvent(&entity_anim[i].rotateEvent, 0.5);
 					}
 				}
 				break;
@@ -483,6 +502,7 @@ static void mainMenuFn(unsigned int selected, void *p) {
 	switch(selected) {
 		case M_NEW_GAME:
 			newGame();
+			setUp();
 			started = 1;
 			break;
 		case M_LOAD_GAME:
@@ -501,6 +521,7 @@ static void mainMenuFn(unsigned int selected, void *p) {
 				newGame();
 				fread(&currentState, sizeof(state_t), 1, save);
 				fclose(save);
+				setUp();
 				started = 1;
 			}
 			break;
@@ -541,6 +562,7 @@ static void pauseMenuFn(unsigned int selected, void *p) {
 	switch(selected) {
 		case P_NEW_GAME:
 			newGame();
+			setUp();
 		case P_CONTINUE:
 			paused = 0;
 			break;
@@ -584,6 +606,7 @@ static void pauseMenuFn(unsigned int selected, void *p) {
 				newGame();
 				fread(&currentState, sizeof(state_t), 1, save);
 				fclose(save);
+				setUp();
 				paused = 0;
 			}
 			break;
