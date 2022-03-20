@@ -226,7 +226,7 @@ static void action(void) {
 	switch(tile->type) {
 		case TILE_DOOR:
 			if(tile->id == 0) break;
-			else if(currentState.keyring[tile->id]) {
+			else if(currentState.keyring[tile->id-1]) {
 				makeStaticToast("Unlocked door");
 				room->deco[0][room->width*target.y+target.x].model = tile->data;
 				tile->id = 0;
@@ -261,6 +261,8 @@ static void action(void) {
 				room_t *t = &d.room[tile->id];
 				unsigned int w = t->width;
 				struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } fail;
+				fail.x = 0;
+				fail.y = 0;
 				for(int y = 0; y < t->height; ++y) {
 					for(int x = 0; x < t->width; ++x) {
 						if(t->tile[w*y+x].type == TILE_FLOOR) {
@@ -307,7 +309,7 @@ static void action(void) {
 					char *key_toast = strdup("You found key X");
 					key_toast[strlen(key_toast)-1] = '0' + currentState.entity[i].id;
 					makeToast(key_toast);
-					currentState.keyring[currentState.entity[i].id] = 1;
+					currentState.keyring[currentState.entity[i].id-1] = 1;
 					currentState.entity[i].type = ENT_NONE;
 				}
 				break;
@@ -371,6 +373,7 @@ static void gameLoop(void) {
 			"%c7%c %c8%c %c9%c";
 		char inv[sizeof(format)];
 		sprintf(inv, format,
+			currentState.keyring[0] ? y[0] : n[0], currentState.keyring[0] ? y[1] : n[1],
 			currentState.keyring[1] ? y[0] : n[0], currentState.keyring[1] ? y[1] : n[1],
 			currentState.keyring[2] ? y[0] : n[0], currentState.keyring[2] ? y[1] : n[1],
 			currentState.keyring[3] ? y[0] : n[0], currentState.keyring[3] ? y[1] : n[1],
@@ -378,8 +381,7 @@ static void gameLoop(void) {
 			currentState.keyring[5] ? y[0] : n[0], currentState.keyring[5] ? y[1] : n[1],
 			currentState.keyring[6] ? y[0] : n[0], currentState.keyring[6] ? y[1] : n[1],
 			currentState.keyring[7] ? y[0] : n[0], currentState.keyring[7] ? y[1] : n[1],
-			currentState.keyring[8] ? y[0] : n[0], currentState.keyring[8] ? y[1] : n[1],
-			currentState.keyring[9] ? y[0] : n[0], currentState.keyring[9] ? y[1] : n[1]
+			currentState.keyring[8] ? y[0] : n[0], currentState.keyring[8] ? y[1] : n[1]
 		);
 		makeStaticToast(inv);
 	}
@@ -476,6 +478,7 @@ static void gameLoop(void) {
 	MENU_ITEM(P_QUIT_GAME, "Quit Game", NULL)
 #include "d_menu_gen.h"
 
+
 static void mainMenuFn(unsigned int selected, void *p) {
 	switch(selected) {
 		case M_NEW_GAME:
@@ -502,7 +505,6 @@ static void mainMenuFn(unsigned int selected, void *p) {
 			}
 			break;
 		case M_CREDITS:
-			// TODO: finish credits
 			message =
 				"# Credits\n"
 				"Programming - Jovan Lanik\n"
@@ -518,6 +520,14 @@ static void mainMenuFn(unsigned int selected, void *p) {
 				"stb_image.h written by Sean Barrett, MIT Licence\n"
 				"glad written by David Herberth, MIT Licence\n"
 				"khrplatform.h, licence as specified in the file itself\n"
+				"libconfig written by Mark Lindner, LGPL\n"
+#if defined(WIP_GLFW)
+				"glfw written by Marcus Geelnard and Camilla Lowy,\n    zlib licence"
+#elif defined(WIP_SDL2)
+				"sdl2 written by Sam Lantinga, zlib licence"
+#else
+				"unknown window backend, check licence file"
+#endif
 				;
 			break;
 		case M_QUIT_GAME:
