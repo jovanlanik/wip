@@ -1,5 +1,5 @@
 # WIP
-This is a work-in-progress game engine using OpenGL.
+This is a work-in-progress game engine using OpenGL and a game called Dungeon implemented in it.
 ## Dependencies
 ### Build tools
 - GCC or Clang
