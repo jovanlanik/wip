@@ -363,6 +363,7 @@ static void action(void) {
 }
 
 static void gameLoop(void) {
+	if(wip_readMotion(ESC)) { paused = 1; return; }
 	if(currentState.player.health <= 0) {
 		started = 0;
 		message =
@@ -623,6 +624,7 @@ static void m_menuLoop(menu *menu) {
 	if(wip_readMotion(UP)) selected--;
 	selected = (selected + menu->item_c) % menu->item_c;
 	if(wip_readMotion(USE)) {
+		wip_clearMotions();
 		menu->func(selected, NULL);
 		selected = 0;
 	}
@@ -639,6 +641,7 @@ static void p_menuLoop(menu *menu) {
 	if(wip_readMotion(UP)) selected--;
 	selected = (selected + menu->item_c) % menu->item_c;
 	if(wip_readMotion(USE)) {
+		wip_clearMotions();
 		menu->func(selected, NULL);
 		selected = 0;
 	}
@@ -654,14 +657,14 @@ static void p_menuLoop(menu *menu) {
 static void messageLoop() {
 	toastEvent.length = 0;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	if(started && !paused) {
+	if(started) {
 		wip_globalKeyLock = 1;
 		gameLoop();
 		wip_globalKeyLock = 0;
 	}
 	drawStr(10, 10, 4.0, message);
 
-	if(wip_readMotion(USE) || wip_readMotion(HELP)) {
+	if(wip_readMotion(USE) || wip_readMotion(ESC)) {
 		wip_clearMotions();
 		message = NULL;
 	}
@@ -680,7 +683,6 @@ void wip_gameLoop(void) {
 		wip_key_t key;
 		while((key = wip_readKey()).action) {
 			if(key.key == WIP_LOCKED) break;
-			if(key.action == WIP_RELEASE && key.key == WIP_ESC) paused = 1;
 			wip_writeMotion(key);
 		}
 

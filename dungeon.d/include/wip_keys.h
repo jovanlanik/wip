@@ -15,7 +15,8 @@
 	MOTION(WIP_ONCE,	LEFT,	WIP_LEFT), \
 	MOTION(WIP_ONCE,	RIGHT,	WIP_RIGHT), \
 	MOTION(WIP_ONCE,	USE,	WIP_ENTER), \
-	MOTION(WIP_ONCE,	HELP,	WIP_ALPHA-'a'+'h')
+	MOTION(WIP_ONCE,	HELP,	WIP_ALPHA-'a'+'h'), \
+	MOTION(WIP_ONCE,	ESC,	WIP_ESC)
 
 #define MOTION(type, motion, key) motion
 enum wip_motion {
