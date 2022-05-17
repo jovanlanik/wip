@@ -46,7 +46,7 @@ char *wip_parseOptions(int argc, char *argv[]) { if(argc-1) wip_log(WIP_WARN, "%
 #else
 char *wip_parseOptions(int argc, char *argv[]) {
 	char opt = 0;
-	static struct option options[] = {
+	const struct option options[] = {
 		{ .name = "help", .val = 'h' },
 		{ .name = "version", .val = 'V' },
 		{ .name = "usage", .val = 'u' },
