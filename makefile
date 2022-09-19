@@ -26,7 +26,7 @@ CFLAGS += -pipe -std=c11 -DWIP_GAME=$(GAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEN
 CFLAGS_SRC = $(CFLAGS) -Wall -Wpedantic -I include -I $(GAME).d/include
 CFLAGS_EXT = $(CFLAGS) -I include/external
 
-LDFLAGS += -ldl -lm $(shell pkg-config --libs $(LIBS))
+LDLIBS = -ldl -lm $(shell pkg-config --libs $(LIBS))
 
 ifndef NDEBUG
     $(warning NDEBUG not explicitly set.)
@@ -56,24 +56,31 @@ OBJ = $(addprefix $(BUILDDIR)/, \
 .PHONY: all clean
 
 all: $(GAME)
+
 clean:
 	rm -r $(BUILDDIR)
+
 $(GAME): $(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) -o $@
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_SRC) -c $< -o $@
+
 $(BUILDDIR)/src/external/%.o: src/external/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_EXT) -c $< -o $@
+
 $(BUILDDIR)/%.vert.o: %.vert
 	@glslangValidator $<
 	@mkdir -p $(dir $@)
 	util/bake $< $@
+
 $(BUILDDIR)/%.frag.o: %.frag
 	@glslangValidator $<
 	@mkdir -p $(dir $@)
 	util/bake $< $@
+
 $(BUILDDIR)/%.conf.o: %.conf
 	@mkdir -p $(dir $@)
 	util/bake $< $@
