@@ -92,4 +92,3 @@ void drawFormatStr(unsigned int x, unsigned int y, float scale, char *format, ..
 	wip_free(str);
 }
 
-

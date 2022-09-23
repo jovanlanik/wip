@@ -3,13 +3,12 @@
 
 # Makefile
 
-include mkconf.mk
-
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
-GAME ?= dungeon
-BUILDDIR ?= build
-WINDOW_BACKEND ?= glfw
+GAME := dungeon
+BUILDDIR = build
+WINDOW_BACKEND = glfw
+include mkconf.mk
 
 LIBS := gl libconfig
 
@@ -22,7 +21,6 @@ else
 endif
 
 CFLAGS += -pipe -std=c11 -DWIP_GAME=$(GAME) -DWIP_WINDOW_BACKEND=$(WINDOW_BACKEND) $(shell pkg-config --cflags $(LIBS))
-
 CFLAGS_SRC = $(CFLAGS) -Wall -Wpedantic -I include -I $(GAME).d/include
 CFLAGS_EXT = $(CFLAGS) -I include/external
 
