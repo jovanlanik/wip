@@ -5,10 +5,6 @@
 #include <math.h>
 #include <string.h>
 
-/* 2021-03-21 Camilla Löwy <elmindreda@elmindreda.org>
- * - Replaced double constants with float equivalents
- */
-
 #ifdef LINMATH_NO_INLINE
 #define LINMATH_H_FUNC static
 #else
@@ -17,25 +13,25 @@
 
 #define LINMATH_H_DEFINE_VEC(n) \
 typedef float vec##n[n]; \
-LINMATH_H_FUNC void vec##n##_add(vec##n r, vec##n  a, vec##n  b) \
+LINMATH_H_FUNC void vec##n##_add(vec##n r, vec##n a, vec##n b) \
 { \
 	int i; \
 	for(i=0; i<n; ++i) \
 		r[i] = a[i] + b[i]; \
 } \
-LINMATH_H_FUNC void vec##n##_sub(vec##n r, vec##n  a, vec##n  b) \
+LINMATH_H_FUNC void vec##n##_sub(vec##n r, vec##n a, vec##n b) \
 { \
 	int i; \
 	for(i=0; i<n; ++i) \
 		r[i] = a[i] - b[i]; \
 } \
-LINMATH_H_FUNC void vec##n##_scale(vec##n r, vec##n  v, float  s) \
+LINMATH_H_FUNC void vec##n##_scale(vec##n r, vec##n v, float s) \
 { \
 	int i; \
 	for(i=0; i<n; ++i) \
 		r[i] = v[i] * s; \
 } \
-LINMATH_H_FUNC float vec##n##_mul_inner(vec##n  a, vec##n  b) \
+LINMATH_H_FUNC float vec##n##_mul_inner(vec##n a, vec##n b) \
 { \
 	float p = 0.f; \
 	int i; \
@@ -43,28 +39,28 @@ LINMATH_H_FUNC float vec##n##_mul_inner(vec##n  a, vec##n  b) \
 		p += b[i]*a[i]; \
 	return p; \
 } \
-LINMATH_H_FUNC float vec##n##_len(vec##n  v) \
+LINMATH_H_FUNC float vec##n##_len(vec##n v) \
 { \
 	return sqrtf(vec##n##_mul_inner(v,v)); \
 } \
-LINMATH_H_FUNC void vec##n##_norm(vec##n r, vec##n  v) \
+LINMATH_H_FUNC void vec##n##_norm(vec##n r, vec##n v) \
 { \
 	float k = 1.f / vec##n##_len(v); \
 	vec##n##_scale(r, v, k); \
 } \
-LINMATH_H_FUNC void vec##n##_min(vec##n r, vec##n  a, vec##n  b) \
+LINMATH_H_FUNC void vec##n##_min(vec##n r, vec##n a, vec##n b) \
 { \
 	int i; \
 	for(i=0; i<n; ++i) \
 		r[i] = a[i]<b[i] ? a[i] : b[i]; \
 } \
-LINMATH_H_FUNC void vec##n##_max(vec##n r, vec##n  a, vec##n  b) \
+LINMATH_H_FUNC void vec##n##_max(vec##n r, vec##n a, vec##n b) \
 { \
 	int i; \
 	for(i=0; i<n; ++i) \
 		r[i] = a[i]>b[i] ? a[i] : b[i]; \
 } \
-LINMATH_H_FUNC void vec##n##_dup(vec##n r, vec##n  src) \
+LINMATH_H_FUNC void vec##n##_dup(vec##n r, vec##n src) \
 { \
 	int i; \
 	for(i=0; i<n; ++i) \
@@ -75,14 +71,14 @@ LINMATH_H_DEFINE_VEC(2)
 LINMATH_H_DEFINE_VEC(3)
 LINMATH_H_DEFINE_VEC(4)
 
-LINMATH_H_FUNC void vec3_mul_cross(vec3 r, vec3  a, vec3  b)
+LINMATH_H_FUNC void vec3_mul_cross(vec3 r, vec3 a, vec3 b)
 {
 	r[0] = a[1]*b[2] - a[2]*b[1];
 	r[1] = a[2]*b[0] - a[0]*b[2];
 	r[2] = a[0]*b[1] - a[1]*b[0];
 }
 
-LINMATH_H_FUNC void vec3_reflect(vec3 r, vec3  v, vec3  n)
+LINMATH_H_FUNC void vec3_reflect(vec3 r, vec3 v, vec3 n)
 {
 	float p = 2.f * vec3_mul_inner(v, n);
 	int i;
@@ -90,7 +86,7 @@ LINMATH_H_FUNC void vec3_reflect(vec3 r, vec3  v, vec3  n)
 		r[i] = v[i] - p*n[i];
 }
 
-LINMATH_H_FUNC void vec4_mul_cross(vec4 r, vec4  a, vec4  b)
+LINMATH_H_FUNC void vec4_mul_cross(vec4 r, vec4 a, vec4 b)
 {
 	r[0] = a[1]*b[2] - a[2]*b[1];
 	r[1] = a[2]*b[0] - a[0]*b[2];
@@ -98,7 +94,7 @@ LINMATH_H_FUNC void vec4_mul_cross(vec4 r, vec4  a, vec4  b)
 	r[3] = 1.f;
 }
 
-LINMATH_H_FUNC void vec4_reflect(vec4 r, vec4  v, vec4  n)
+LINMATH_H_FUNC void vec4_reflect(vec4 r, vec4 v, vec4 n)
 {
 	float p  = 2.f*vec4_mul_inner(v, n);
 	int i;
@@ -114,25 +110,25 @@ LINMATH_H_FUNC void mat4x4_identity(mat4x4 M)
 		for(j=0; j<4; ++j)
 			M[i][j] = i==j ? 1.f : 0.f;
 }
-LINMATH_H_FUNC void mat4x4_dup(mat4x4 M, mat4x4  N)
+LINMATH_H_FUNC void mat4x4_dup(mat4x4 M, mat4x4 N)
 {
 	int i;
 	for(i=0; i<4; ++i)
 		vec4_dup(M[i], N[i]);
 }
-LINMATH_H_FUNC void mat4x4_row(vec4 r, mat4x4  M, int i)
+LINMATH_H_FUNC void mat4x4_row(vec4 r, mat4x4 M, int i)
 {
 	int k;
 	for(k=0; k<4; ++k)
 		r[k] = M[k][i];
 }
-LINMATH_H_FUNC void mat4x4_col(vec4 r, mat4x4  M, int i)
+LINMATH_H_FUNC void mat4x4_col(vec4 r, mat4x4 M, int i)
 {
 	int k;
 	for(k=0; k<4; ++k)
 		r[k] = M[i][k];
 }
-LINMATH_H_FUNC void mat4x4_transpose(mat4x4 M, mat4x4  N)
+LINMATH_H_FUNC void mat4x4_transpose(mat4x4 M, mat4x4 N)
 {
     // Note: if M and N are the same, the user has to
     // explicitly make a copy of M and set it to N.
@@ -141,32 +137,32 @@ LINMATH_H_FUNC void mat4x4_transpose(mat4x4 M, mat4x4  N)
 		for(i=0; i<4; ++i)
 			M[i][j] = N[j][i];
 }
-LINMATH_H_FUNC void mat4x4_add(mat4x4 M, mat4x4  a, mat4x4  b)
+LINMATH_H_FUNC void mat4x4_add(mat4x4 M, mat4x4 a, mat4x4 b)
 {
 	int i;
 	for(i=0; i<4; ++i)
 		vec4_add(M[i], a[i], b[i]);
 }
-LINMATH_H_FUNC void mat4x4_sub(mat4x4 M, mat4x4  a, mat4x4  b)
+LINMATH_H_FUNC void mat4x4_sub(mat4x4 M, mat4x4 a, mat4x4 b)
 {
 	int i;
 	for(i=0; i<4; ++i)
 		vec4_sub(M[i], a[i], b[i]);
 }
-LINMATH_H_FUNC void mat4x4_scale(mat4x4 M, mat4x4  a, float k)
+LINMATH_H_FUNC void mat4x4_scale(mat4x4 M, mat4x4 a, float k)
 {
 	int i;
 	for(i=0; i<4; ++i)
 		vec4_scale(M[i], a[i], k);
 }
-LINMATH_H_FUNC void mat4x4_scale_aniso(mat4x4 M, mat4x4  a, float x, float y, float z)
+LINMATH_H_FUNC void mat4x4_scale_aniso(mat4x4 M, mat4x4 a, float x, float y, float z)
 {
 	vec4_scale(M[0], a[0], x);
 	vec4_scale(M[1], a[1], y);
 	vec4_scale(M[2], a[2], z);
 	vec4_dup(M[3], a[3]);
 }
-LINMATH_H_FUNC void mat4x4_mul(mat4x4 M, mat4x4  a, mat4x4  b)
+LINMATH_H_FUNC void mat4x4_mul(mat4x4 M, mat4x4 a, mat4x4 b)
 {
 	mat4x4 temp;
 	int k, r, c;
@@ -177,7 +173,7 @@ LINMATH_H_FUNC void mat4x4_mul(mat4x4 M, mat4x4  a, mat4x4  b)
 	}
 	mat4x4_dup(M, temp);
 }
-LINMATH_H_FUNC void mat4x4_mul_vec4(vec4 r, mat4x4  M, vec4  v)
+LINMATH_H_FUNC void mat4x4_mul_vec4(vec4 r, mat4x4 M, vec4 v)
 {
 	int i, j;
 	for(j=0; j<4; ++j) {
@@ -203,13 +199,13 @@ LINMATH_H_FUNC void mat4x4_translate_in_place(mat4x4 M, float x, float y, float 
 		M[3][i] += vec4_mul_inner(r, t);
 	}
 }
-LINMATH_H_FUNC void mat4x4_from_vec3_mul_outer(mat4x4 M, vec3  a, vec3  b)
+LINMATH_H_FUNC void mat4x4_from_vec3_mul_outer(mat4x4 M, vec3 a, vec3 b)
 {
 	int i, j;
 	for(i=0; i<4; ++i) for(j=0; j<4; ++j)
 		M[i][j] = i<3 && j<3 ? a[i] * b[j] : 0.f;
 }
-LINMATH_H_FUNC void mat4x4_rotate(mat4x4 R, mat4x4  M, float x, float y, float z, float angle)
+LINMATH_H_FUNC void mat4x4_rotate(mat4x4 R, mat4x4 M, float x, float y, float z, float angle)
 {
 	float s = sinf(angle);
 	float c = cosf(angle);
@@ -243,7 +239,7 @@ LINMATH_H_FUNC void mat4x4_rotate(mat4x4 R, mat4x4  M, float x, float y, float z
 		mat4x4_dup(R, M);
 	}
 }
-LINMATH_H_FUNC void mat4x4_rotate_X(mat4x4 Q, mat4x4  M, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_X(mat4x4 Q, mat4x4 M, float angle)
 {
 	float s = sinf(angle);
 	float c = cosf(angle);
@@ -255,7 +251,7 @@ LINMATH_H_FUNC void mat4x4_rotate_X(mat4x4 Q, mat4x4  M, float angle)
 	};
 	mat4x4_mul(Q, M, R);
 }
-LINMATH_H_FUNC void mat4x4_rotate_Y(mat4x4 Q, mat4x4  M, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_Y(mat4x4 Q, mat4x4 M, float angle)
 {
 	float s = sinf(angle);
 	float c = cosf(angle);
@@ -267,7 +263,7 @@ LINMATH_H_FUNC void mat4x4_rotate_Y(mat4x4 Q, mat4x4  M, float angle)
 	};
 	mat4x4_mul(Q, M, R);
 }
-LINMATH_H_FUNC void mat4x4_rotate_Z(mat4x4 Q, mat4x4  M, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_Z(mat4x4 Q, mat4x4 M, float angle)
 {
 	float s = sinf(angle);
 	float c = cosf(angle);
@@ -279,7 +275,7 @@ LINMATH_H_FUNC void mat4x4_rotate_Z(mat4x4 Q, mat4x4  M, float angle)
 	};
 	mat4x4_mul(Q, M, R);
 }
-LINMATH_H_FUNC void mat4x4_invert(mat4x4 T, mat4x4  M)
+LINMATH_H_FUNC void mat4x4_invert(mat4x4 T, mat4x4 M)
 {
 	float s[6];
 	float c[6];
@@ -320,7 +316,7 @@ LINMATH_H_FUNC void mat4x4_invert(mat4x4 T, mat4x4  M)
 	T[3][2] = (-M[3][0] * s[3] + M[3][1] * s[1] - M[3][2] * s[0]) * idet;
 	T[3][3] = ( M[2][0] * s[3] - M[2][1] * s[1] + M[2][2] * s[0]) * idet;
 }
-LINMATH_H_FUNC void mat4x4_orthonormalize(mat4x4 R, mat4x4  M)
+LINMATH_H_FUNC void mat4x4_orthonormalize(mat4x4 R, mat4x4 M)
 {
 	mat4x4_dup(R, M);
 	float s = 1.f;
@@ -379,7 +375,7 @@ LINMATH_H_FUNC void mat4x4_perspective(mat4x4 m, float y_fov, float aspect, floa
 {
 	/* NOTE: Degrees are an unhandy unit to work with.
 	 * linmath.h uses radians for everything! */
-	float  a = 1.f / tanf(y_fov / 2.f);
+	float const a = 1.f / tanf(y_fov / 2.f);
 
 	m[0][0] = a / aspect;
 	m[0][1] = 0.f;
@@ -401,7 +397,7 @@ LINMATH_H_FUNC void mat4x4_perspective(mat4x4 m, float y_fov, float aspect, floa
 	m[3][2] = -((2.f * f * n) / (f - n));
 	m[3][3] = 0.f;
 }
-LINMATH_H_FUNC void mat4x4_look_at(mat4x4 m, vec3  eye, vec3  center, vec3  up)
+LINMATH_H_FUNC void mat4x4_look_at(mat4x4 m, vec3 eye, vec3 center, vec3 up)
 {
 	/* Adapted from Android's OpenGL Matrix.java.                        */
 	/* See the OpenGL GLUT documentation for gluLookAt for a description */
@@ -449,31 +445,33 @@ typedef float quat[4];
 #define quat_norm vec4_norm
 #define quat_scale vec4_scale
 #define quat_mul_inner vec4_mul_inner
-#define quat_dup vec4_dup
 
 LINMATH_H_FUNC void quat_identity(quat q)
 {
 	q[0] = q[1] = q[2] = 0.f;
 	q[3] = 1.f;
 }
-LINMATH_H_FUNC void quat_mul(quat r, quat  p, quat  q)
+LINMATH_H_FUNC void quat_mul(quat r, quat p, quat q)
 {
-	vec3 w;
-	vec3_mul_cross(r, p, q);
+	vec3 w, tmp;
+
+	vec3_mul_cross(tmp, p, q);
 	vec3_scale(w, p, q[3]);
-	vec3_add(r, r, w);
+	vec3_add(tmp, tmp, w);
 	vec3_scale(w, q, p[3]);
-	vec3_add(r, r, w);
+	vec3_add(tmp, tmp, w);
+
+	vec3_dup(r, tmp);
 	r[3] = p[3]*q[3] - vec3_mul_inner(p, q);
 }
-LINMATH_H_FUNC void quat_conj(quat r, quat  q)
+LINMATH_H_FUNC void quat_conj(quat r, quat q)
 {
 	int i;
 	for(i=0; i<3; ++i)
 		r[i] = -q[i];
 	r[3] = q[3];
 }
-LINMATH_H_FUNC void quat_rotate(quat r, float angle, vec3  axis) {
+LINMATH_H_FUNC void quat_rotate(quat r, float angle, vec3 axis) {
     vec3 axis_norm;
     vec3_norm(axis_norm, axis);
     float s = sinf(angle / 2);
@@ -481,7 +479,7 @@ LINMATH_H_FUNC void quat_rotate(quat r, float angle, vec3  axis) {
     vec3_scale(r, axis_norm, s);
     r[3] = c;
 }
-LINMATH_H_FUNC void quat_mul_vec3(vec3 r, quat  q, vec3  v)
+LINMATH_H_FUNC void quat_mul_vec3(vec3 r, quat q, vec3 v)
 {
 /*
  * Method by Fabian 'ryg' Giessen (of Farbrausch)
@@ -501,7 +499,7 @@ v' = v + q.w * t + cross(q.xyz, t)
 	vec3_add(r, v, t);
 	vec3_add(r, r, u);
 }
-LINMATH_H_FUNC void mat4x4_from_quat(mat4x4 M, quat  q)
+LINMATH_H_FUNC void mat4x4_from_quat(mat4x4 M, quat q)
 {
 	float a = q[3];
 	float b = q[0];
@@ -531,7 +529,7 @@ LINMATH_H_FUNC void mat4x4_from_quat(mat4x4 M, quat  q)
 	M[3][3] = 1.f;
 }
 
-LINMATH_H_FUNC void mat4x4o_mul_quat(mat4x4 R, mat4x4  M, quat  q)
+LINMATH_H_FUNC void mat4x4o_mul_quat(mat4x4 R, mat4x4 M, quat q)
 {
 /*  XXX: The way this is written only works for orthogonal matrices. */
 /* TODO: Take care of non-orthogonal case. */
@@ -545,7 +543,7 @@ LINMATH_H_FUNC void mat4x4o_mul_quat(mat4x4 R, mat4x4  M, quat  q)
 	R[2][3] = M[2][3];
 	R[3][3] = M[3][3];  // typically 1.0, but here we make it general
 }
-LINMATH_H_FUNC void quat_from_mat4x4(quat q, mat4x4  M)
+LINMATH_H_FUNC void quat_from_mat4x4(quat q, mat4x4 M)
 {
 	float r=0.f;
 	int i;
@@ -575,22 +573,22 @@ LINMATH_H_FUNC void quat_from_mat4x4(quat q, mat4x4  M)
 	q[3] = (M[p[2]][p[1]] - M[p[1]][p[2]])/(2.f*r);
 }
 
-LINMATH_H_FUNC void mat4x4_arcball(mat4x4 R, mat4x4  M, vec2  _a, vec2  _b, float s)
+LINMATH_H_FUNC void mat4x4_arcball(mat4x4 R, mat4x4 M, vec2 _a, vec2 _b, float s)
 {
 	vec2 a; memcpy(a, _a, sizeof(a));
 	vec2 b; memcpy(b, _b, sizeof(b));
 	
-	float z_a = 0.f;
-	float z_b = 0.f;
+	float z_a = 0.;
+	float z_b = 0.;
 
-	if(vec2_len(a) < 1.f) {
-		z_a = sqrtf(1.f - vec2_mul_inner(a, a));
+	if(vec2_len(a) < 1.) {
+		z_a = sqrtf(1. - vec2_mul_inner(a, a));
 	} else {
 		vec2_norm(a, a);
 	}
 
-	if(vec2_len(b) < 1.f) {
-		z_b = sqrtf(1.f - vec2_mul_inner(b, b));
+	if(vec2_len(b) < 1.) {
+		z_b = sqrtf(1. - vec2_mul_inner(b, b));
 	} else {
 		vec2_norm(b, b);
 	}
@@ -601,7 +599,7 @@ LINMATH_H_FUNC void mat4x4_arcball(mat4x4 R, mat4x4  M, vec2  _a, vec2  _b, floa
 	vec3 c_;
 	vec3_mul_cross(c_, a_, b_);
 
-	float  angle = acos(vec3_mul_inner(a_, b_)) * s;
+	float const angle = acos(vec3_mul_inner(a_, b_)) * s;
 	mat4x4_rotate(R, M, c_[0], c_[1], c_[2], angle);
 }
 #endif
