@@ -56,7 +56,7 @@ OBJ = $(addprefix $(BUILDDIR)/, \
 all: $(GAME)
 
 clean:
-	rm -r $(BUILDDIR)
+	rm -r $(BUILDDIR) | true
 
 $(GAME): $(OBJ)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
