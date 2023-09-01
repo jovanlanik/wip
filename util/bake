@@ -14,4 +14,4 @@ INPUT=$(realpath "$1")
 OUTPUT=$(realpath "$2")
 cd "$TEMP"
 { cat "$INPUT"; printf '\0'; } > "$FILE"
-ld -r -b binary "$FILE" -o "$OUTPUT"
+ld -r -b binary -z noexecstack "$FILE" -o "$OUTPUT"
