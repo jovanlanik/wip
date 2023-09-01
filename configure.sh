@@ -7,7 +7,7 @@
 export LC_ALL=C
 
 DEFAULT='CC=gcc
-NAME=dungeon
+GAME=dungeon
 NDEBUG=0
 WINDOW_BACKEND=glfw
 prefix=/usr/local
