@@ -42,6 +42,7 @@ GLuint wip_loadTexture(wip_img_t *image) {
 	return texture;
 }
 
+// TODO: error
 GLuint wip_openTexture(char *name) {
 	GLuint texture = 0;
 	wip_img_t image;

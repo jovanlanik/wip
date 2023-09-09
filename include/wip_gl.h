@@ -10,7 +10,7 @@
 #ifdef NDEBUG
 #define wip_printGlErrors(...) /* nothing */
 #else
-#define wip_printGlErrors() _wip_glError(__func__)
+#define wip_printGlErrors() _wip_printGlErrors(__func__)
 #endif
 void _wip_printGlErrors(const char *func);
 void wip_initGl(void);
