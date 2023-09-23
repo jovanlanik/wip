@@ -10,8 +10,8 @@ error() { echo "$0: $1." >&2; exit 1; }
 
 TEMP=$(mktemp -d)
 FILE=$(basename "$1")
-INPUT=$(realpath "$1")
-OUTPUT=$(realpath "$2")
+INPUT=$(readlink -f "$1")
+OUTPUT=$(readlink -f "$2")
 cd "$TEMP"
 { cat "$INPUT"; printf '\0'; } > "$FILE"
 ld -r -b binary -z noexecstack "$FILE" -o "$OUTPUT"
