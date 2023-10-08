@@ -46,8 +46,11 @@ if(LIBCONFIG_FOUND)
 	target_include_directories(${GAME} PUBLIC ${LIBCONFIG_INCLUDE_DIRS})
 	target_link_libraries(${GAME} PUBLIC ${LIBCONFIG_LIBRARIES})
 else()
-	find_library(LIBCONFIG_LOCATION libconfig REQUIRED)
-	target_link_libraries(${GAME} PUBLIC ${LIBCONFIG_LOCATION})
+	FIND_PATH(CONFIG_INCLUDE_DIR libconfig.h /usr/include /usr/local/include)
+        FIND_LIBRARY(CONFIG_LIBRARY NAMES config PATH /usr/lib /usr/local/lib)
+
+        target_include_directories(${GAME} PUBLIC ${CONFIG_INCLUDE_DIR})
+        target_link_libraries(${GAME} PUBLIC ${CONFIG_LIBRARY})
 endif()
 
 target_include_directories(external PUBLIC "include/external")
