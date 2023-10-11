@@ -2,6 +2,7 @@
 /.cache/
 /demo
 /dungeon
+/flipdot
 /gmon.out
 /mkconf.mk
 /save.bin

@@ -3,6 +3,8 @@
 
 // Functions
 
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
@@ -97,7 +99,6 @@ char *wip_readFile(FILE* file) {
 	return buff;
 }
 
-/*
 void wip_sleep(double seconds) {
 	double intpart;
 	struct timespec time;
@@ -109,6 +110,7 @@ void wip_sleep(double seconds) {
 	return;
 }
 
+/*
 void *timeoutFunc(void *arg) {
 	wip_timeout_t *timeout = (wip_timeout_t *)arg;
 
