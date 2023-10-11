@@ -271,7 +271,7 @@ static void action(void) {
 						"always start again. See if you can find any secrets.\n"
 						"\n"
 						"This game was made in a custom engine by Jovan Lanik\n"
-						"from scratch. Credits can be accessed from the menu."
+						"from scratch. Credits can be accessed from the menu.\n"
 						;
 				}
 				char *gate_toast = strdup("Gate to room X");
@@ -371,7 +371,7 @@ static void gameLoop(void) {
 			"\n"
 			"You were defeated by dungeon snakes! Most of your body\n"
 			"will soon be devoured and the rest will rot forever in\n"
-			"this dungeon... Beter luck next time."
+			"this dungeon... Beter luck next time.\n"
 			;
 	}
 	if(wip_readMotion(HELP)) message =
@@ -382,7 +382,7 @@ static void gameLoop(void) {
 		"- WIP_RIGHT = Turn right\n"
 		"- WIP_ENTER = Show inventory\n"
 		"- 'H' = Show help message\n"
-		"- WIP_ESC = Pause game";
+		"- WIP_ESC = Pause game\n";
 	if(wip_readMotion(USE)) {
 		const char y[] = "[]";
 		const char n[] = "  ";
@@ -516,7 +516,7 @@ static void mainMenuFn(unsigned int selected, void *p) {
 						__func__,
 						strerror(errno)
 					);
-					message = "# Error\n\nFailed to load, check console output.";
+					message = "# Error\n\nFailed to load, check console output.\n";
 					return;
 				}
 				newGame();
@@ -554,6 +554,7 @@ static void mainMenuFn(unsigned int selected, void *p) {
 #endif
 #undef wip_glfw3
 #undef wip_sdl2
+				"\n"
 				;
 			break;
 		case M_QUIT_GAME:
@@ -581,7 +582,7 @@ static void pauseMenuFn(unsigned int selected, void *p) {
 						__func__,
 						strerror(errno)
 					);
-					message = "# Error\n\nFailed to save, check console output.";
+					message = "# Error\n\nFailed to save, check console output.\n";
 				}
 				fwrite(&currentState, sizeof(state_t), 1, save);
 				fflush(save);
@@ -591,7 +592,7 @@ static void pauseMenuFn(unsigned int selected, void *p) {
 					"\n"
 					"Your progress has been saved to ./save.bin\n"
 					"Keep in mind this file is binary and may or\n"
-					"may not load on another system."
+					"may not load on another system.\n"
 					;
 			}
 			break;
@@ -605,7 +606,7 @@ static void pauseMenuFn(unsigned int selected, void *p) {
 						__func__,
 						strerror(errno)
 					);
-					message = "# Error\n\nFailed to load, check console output.";
+					message = "# Error\n\nFailed to load, check console output.\n";
 					return;
 				}
 				newGame();
@@ -666,7 +667,7 @@ static void messageLoop(void) {
 		gameLoop();
 		wip_globalKeyLock = 0;
 	}
-	drawStr(10, 10, 4.0, message);
+	drawFormatStr(10, 10, 4.0, "%s\n%s", message, "PRESS ENTER TO CONTINUE");
 
 	if(wip_readMotion(USE) || wip_readMotion(ESC)) {
 		wip_clearMotions();
