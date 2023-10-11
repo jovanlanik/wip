@@ -7,6 +7,13 @@
 #include "wip_conf.h"
 #include "wip_gl.h"
 
+#define wip_osmesa 1
+#if WIP_WINDOW_BACKEND == wip_osmesa
+#define WIP_OSMESA
+#include <GL/osmesa.h>
+#endif
+#undef wip_osmesa
+
 void _wip_printGlErrors(const char *func) {
 	GLenum error;
 	while((error = glGetError()) !=  GL_NO_ERROR) {
@@ -17,7 +24,11 @@ void _wip_printGlErrors(const char *func) {
 
 void wip_initGl(void) {
 	wip_debug(WIP_INFO, "%s: Initializing OpenGL...", __func__);
+#ifndef WIP_OSMESA
 	if(!gladLoadGL())
+#else
+	if(!gladLoadGLLoader((GLADloadproc)OSMesaGetProcAddress))
+#endif
 		wip_log(WIP_FATAL, "%s: Couldn't initialize OpenGL.", __func__);
 	if(!GLAD_GL_VERSION_3_3)
 		wip_log(WIP_FATAL, "%s: OpenGL 3.3 not supported.", __func__);

@@ -118,6 +118,33 @@ void wip_initWindow(void) {
 	return;
 }
 
+void wip_initOffscreen(int width, int height) {
+	wip_debug(WIP_INFO, "%s: Initializing offscreen window...", __func__);
+
+	if(!glfwInit())
+		wip_log(WIP_FATAL, "%s: Couldn't initialize GLWF.", __func__);
+
+	glfwSetErrorCallback(error_callback);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
+	wip_globalWindow.handle =
+		glfwCreateWindow(width, height, "WIP", NULL, NULL);
+
+	if(!wip_globalWindow.handle)
+		wip_log(WIP_FATAL, "%s: Couldn't create offscreen window.", __func__);
+
+	glfwMakeContextCurrent(wip_globalWindow.handle);
+
+	glfwSetWindowCloseCallback(wip_globalWindow.handle, window_close_callback);
+	glfwSetKeyCallback(wip_globalWindow.handle, key_callback);
+
+	wip_debug(WIP_INFO, "%s: Done.", __func__);
+	return;
+}
+
 void wip_swapWindow(void) {
 	glfwSwapBuffers(wip_globalWindow.handle);
 }

@@ -543,13 +543,17 @@ static void mainMenuFn(unsigned int selected, void *p) {
 				"glad written by David Herberth, MIT Licence\n"
 				"khrplatform.h, licence as specified in the file itself\n"
 				"libconfig written by Mark Lindner, LGPL\n"
-#if defined(WIP_GLFW)
+#define wip_glfw3 1
+#define wip_sdl2 2
+#if WIP_WINDOW_BACKEND == wip_glfw3
 				"glfw written by Marcus Geelnard and Camilla Lowy,\n    zlib licence"
-#elif defined(WIP_SDL2)
+#elif WIP_WINDOW_BACKEND == wip_sdl2
 				"sdl2 written by Sam Lantinga, zlib licence"
 #else
 				"unknown window backend, check licence file"
 #endif
+#undef wip_glfw3
+#undef wip_sdl2
 				;
 			break;
 		case M_QUIT_GAME:

@@ -6,7 +6,7 @@ This is a work-in-progress game engine using OpenGL and a game called Dungeon im
 - GCC or Clang
 - GNU Make and pkg-config or CMake
 ### Libraries
-- GLFW or SDL2
+- GLFW, SDL2 or OSMesa
 - libconfig
 ## Building
 ### Using make

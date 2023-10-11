@@ -55,7 +55,6 @@ static int unifyKey(SDL_Keysym key) {
 	return WIP_UNKNOWN;
 }
 
-
 // TODO: fix vsync (I don't remember what's broken, so I'll have to find out first...)
 // TODO: check msaa before setting and set closest possible value
 void wip_initWindow(void) {
@@ -79,11 +78,14 @@ void wip_initWindow(void) {
 
 	SDL_GL_CreateContext(wip_globalWindow.handle);
 
-	//SDL_GL_CreateContext(wip_globalWindow.handle);
 	SDL_GL_SetSwapInterval(wip_getConfBool("video.vsync"));
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;
+}
+
+void wip_initOffscreen(int width, int height) {
+	wip_debug(WIP_FATAL, "%s: Not implemented in backend.", __func__);
 }
 
 void wip_swapWindow(void) {

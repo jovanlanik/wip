@@ -11,6 +11,7 @@ typedef struct {
 } wip_window_t;
 
 void wip_initWindow(void);
+void wip_initOffscreen(int width, int height);
 void wip_swapWindow(void);
 void wip_pollWindow(void);
 double wip_timeWindow(void);
