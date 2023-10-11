@@ -122,6 +122,16 @@ static wip_glmdl_t *getEntModel(entity_t *ent) {
 	}
 }
 
+static int entIsItem(enum entity type) {
+	switch(type) {
+		case ENT_COBRA:
+		case ENT_SNAKE:
+			return 0;
+		default:
+			return 1;
+	}
+}
+
 extern struct anim entity_anim[];
 
 void drawEnts(unsigned int room, entity_t *ent, wip_globj_t pv) {
@@ -145,6 +155,7 @@ void drawEnts(unsigned int room, entity_t *ent, wip_globj_t pv) {
 		);
 		object.x = wip_interpolate(2 * ent[i].x, 2 * entity_anim[i].x, wip_eventPart(&entity_anim[i].moveEvent, wip_easeInOut));
 		object.y = wip_interpolate(2 * ent[i].y, 2 * entity_anim[i].y, wip_eventPart(&entity_anim[i].moveEvent, wip_easeInOut));
+		if(entIsItem(ent[i].type)) object.z = sin(wip_timeWindow() * 1.5f) * 0.025f;
 		wip_glmdl_t *model = getEntModel(&ent[i]);
 		drawModel(
 			&object,
