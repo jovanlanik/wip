@@ -1,7 +1,7 @@
-// WIP
-// Copyright (c) 2020 Jovan Lanik
+// Dungeon
+// Copyright (c) 2023 Jovan Lanik
 
-// WIP Source
+// Source
 
 #include "wip_arg.h"
 #include "wip_conf.h"
