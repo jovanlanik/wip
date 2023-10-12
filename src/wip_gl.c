@@ -46,6 +46,12 @@ void wip_initGl(void) {
 	return;
 }
 
+#ifdef NDEBUG
+#define DEBUG_LOG_BUFFER_LEN 1024
+#else
+#define DEBUG_LOG_BUFFER_LEN 8192
+#endif
+
 GLuint wip_loadShader(const GLchar *source, GLenum type) {
 	wip_debug(WIP_INFO, "%s: Loading shader...", __func__);
 	GLuint shader = glCreateShader(type);
@@ -58,7 +64,7 @@ GLuint wip_loadShader(const GLchar *source, GLenum type) {
 	GLint result;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 	if(result == GL_FALSE) {
-		char str[2048];
+		char str[DEBUG_LOG_BUFFER_LEN];
 		glGetShaderInfoLog(shader, sizeof(str), NULL, str);
 		wip_log(WIP_ERROR, "%s: Couldn't compile shader:\n%s", __func__, str);
 		glDeleteShader(shader);
@@ -80,7 +86,9 @@ GLuint wip_loadProgram(GLuint vert, GLuint frag) {
 	GLint result;
 	glGetProgramiv(program, GL_LINK_STATUS, &result);
 	if(result == GL_FALSE) {
-		wip_log(WIP_ERROR, "%s: Couldn't link program.", __func__);
+		char str[DEBUG_LOG_BUFFER_LEN];
+		glGetProgramInfoLog(program, sizeof(str), NULL, str);
+		wip_log(WIP_ERROR, "%s: Couldn't link program:\n%s", __func__, str);
 		glDeleteProgram(program);
 		return 0;
 	}
