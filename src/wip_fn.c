@@ -88,7 +88,7 @@ FILE *wip_openFile(const char *name) {
 	return file;
 }
 
-char *wip_readFile(FILE* file) {
+char *wip_readFile(FILE *file) {
 	if(!file) return NULL;
 	fseek(file, 0, SEEK_END);
 	long int size = ftell(file);
