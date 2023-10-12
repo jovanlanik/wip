@@ -439,10 +439,8 @@ static void gameLoop(void) {
 	angle += TO_RAD(90.0 * (currentState.player.d+2));
 	oldAngle += TO_RAD(90.0 * (oldDir+2));
 
-	quat_rotate(camera.rotation,
-		wip_interpolate(angle, oldAngle, wip_eventPart(&rotateEvent, wip_easeInOut)),
-		(float[]){0, 0, 1}
-	);
+	float r = wip_interpolate(angle, oldAngle, wip_eventPart(&rotateEvent, wip_easeInOut));
+	quat_rotate(camera.rotation, r, (float[]){0, 0, 1});
 
 	vec3 camOld;
 	quat_mul_vec3(camOld, camera.rotation, camera.position);
@@ -452,7 +450,7 @@ static void gameLoop(void) {
 		- wip_eventPart(&bumpEvent, wip_easeInOut)/25.0
 		+ 1.0/25.0;
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	drawScreen(r);
 
 	wip_globj_t pv, view;
 
@@ -634,7 +632,7 @@ static void m_menuLoop(menu *menu) {
 		selected = 0;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	drawScreen(0.0f);
 	drawMenu(*menu, selected, NULL);
 }
 
@@ -651,7 +649,7 @@ static void p_menuLoop(menu *menu) {
 		selected = 0;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	drawScreen(0.0f);
 	wip_globalKeyLock = 1;
 	gameLoop();
 	wip_globalKeyLock = 0;
@@ -661,7 +659,7 @@ static void p_menuLoop(menu *menu) {
 
 static void messageLoop(void) {
 	toastEvent.length = 0;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	drawScreen(0.0f);
 	if(started) {
 		wip_globalKeyLock = 1;
 		gameLoop();
@@ -676,7 +674,7 @@ static void messageLoop(void) {
 }
 
 void wip_gameLoop(void) {
-	glClearColor(0.8f, 0.9f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	initGameLoop();
 

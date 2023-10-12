@@ -3,6 +3,7 @@
 
 // Drawing functions
 
+#include "wip_gl.h"
 #include "wip_mdl.h"
 #include "wip_obj.h"
 #include "wip_img.h"
@@ -21,7 +22,80 @@ extern unsigned int materialLocation;
 
 extern GLuint program;
 
+extern const char _binary_d_background_vert_start[];
+extern const char _binary_d_background_frag_start[];
+
 extern float m[3];
+
+#ifdef GL_TRUE
+#define UINT GLuint
+#else
+#define UINT uint32_t
+#endif
+#define BUFF2(type) { type data_b; type element_b; }
+
+void drawScreen(float rot) {
+	const float vertices[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+	};
+	const unsigned int indices[] = {
+		0, 1, 2, 3,
+	};
+
+	static int init = 0;
+	static union WIP_NAMED_VEC_T(2, UINT, BUFF2, buffers, ) render_object;
+	static GLuint vertex_a = 0;
+	static GLuint program = 0;
+	static GLuint dirLocation = 0;
+	static GLuint timeLocation = 0;
+	if(init == 0) {
+		init = 1;
+
+		glGenVertexArrays(1, &vertex_a);
+		glBindVertexArray(vertex_a);
+
+		glGenBuffers(2, render_object.buffers);
+		glBindBuffer(GL_ARRAY_BUFFER, render_object.data_b);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render_object.element_b);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		GLuint vert = wip_loadShader((char *)_binary_d_background_vert_start, GL_VERTEX_SHADER);
+		GLuint frag = wip_loadShader((char *)_binary_d_background_frag_start, GL_FRAGMENT_SHADER);
+		program = wip_loadProgram(vert, frag);
+		for(int i = 0; i < 25; ++i) wip_printGlErrors();
+
+		dirLocation = glGetUniformLocation(program, "dir");
+		timeLocation = glGetUniformLocation(program, "time");
+	}
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(program);
+	glBindVertexArray(vertex_a);
+
+	glUniform1f(dirLocation, rot);
+	glUniform1f(timeLocation, wip_timeWindow());
+	glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	return;
+}
+
+#undef UINT
+#undef BUFF2
 
 void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t *light) {
 	static int init = 0;
