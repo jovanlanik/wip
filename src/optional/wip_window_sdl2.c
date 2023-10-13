@@ -85,7 +85,30 @@ void wip_initWindow(void) {
 }
 
 void wip_initOffscreen(int width, int height) {
-	wip_debug(WIP_FATAL, "%s: Not implemented in backend.", __func__);
+	wip_debug(WIP_INFO, "%s: Initializing offscreen window...", __func__);
+
+	if(SDL_Init(SDL_INIT_VIDEO))
+		wip_log(WIP_FATAL, "%s: Couldn't initialize SDL2.", __func__);
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, wip_getConfInt("graphics.msaa") > 0);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, wip_getConfInt("graphics.msaa"));
+
+	wip_globalWindow.handle = SDL_CreateWindow("WIP", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+
+	if(!wip_globalWindow.handle) {
+		wip_log(WIP_FATAL, "%s: Couldn't create offscreen window: %s", __func__, SDL_GetError());
+	}
+
+	SDL_GL_CreateContext(wip_globalWindow.handle);
+
+	SDL_GL_SetSwapInterval(wip_getConfBool("video.vsync"));
+
+	wip_debug(WIP_INFO, "%s: Done.", __func__);
+	return;
 }
 
 void wip_swapWindow(void) {
