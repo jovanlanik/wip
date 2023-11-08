@@ -15,7 +15,6 @@ typedef struct {
 /*
 	Initialize a connections to a display.
 	mcastgroup is string containing a multicasst address.
-
 */
 wfdd_display_t *wfdd_initDisplay(const char *mcastgroup, int port);
 
