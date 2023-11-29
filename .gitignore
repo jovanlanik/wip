@@ -1,13 +1,2 @@
-/build/
-/.cache/
-/demo
-/dungeon
-/flipdot
-/gmon.out
-/mkconf.mk
+/builddir/
 /save.bin
-compile_flags.txt
-compile_commands.json
-*.vert.h
-*.frag.h
-*.o

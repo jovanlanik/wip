@@ -1,0 +1,2 @@
+option('game', type : 'string', value : 'dungeon', description : 'Game to build')
+option('window_backend', type : 'combo', choices : ['glfw3', 'sdl2', 'osmesa'], value : 'glfw3')
