@@ -13,7 +13,8 @@
 
 int wip_globalKeyLock = 0;
 
-#define KEY(key, code) [WIP_##key] = { #key }
+#define KEY(key, code) [WIP_##key] = { #key },
+
 char wip_globalKeyName[][64] = {
 	WIP_KEY_LIST
 };

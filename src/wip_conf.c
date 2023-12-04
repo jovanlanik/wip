@@ -42,6 +42,7 @@ int wip_setConf##name(const char *path, type val) { \
 	} \
 	return 1; \
 }
+
 WIP_CONF_TYPE_LIST
 #undef CONF_TYPE
 

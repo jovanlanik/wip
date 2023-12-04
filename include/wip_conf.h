@@ -19,6 +19,7 @@ void wip_termConf(void);
 int wip_findConf##name(const char *p); \
 type wip_getConf##name(const char *p); \
 int wip_setConf##name(const char *p, type val);
+
 WIP_CONF_TYPE_LIST
 #undef CONF_TYPE
 
