@@ -38,12 +38,12 @@ flipdot_conf_c = custom_target(
 flipdot_set += flipdot_conf_c
 
 flipdot_include_dirs = include_directories('include')
+flipdot_external_include_dirs = include_directories('include/external')
 
-# TODO: move to flipdot.d subdir
-wfdd_set = files('../src/external/wfdd.c')
+wfdd_set = files('src/external/wfdd.c')
 wfdd_dep = declare_dependency(
   sources: wfdd_set,
-  include_directories : external_include_dirs,
+  include_directories : flipdot_external_include_dirs,
 )
 
 executable(
