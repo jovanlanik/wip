@@ -36,19 +36,19 @@ enum wip_motion wip_findMotion(const char *name) {
 	return 0;
 }
 
-int wip_readMotion(enum wip_motion m) {
+bool wip_readMotion(enum wip_motion m) {
 	if(wip_globalKeyLock) return 0;
 	wip_motion_t *motion = &wip_globalMotion[m];
-	int ret = motion->state;
+	bool ret = motion->state;
 	if(motion->type == WIP_ONCE_PRESS || motion->type == WIP_ONCE_RELEASE)
-		motion->state = 0;
+		motion->state = false;
 	return ret;
 }
 
-int wip_writeMotion(wip_key_t key) {
-	if(key.key == WIP_LOCKED) return 1;
+bool wip_writeMotion(wip_key_t key) {
+	if(key.key == WIP_LOCKED) return true;
 	wip_motion_t *motion = wip_globalKey[key.key];
-	if(!motion) return 0;
+	if(!motion) return false;
 	/*
 	wip_debug(WIP_INFO, "%s: Motion %s (%d) from key %s (%d).", __func__,
 		wip_globalMotionName[motion->motion], motion->motion
@@ -65,7 +65,7 @@ int wip_writeMotion(wip_key_t key) {
 			if(key.action == WIP_RELEASE) motion->state = 1;
 			break;
 	}
-	return 1;
+	return true;
 }
 
 void wip_bindMotion(enum wip_motion m, enum wip_key k) {
@@ -100,11 +100,11 @@ enum wip_key wip_findKey(const char *name) {
 	return 0;
 }
 
-int wip_writeKey(wip_key_t key) {
-	if(wip_key.head + 1 == wip_key.tail) return 0;
+bool wip_writeKey(wip_key_t key) {
+	if(wip_key.head + 1 == wip_key.tail) return false;
 	wip_key.head = (wip_key.head + 1) % WIP_KEY_BUFFER;
 	wip_key.buffer[wip_key.head] = key;
-	return 1;
+	return true;
 }
 
 wip_key_t wip_readKey(void) {

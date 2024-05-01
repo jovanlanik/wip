@@ -22,7 +22,7 @@
 
 enum wip_motion {
 	MOTION_LIST
-	WIP_MOTION_END
+	WIP_MOTION_END,
 };
 #undef MOTION
 

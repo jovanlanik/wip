@@ -22,25 +22,25 @@ extern const char *wip_defaultConf;
 config_t wip_globalConf;
 
 // TODO: Add unknown setting to config if not found.
-#define CONF_TYPE(type, name, lib, mac, def) \
-int wip_findConf##name(const char*path) { \
+#define CONF_TYPE(ret_type, lib_type, name, lib, mac, def) \
+bool wip_findConf##name(const char*path) { \
 	config_setting_t *s = config_lookup(&wip_globalConf, path); \
-	if(s && config_setting_type(s) == mac) return 1; \
-	return 0; \
+	if(s && config_setting_type(s) == mac) return true; \
+	return false; \
 } \
-type wip_getConf##name(const char *path) { \
-	type x = def; \
+ret_type wip_getConf##name(const char *path) { \
+	lib_type x = def; \
 	if(!config_lookup_##lib(&wip_globalConf, path, &x)) \
 		wip_log(WIP_WARN, "%s: Can't find '%s' in config.", __func__, path); \
 	return x; \
 } \
-int wip_setConf##name(const char *path, type val) { \
+bool wip_setConf##name(const char *path, ret_type val) { \
 	config_setting_t *setting = config_lookup(&wip_globalConf, path); \
 	if(!setting || !config_setting_set_##lib(setting, val)) { \
 		wip_log(WIP_WARN, "%s: Can't set '%s': Not in config.", __func__, path); \
-		return 0; \
+		return false; \
 	} \
-	return 1; \
+	return true; \
 }
 
 WIP_CONF_TYPE_LIST

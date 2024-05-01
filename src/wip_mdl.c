@@ -126,15 +126,15 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 	msh_ply_close(ply_file);
 	
 	if(!hasNormal) { 
-		wip_debug(WIP_WARN, "%s: Couldn't load vertex normals from model, may be missing.", __func__);
+		//wip_debug(WIP_WARN, "%s: Couldn't load vertex normals from model, may be missing.", __func__);
 		*((void **)formatNormal.data) = wip_alloc((int)*formatVertex.data_count * 3 * sizeof(float));
 	}
 	if(!hasUv) {
-		wip_debug(WIP_WARN, "%s: Couldn't load UVs from model, may be missing.", __func__);
+		//wip_debug(WIP_WARN, "%s: Couldn't load UVs from model, may be missing.", __func__);
 		*((void **)formatUv.data) = wip_alloc((int)*formatVertex.data_count * 2 * sizeof(float));
 	}
 	if(!hasColor) {
-		wip_debug(WIP_WARN, "%s: Couldn't load vertex colors from model, may be missing.", __func__);
+		//wip_debug(WIP_WARN, "%s: Couldn't load vertex colors from model, may be missing.", __func__);
 		*((void **)formatColor.data) = wip_alloc((int)*formatVertex.data_count * 4 * sizeof(uint8_t));
 	}
 
