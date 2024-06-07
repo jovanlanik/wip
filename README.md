@@ -9,6 +9,7 @@ This is a work-in-progress game engine using OpenGL and a game called Dungeon im
 ### Libraries
 - GLFW, SDL2 or OSMesa
 - libconfig
+- LuaJIT or Lua5.1
 ## Building
 ```
 $ meson setup builddir
