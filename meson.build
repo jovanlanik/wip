@@ -10,10 +10,12 @@
 project('WIP', 'c', version : 'prerelease', default_options : ['c_std=c11'])
 
 game = get_option('game')
+lua_backend = get_option('lua_backend')
 window_backend = get_option('window_backend')
 
 add_project_arguments(
   '-DWIP_GAME=' + game,
+  '-DWIP_LUA_BACKEND=wip_' + lua_backend,
   '-DWIP_WINDOW_BACKEND=wip_' + window_backend,
   language : 'c',
 )
@@ -28,6 +30,7 @@ wip_set = files([
   'src/wip_input.c',
   'src/wip_mdl.c',
   'src/wip_obj.c',
+  'src/wip_lua.c',
   'src/optional/wip_window_' + window_backend + '.c',
 ])
 
@@ -62,6 +65,7 @@ cc = meson.get_compiler('c')
 m_dep = cc.find_library('m', required : false)
 gl_dep = dependency('gl')
 libconfig_dep = dependency('libconfig')
+lua_backend_dep = dependency(lua_backend)
 window_backend_dep = dependency(window_backend)
 
 external_include_dirs = include_directories('include/external')
@@ -77,6 +81,7 @@ wip_deps = [
   m_dep,
   gl_dep,
   libconfig_dep,
+  lua_backend_dep,
   window_backend_dep,
   glad_dep,
 ]

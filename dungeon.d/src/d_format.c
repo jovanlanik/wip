@@ -14,6 +14,7 @@
 #include "d_format.h"
 
 extern char *msg[];
+extern char *scr[];
 
 #ifdef _WIN32
 static int getline(char **lineptr, size_t *n, FILE *stream) {
@@ -267,6 +268,15 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 			msg[id] = wip_readFile(file);
 			i += 2;
 		}
+		else if(strcmp("script", token[i]) == 0) {
+			unsigned int id;
+			if(wip_atoui(token[i+1], &id)) {
+				wip_log(WIP_ERROR, "%s: Unexpected token: %s, expected script id (uint).", __func__, token[i+1]);
+				return 1;
+			}
+			scr[id] = strdup(token[i+2]);
+			i += 2;
+		}
 	}
 
 	for(int i = 0; i < token_c; ++i) {
@@ -344,6 +354,8 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 				case 'S':
 					ent->type = ENT_SNAKE;
 					break;
+				case 'L':
+					ent->type = ENT_LUA;
 				default:
 					break;
 			}
@@ -367,6 +379,7 @@ int readDungeon(dungeon_t *dungeon, state_t *state, char *filename) {
 			i += 6;
 		}
 		else if(strcmp("msg", token[i]) == 0) i += 2;
+		else if(strcmp("script", token[i]) == 0) i += 2;
 		else {
 			wip_debug(WIP_ERROR, "%s: Unknown token: %s.", __func__, token[i]);
 			return 1;

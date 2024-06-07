@@ -111,7 +111,7 @@ void wip_sleep(double seconds) {
 }
 
 /*
-void *timeoutFunc(void *arg) {
+static void *timeoutFunc(void *arg) {
 	wip_timeout_t *timeout = (wip_timeout_t *)arg;
 
 	*timeout->done = 0;

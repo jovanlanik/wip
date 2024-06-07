@@ -5,6 +5,10 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#if WIP_LUA_BACKEND != wip_luajit
+	#error Only LuaJIT is supported.
+#endif
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
@@ -23,6 +27,7 @@
 #include "wip_gl.h"
 #include "wip_math.h"
 #include "wip_event.h"
+#include "wip_lua.h"
 #include "external/linmath.h"
 
 #include "d_state.h"
@@ -60,11 +65,16 @@ wip_event_t toastEvent;
 wip_event_t attkEvent;
 struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } oldPos;
 
+#define MSG_MAX 128
+#define SCR_MAX 128
+
 // Runtime
 int started = 0;
 int paused = 0;
-char *msg[128];
-char *message = NULL;
+char *msg[MSG_MAX];
+char *scr[SCR_MAX];
+struct { char *model; int act, action; } script[SCR_MAX];
+const char *message = NULL;
 char *toast = NULL;
 wip_obj_t center, camera;
 wip_glmdl_t *sword_model;
@@ -73,9 +83,17 @@ wip_glmdl_t *snake_model;
 dungeon_t d;
 wip_globj_t projection;
 struct anim entity_anim[ENT_MAX];
+lua_State *lua = NULL;
 
 // Game
 state_t currentState;
+
+const int getFilenameMax(void) { return FILENAME_MAX; }
+const int getEntMax(void) { return ENT_MAX; }
+state_t *getState(void) { return &currentState; }
+
+void sendMessage(const char *s) { message = s; }
+void clearMessage(void) { message = NULL; }
 
 static void initGameLoop(void) {
 	wip_makeObject(&camera);
@@ -107,20 +125,24 @@ static void initGameLoop(void) {
 	return;
 }
 
-static void makeToast(char *toastMsg) {
+static void sendToast(char *toastMsg) {
 	wip_startEvent(&toastEvent, 2.0);
 	if(toast) wip_free(toast);
 	toast = toastMsg;
 }
 
-static void makeStaticToast(char *toast) {
-	makeToast(strdup(toast));
+void sendStaticToast(const char *toastMsg) {
+	sendToast(strdup(toastMsg));
 }
 
 static void newGame(void) {
 	srand((unsigned)wip_timeWindow());
 
 	memset(&currentState, 0, sizeof(state_t));
+
+	if(lua) lua_close(lua);
+	lua = wip_luaInit();
+
 	if(readDungeon(&d, &currentState,"./res/map/main.df") != 0)
 		wip_log(WIP_FATAL, "%s: Couldn't load dungeon from %s.", __func__, currentState.dungeon);
 
@@ -133,9 +155,29 @@ static void newGame(void) {
 	wip_startEvent(&moveEvent, 0.25);
 	wip_startEvent(&bumpEvent, 0.125);
 	wip_startEvent(&attkEvent, 0.001);
-	makeStaticToast("Welcome to the dungeon!");
+	sendStaticToast("Welcome to the dungeon!");
 
 	currentState.player.health = 12;
+
+	if(luaL_dostring(lua, "package.path = './res/lua/?.lua'") == LUA_OK)
+		lua_pop(lua, lua_gettop(lua));
+	else wip_log(WIP_WARN, "%s: Lua error: %s", __func__, lua_tostring(lua, -1));
+
+	for(int i = 0; i < SCR_MAX; ++i) {
+		if(!scr[i]) continue;
+		if(luaL_dofile(lua, scr[i]) == LUA_OK) {
+			if(lua_istable(lua, -1)) {
+				lua_rawgeti(lua, -1, 1);
+				lua_rawgeti(lua, -2, 2);
+				lua_rawgeti(lua, -3, 3);
+				script[i].action = luaL_ref(lua, LUA_REGISTRYINDEX);
+				script[i].act = luaL_ref(lua, LUA_REGISTRYINDEX);
+				script[i].model = strdup(lua_tostring(lua, -1));
+			}
+		}
+		else wip_log(WIP_WARN, "%s: Lua error: %s", __func__, lua_tostring(lua, -1));
+		lua_settop(lua, 0);
+	}
 
 	return;
 }
@@ -227,6 +269,11 @@ static void entityAct(unsigned int chance) {
 					}
 				}
 				break;
+			case ENT_LUA:
+				lua_rawgeti(lua, LUA_REGISTRYINDEX, script[currentState.entity[i].id].act);
+				lua_pushnumber(lua, i);
+				lua_call(lua, 1, 0);
+				break;
 			default:
 				wip_debug(WIP_WARN, "%s: Unknown entity %d.", __func__, currentState.entity[i].type);
 				break;
@@ -246,7 +293,7 @@ static void action(void) {
 		case TILE_DOOR:
 			if(tile->id == 0) break;
 			else if(currentState.keyring[tile->id-1]) {
-				makeStaticToast("Unlocked door");
+				sendStaticToast("Unlocked door");
 				room->deco[0][room->width*target.y+target.x].model = tile->data;
 				tile->id = 0;
 				return;
@@ -254,7 +301,7 @@ static void action(void) {
 			else {
 				char *door_toast = strdup("This door is locked! You need key X");
 				door_toast[strlen(door_toast)-1] = '0' + tile->id;
-				makeToast(door_toast);
+				sendToast(door_toast);
 			}
 		case TILE_WALL:
 			wip_startEvent(&bumpEvent, 0.125);
@@ -290,7 +337,7 @@ static void action(void) {
 						}
 						else if(t->tile[w*y+x].type == TILE_GATE && t->tile[w*y+x].id == id) {
 							gate_toast[strlen(gate_toast)-1] = '0' + currentState.room;
-							makeToast(gate_toast);
+							sendToast(gate_toast);
 							currentState.player.x = x;
 							currentState.player.y = y;
 							currentState.player.direction = t->deco[0][w*y+x].dir;
@@ -327,29 +374,37 @@ static void action(void) {
 				{
 					char *key_toast = strdup("You found key X");
 					key_toast[strlen(key_toast)-1] = '0' + currentState.entity[i].id;
-					makeToast(key_toast);
+					sendToast(key_toast);
 					currentState.keyring[currentState.entity[i].id-1] = 1;
 					currentState.entity[i].type = ENT_NONE;
 				}
 				break;
 			case ENT_HEAL:
-				makeStaticToast("The potion refreshes your body");
+				sendStaticToast("The potion refreshes your body");
 				currentState.player.health += currentState.entity[i].id;
 				currentState.entity[i].type = ENT_NONE;
 				break;
 			case ENT_COBRA:
 			case ENT_SNAKE:
 				{
-					unsigned int dmg = rand() % currentState.room + 1;
+					unsigned int dmg = rand() % (currentState.room ? currentState.room : 1) + 1;
 					char *attack_toast = strdup("You dealt X damage!");
 					attack_toast[10] = '0' + dmg;
-					makeToast(attack_toast);
+					sendToast(attack_toast);
 					wip_startEvent(&attkEvent, 0.10);
 					currentState.entity[i].id -= dmg;
 					if(currentState.entity[i].id <= 0)
 						currentState.entity[i].type = ENT_NONE;
 				}
 				return;
+			case ENT_LUA:
+				lua_rawgeti(lua, LUA_REGISTRYINDEX, script[currentState.entity[i].id].action);
+				lua_pushnumber(lua, i);
+				lua_call(lua, 1, 1);
+				bool ret = lua_toboolean(lua, -1);
+				lua_pop(lua, -1);
+				if(ret) return;
+				break;
 			default:
 				wip_debug(WIP_WARN, "%s: Unknown entity %d.", __func__, currentState.entity[i].type);
 				break;
@@ -403,7 +458,7 @@ static void gameLoop(void) {
 			currentState.keyring[7] ? y[0] : n[0], currentState.keyring[7] ? y[1] : n[1],
 			currentState.keyring[8] ? y[0] : n[0], currentState.keyring[8] ? y[1] : n[1]
 		);
-		makeStaticToast(inv);
+		sendStaticToast(inv);
 	}
 	if(!wip_eventRemainder(&moveEvent) && wip_readMotion(UP)) {
 		action();

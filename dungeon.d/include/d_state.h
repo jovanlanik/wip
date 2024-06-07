@@ -25,6 +25,7 @@ enum entity {
 	ENT_HEAL,
 	ENT_COBRA,
 	ENT_SNAKE,
+	ENT_LUA,
 };
 
 typedef struct {

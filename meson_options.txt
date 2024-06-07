@@ -1,2 +1,3 @@
 option('game', type : 'string', value : 'dungeon', description : 'Game to build')
+option('lua_backend', type : 'combo', choices : ['luajit', 'lua5.1'], value : 'luajit')
 option('window_backend', type : 'combo', choices : ['glfw3', 'sdl2', 'osmesa'], value : 'glfw3')

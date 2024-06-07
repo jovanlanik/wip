@@ -7,6 +7,10 @@
 ! accepts capital letter and model filename
 model T d_torch
 
+! `script` loads a lua script
+! accepts script id, filename
+script 0 ./res/lua/bump_toast.lua
+
 ! `room` starts a room definition
 ! accepts room id, width and height
 room 0 7 5
@@ -29,7 +33,8 @@ room 0 7 5
 ! room, x, y and dir
 entity K 1 0 1 2 >
 
-entity B 0 0 3 2 <
+!entity B 0 0 3 2 <
+entity L 0 0 3 2 <
 
 ! `msg` loads a message from file
 ! accepts message id, filename
@@ -45,7 +50,7 @@ player 0 2 2 >
 deco 0 0
 ! first char is deco type
 ! second char is direction (one letter cardinal, numeric or arrow)
-== == == == == =v ==
+== =v == == == =v ==
 == == == == == == ==
 == == == == =< == ==
 == == == == == == ==

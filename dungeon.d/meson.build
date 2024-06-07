@@ -27,7 +27,7 @@ foreach shader : dungeon_glsl
     shader_id,
     output : shader_id + '.c',
     input : [ bake, shader ],
-    command : [ python, '@INPUT0@', '@INPUT1@', '-o', '@OUTPUT@' ]
+    command : [ python, '@INPUT0@', '@INPUT1@', '-o', '@OUTPUT@' ],
   )
   dungeon_set += shader_c
 endforeach
@@ -39,9 +39,19 @@ dungeon_conf_c = custom_target(
   dungeon_conf_id,
   output : dungeon_conf_id + '.c',
   input : [ bake, dungeon_conf ],
-  command : [ python, '@INPUT0@', '@INPUT1@', '-o', '@OUTPUT@' ]
+  command : [ python, '@INPUT0@', '@INPUT1@', '-o', '@OUTPUT@' ],
 )
 dungeon_set += dungeon_conf_c
+
+#dungeon_lua = files('../res/lua/dungeon.lua')
+#dungeon_lua_id = fs.name(dungeon_lua)
+#dungeon_lua_c = custom_target(
+#  dungeon_lua_id,
+#  output : dungeon_lua_id + '.c',
+#  input : [ bake, dungeon_lua ],
+#  command : [ python, '@INPUT0@', '@INPUT1@', '-o', '@OUTPUT@' ],
+#)
+#dungeon_set += dungeon_lua_c
 
 dungeon_include_dirs = include_directories('include')
 
@@ -50,4 +60,5 @@ executable(
   sources: dungeon_set,
   include_directories : dungeon_include_dirs,
   dependencies : wip_dep,
+  export_dynamic : true,
 )
