@@ -28,6 +28,7 @@
 #include "wip_math.h"
 #include "wip_event.h"
 #include "wip_lua.h"
+#include "wip_hashmap.h"
 #include "external/linmath.h"
 
 #include "d_state.h"
@@ -65,9 +66,6 @@ wip_event_t toastEvent;
 wip_event_t attkEvent;
 struct { union WIP_NAMED_VEC_T(2, int, WIP_XY, position, ); } oldPos;
 
-#define MSG_MAX 128
-#define SCR_MAX 128
-
 // Runtime
 int started = 0;
 int paused = 0;
@@ -84,6 +82,7 @@ dungeon_t d;
 wip_globj_t projection;
 struct anim entity_anim[ENT_MAX];
 lua_State *lua = NULL;
+wip_hashmap_t models = { .item_c = MDL_MAX, .item = { [MDL_MAX] = {} } };
 
 // Game
 state_t currentState;
@@ -173,6 +172,7 @@ static void newGame(void) {
 				script[i].action = luaL_ref(lua, LUA_REGISTRYINDEX);
 				script[i].act = luaL_ref(lua, LUA_REGISTRYINDEX);
 				script[i].model = strdup(lua_tostring(lua, -1));
+				wip_hashmapInsert(&models, script[i].model, wip_openModel(script[i].model));
 			}
 		}
 		else wip_log(WIP_WARN, "%s: Lua error: %s", __func__, lua_tostring(lua, -1));

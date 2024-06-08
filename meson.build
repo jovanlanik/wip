@@ -31,6 +31,7 @@ wip_set = files([
   'src/wip_mdl.c',
   'src/wip_obj.c',
   'src/wip_lua.c',
+  'src/wip_hashmap.c',
   'src/optional/wip_window_' + window_backend + '.c',
 ])
 

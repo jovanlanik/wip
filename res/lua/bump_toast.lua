@@ -6,8 +6,9 @@ local act = function(self_id)
 	end
 end
 local action = function(self_id)
+	dungeon.sendToast('Surprise!')
 	dungeon.state.entity[self_id].type = 'ENT_SNAKE'
 	dungeon.state.entity[self_id].id = 1
 	return true
 end
-return { 'book', act, action }
+return { 'd_book', act, action }

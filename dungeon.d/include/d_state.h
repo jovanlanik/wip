@@ -7,10 +7,9 @@
 
 #include <stdio.h>
 
+#include "wip_game.h"
 #include "wip_types.h"
 #include "dungeon.h"
-
-#define ENT_MAX 128
 
 typedef struct {
 	union WIP_NAMED_VEC_T(2, int, WIP_XY, position, );

@@ -3,11 +3,13 @@
 
 // Drawing functions
 
+#include "wip_game.h"
 #include "wip_gl.h"
 #include "wip_mdl.h"
 #include "wip_obj.h"
 #include "wip_img.h"
 #include "wip_math.h"
+#include "wip_hashmap.h"
 #include "external/glad/glad.h"
 #include "external/linmath.h"
 
@@ -26,6 +28,9 @@ extern const char _binary_d_background_vert_start[];
 extern const char _binary_d_background_frag_start[];
 
 extern float m[3];
+
+extern struct { char *model; int act, action; } script[SCR_MAX];
+extern wip_hashmap_t models;
 
 #ifdef GL_TRUE
 #define UINT GLuint
@@ -191,6 +196,8 @@ static wip_glmdl_t *getEntModel(entity_t *ent) {
 			return snake_model;
 		case ENT_HEAL:
 			return heal_model;
+		case ENT_LUA:
+			return wip_hashmapGet(&models, script[ent->id].model);
 		default:
 			return NULL;
 	}
