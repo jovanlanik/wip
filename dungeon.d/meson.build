@@ -16,6 +16,8 @@ dungeon_glsl = files([
   'glsl/d_background.vert',
   'glsl/d_texture.frag',
   'glsl/d_texture.vert',
+  'glsl/d_text.frag',
+  'glsl/d_text.vert',
 ])
 
 foreach shader : dungeon_glsl

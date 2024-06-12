@@ -45,8 +45,9 @@ void main() {
 	vec2 ouv = gl_FragCoord.xy * 0.001;
 
 	vec2 uv = ouv;
-	uv *= 1.5;
-	uv.y *= 1.5;
+	uv *= 1.0;
+	uv.x += sin(uv.y*60.0 + sin(time/2.0)) / 40.0;
+	uv.y *= 3.0;
 
 	float t = 0.01;
 	float c = 0.1;
@@ -61,14 +62,12 @@ void main() {
 	float n1 = snoise((uv1)*5.0)*0.5+0.5;
 	float n2 = snoise((uv2)*5.0)*0.5+0.5;
 
-	float x = 0.5;
+	float x = 0.55;
 	float d = 0.975;
 	float n = step(ouv.y - x, n1 * n2);
 	vec3 bg1 = vec3(0.725, 0.825, 0.975);
 	vec3 bg2 = bg1 * d;
 
 	vec3 col = mix(bg1, bg2, n);
-
-	// Output to screen
 	fragColor = vec4(col,1.0);
 }

@@ -35,10 +35,7 @@ wip_set = files([
   'src/optional/wip_window_' + window_backend + '.c',
 ])
 
-wip_glsl = files([
-  'glsl/text.frag',
-  'glsl/text.vert',
-])
+wip_glsl = files([])
 
 fs = import('fs')
 bake = files('util/bake.py')

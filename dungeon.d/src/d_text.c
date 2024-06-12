@@ -13,8 +13,8 @@
 #include "wip_img.h"
 #include "wip_conf.h"
 
-extern const char _binary_text_vert_start[];
-extern const char _binary_text_frag_start[];
+extern const char _binary_d_text_vert_start[];
+extern const char _binary_d_text_frag_start[];
 
 void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned int oy, float scale) {
 	static wip_glmdl_t *model = NULL;
@@ -27,9 +27,9 @@ void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned 
 	static GLuint textProgram;
 	if(!model) {
 		model = wip_openModel("char");
-		texture = wip_openTexture("font");
-		GLuint textVert = wip_loadShader(_binary_text_vert_start, GL_VERTEX_SHADER);
-		GLuint textFrag = wip_loadShader(_binary_text_frag_start, GL_FRAGMENT_SHADER);
+		texture = wip_openTexture("d_font");
+		GLuint textVert = wip_loadShader(_binary_d_text_vert_start, GL_VERTEX_SHADER);
+		GLuint textFrag = wip_loadShader(_binary_d_text_frag_start, GL_FRAGMENT_SHADER);
 		textProgram = wip_loadProgram(textVert, textFrag);
 		glDeleteShader(textVert);
 		glDeleteShader(textFrag);

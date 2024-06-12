@@ -9,7 +9,7 @@ model T d_torch
 
 ! `script` loads a lua script
 ! accepts script id, filename
-script 0 ./res/lua/bump_toast.lua
+!script 0 ./res/lua/bump_toast.lua
 
 ! `room` starts a room definition
 ! accepts room id, width and height
@@ -28,13 +28,13 @@ room 0 7 5
 
 ! `entity` spawns an entity
 ! accepts:
-! type (`B` is book, `S` snake, `K` key, `H` is health potion)
-! data (message id for books, health for snakes and potion, key id for keys)
+! type (`B` is book, `S` snake, `K` key, `H` is health potion, `L` is lua entity)
+! data (message id for books, health for snakes and potion, key id for keys, script id for lua entities)
 ! room, x, y and dir
 entity K 1 0 1 2 >
 
-!entity B 0 0 3 2 <
-entity L 0 0 3 2 <
+entity B 0 0 3 2 <
+!entity L 0 0 3 2 <
 
 ! `msg` loads a message from file
 ! accepts message id, filename
