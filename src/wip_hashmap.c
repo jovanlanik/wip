@@ -11,7 +11,7 @@ static int hash_djb2(char *s) {
 	int hash = 5381;
 	int c;
 	while((c = *s++))
-		hash = ((hash << 5) + hash) ^ c;
+		hash = 33 * hash ^ c;
 	return hash;
 }
 
