@@ -3,7 +3,7 @@
 
 // Hashmap
 
-#include "string.h"
+#include <string.h>
 
 #include "wip_hashmap.h"
 
