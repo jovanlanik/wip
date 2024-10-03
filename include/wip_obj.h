@@ -18,7 +18,7 @@ typedef struct {
 	union WIP_NAMED_VEC_T(3, float, WIP_XYZ, scale, s);
 	union WIP_NAMED_VEC_T(4, float, WIP_XYZW, rotation, r);
 	//float rotation[4];
-	union WIP_NAMED_VEC_T(3, float, WIP_XYZ, momentum, m);
+	//union WIP_NAMED_VEC_T(3, float, WIP_XYZ, momentum, m);
 	//union WIP_NAMED_VEC_T(3, float, WIP_XYZ, angular, a);
 } wip_obj_t;
 

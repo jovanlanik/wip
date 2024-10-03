@@ -21,12 +21,14 @@ typedef struct {
 } wip_ply_t;
 
 typedef struct {
-	struct {
-		struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, vertex, v);
-		struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, normal, n);
-		struct WIP_NAMED_VEC_T(2, float, WIP_UV, uv, u);
-		struct WIP_NAMED_VEC_T(4, uint8_t, WIP_RGBA, color, c);
-	} *model;
+	struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, vertex, v);
+	struct WIP_NAMED_VEC_T(3, float, WIP_XYZ, normal, n);
+	struct WIP_NAMED_VEC_T(2, float, WIP_UV, uv, u);
+	struct WIP_NAMED_VEC_T(4, uint8_t, WIP_RGBA, color, c);
+} wip_vertex_t;
+
+typedef struct {
+	wip_vertex_t *model;
 	uint32_t *index;
 	int vertex_c;
 	int index_c;
