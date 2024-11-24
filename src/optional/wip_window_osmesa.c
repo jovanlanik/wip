@@ -55,6 +55,7 @@ void wip_initOffscreen(int width, int height) {
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	startTime = time.tv_sec + time.tv_nsec * 1e-9;
 
+	wip_debug(WIP_INFO, "%s: Done.", __func__);
 	return;
 }
 
@@ -71,5 +72,10 @@ void wip_termWindow(void) {
 	wip_debug(WIP_INFO, "%s: Terminating window...", __func__);
 	OSMesaDestroyContext(wip_globalWindow.handle);
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
+}
+
+void wip_getCursor(double *x, double *y) {
+	*x = 0;
+	*y = 0;
 }
 

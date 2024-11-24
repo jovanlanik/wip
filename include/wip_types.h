@@ -5,10 +5,12 @@
 
 #pragma once
 
-#define WIP_UV(type) { type s, t; }
+#define WIP_UV(type) { type u, v; }
 #define WIP_XY(type) { type x, y; }
 #define WIP_XYZ(type) { type x, y, z; }
+#define WIP_UVS(type) { type u, v, s; }
 #define WIP_XYZW(type) { type x, y, z, w; }
+#define WIP_UVST(type) { type u, v, s, t; }
 #define WIP_RGB(type) { type r, g, b; }
 #define WIP_RGBA(type) { type r, g, b, a; }
 

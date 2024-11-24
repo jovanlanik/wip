@@ -3,6 +3,8 @@
 
 // Hashmap
 
+#pragma once
+
 typedef struct {
 	int item_c;
 	struct {

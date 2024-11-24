@@ -8,7 +8,6 @@
 
 #include "wip_fn.h"
 #include "wip_window.h"
-#include "wip_gl.h"
 #include "wip_input.h"
 #include "wip_conf.h"
 
@@ -52,7 +51,7 @@ static int unifyKey(int key) {
 	if(key >= GLFW_KEY_0 && key <= GLFW_KEY_9) return key;
 	if(key >= GLFW_KEY_A && key <= GLFW_KEY_Z) return key + ('a' - 'A');
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F25) return key - GLFW_KEY_F1 + WIP_F+1;
-	wip_log(WIP_WARN, "GLFW: Couldn't unify keycode: %d", key);
+	wip_debug(WIP_WARN, "GLFW: Couldn't unify keycode: %d", key);
 	return WIP_UNKNOWN;
 }
 
@@ -63,7 +62,6 @@ static void error_callback(int error, const char *message) {
 
 static void window_close_callback(GLFWwindow *window) {
 	wip_debug(WIP_INFO, "GLFW: Close requested by environment...");
-	//glfwSetWindowShouldClose(window, GLFW_FALSE);
 	return;
 }
 
@@ -84,7 +82,7 @@ void wip_initWindow(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
+	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, wip_getConfInt("graphics.msaa"));
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
@@ -163,5 +161,9 @@ void wip_termWindow(void) {
 	wip_debug(WIP_INFO, "%s: Terminating window...", __func__);
 	glfwTerminate();
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
+}
+
+void wip_getCursor(double *x, double *y) {
+	glfwGetCursorPos(wip_globalWindow.handle, x, y);
 }
 

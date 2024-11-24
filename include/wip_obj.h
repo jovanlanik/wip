@@ -10,7 +10,7 @@
 enum wip_objFlags {
 	WIP_POS = 1,
 	WIP_ROT = 2,
-	WIP_SCALE = 4
+	WIP_SCALE = 4,
 };
 
 typedef struct {

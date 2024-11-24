@@ -16,4 +16,5 @@ void wip_swapWindow(void);
 void wip_pollWindow(void);
 double wip_timeWindow(void);
 void wip_termWindow(void);
+void wip_getCursor(double *x, double *y);
 

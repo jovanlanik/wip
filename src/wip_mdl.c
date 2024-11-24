@@ -126,15 +126,15 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 	msh_ply_close(ply_file);
 	
 	if(!hasNormal) { 
-		//wip_debug(WIP_WARN, "%s: Couldn't load vertex normals from model, may be missing.", __func__);
+		wip_debug(WIP_WARN, "%s: Couldn't load vertex normals from model, may be missing.", __func__);
 		*((void **)formatNormal.data) = wip_alloc((int)*formatVertex.data_count * 3 * sizeof(float));
 	}
 	if(!hasUv) {
-		//wip_debug(WIP_WARN, "%s: Couldn't load UVs from model, may be missing.", __func__);
+		wip_debug(WIP_WARN, "%s: Couldn't load UVs from model, may be missing.", __func__);
 		*((void **)formatUv.data) = wip_alloc((int)*formatVertex.data_count * 2 * sizeof(float));
 	}
 	if(!hasColor) {
-		//wip_debug(WIP_WARN, "%s: Couldn't load vertex colors from model, may be missing.", __func__);
+		wip_debug(WIP_WARN, "%s: Couldn't load vertex colors from model, may be missing.", __func__);
 		*((void **)formatColor.data) = wip_alloc((int)*formatVertex.data_count * 4 * sizeof(uint8_t));
 	}
 
@@ -163,8 +163,6 @@ wip_ply_t *wip_readModel(wip_ply_t *p, const char *file) {
 				4 * sizeof(uint8_t)
 			);
 		}
-		//wip_debug(WIP_INFO, "x: %f, y: %f, z: %f, s: %f, t: %f",
-		//	p->vertex[2*i], p->vertex[2*i+1], p->vertex[2*i+2], p->uv[2*i], p->uv[2*i+1]);
 	}
 
 	wip_debug(WIP_INFO, "%s: Done.", __func__);
@@ -199,13 +197,13 @@ wip_glmdl_t *wip_loadModel(wip_glmdl_t *gm, wip_mdl_t *m) {
 	glBindBuffer(GL_ARRAY_BUFFER, gm->data_b);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gm->element_b);
 
-	glBufferData(GL_ARRAY_BUFFER, m->vertex_c*sizeof(m->model[0]), m->model, GL_STATIC_DRAW);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3*(m->index_c)*sizeof(uint32_t), m->index, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m->vertex_c * sizeof(wip_vertex_t), m->model, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * m->index_c * sizeof(uint32_t), m->index, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(m->model[0]), 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(m->model[0]), (void *)(sizeof(float)*6));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(m->model[0]), (void *)(sizeof(float)*12));
-	glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(m->model[0]), (void *)(sizeof(float)*16));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(wip_vertex_t), (void *)offsetof(wip_vertex_t, vertex));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(wip_vertex_t), (void *)offsetof(wip_vertex_t, normal));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(wip_vertex_t), (void *)offsetof(wip_vertex_t, uv));
+	glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(wip_vertex_t), (void *)offsetof(wip_vertex_t, color));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);

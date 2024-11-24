@@ -51,7 +51,7 @@ static int unifyKey(SDL_Keysym key) {
 	if(key.scancode >= SDL_SCANCODE_A && key.scancode <= SDL_SCANCODE_Z) return key.scancode + ('a' - SDL_SCANCODE_A);
 	if(key.scancode >= SDL_SCANCODE_F1 && key.scancode <= SDL_SCANCODE_F12) return key.scancode - SDL_SCANCODE_F1 + WIP_F+1;
 	if(key.scancode >= SDL_SCANCODE_F13 && key.scancode <= SDL_SCANCODE_F24) return key.scancode - SDL_SCANCODE_F13 + WIP_F+13;
-	wip_log(WIP_WARN, "SDL2: Couldn't unify scancode: %d", key.scancode);
+	wip_debug(WIP_WARN, "SDL2: Couldn't unify scancode: %d", key.scancode);
 	return WIP_UNKNOWN;
 }
 
@@ -145,5 +145,9 @@ double wip_timeWindow(void) {
 void wip_termWindow(void) {
 	wip_debug(WIP_INFO, "%s: Terminating window...", __func__);
 	SDL_Quit();
+}
+
+void wip_getCursor(double *x, double *y) {
+	SDL_GetMouseState(x, y);
 }
 

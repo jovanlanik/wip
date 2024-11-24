@@ -28,22 +28,27 @@ int wip_freeImage(wip_img_t *image) {
 	return 1;
 }
 
-GLuint wip_loadTexture(wip_img_t *image) {
+GLuint wip_loadTextureF(wip_img_t *image, GLint min, GLint mag) {
 	// TODO: loading multiple textures
 	// TODO: treat failure
 	GLuint texture;
 	GLenum format = image->channels == 4 ? GL_RGBA : GL_RGB;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
 	glTexImage2D(GL_TEXTURE_2D, 0, format, image->width, image->height, 0, format, GL_UNSIGNED_BYTE, image->data);
-	//glGenerateMipmap(GL_TEXTURE_2D);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	return texture;
 }
 
+GLuint wip_loadTexture(wip_img_t *image) {
+	return wip_loadTextureF(image, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+}
+
 // TODO: error
-GLuint wip_openTexture(char *name) {
+GLuint wip_openTextureF(char *name, GLint min, GLint mag) {
 	GLuint texture = 0;
 	wip_img_t image;
 	
@@ -57,11 +62,15 @@ GLuint wip_openTexture(char *name) {
 	wip_free(filename);
 
 	if(image.data) {
-		texture = wip_loadTexture(&image);
+		texture = wip_loadTextureF(&image, min, mag);
 		wip_freeImage(&image);
 	}
 
 	return texture;
+}
+
+GLuint wip_openTexture(char *name) {
+	return wip_openTextureF(name, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 }
 
 // TODO: unload or free texture

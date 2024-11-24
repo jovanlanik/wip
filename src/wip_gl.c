@@ -74,14 +74,13 @@ GLuint wip_loadShader(const GLchar *source, GLenum type) {
 	return shader;
 }
 
-GLuint wip_loadProgram(GLuint vert, GLuint frag) {
+GLuint wip_loadProgramF(GLuint shader[], int count) {
 	GLuint program = glCreateProgram();
 	if(program == 0) {
 		wip_log(WIP_ERROR, "%s: Couldn't create program: %x", __func__, glGetError());
 		return 0;
 	}
-	glAttachShader(program, vert);
-	glAttachShader(program, frag);
+	for(int i = 0; i < count; ++i) glAttachShader(program, shader[i]);
 	glLinkProgram(program);
 	GLint result;
 	glGetProgramiv(program, GL_LINK_STATUS, &result);
@@ -93,5 +92,10 @@ GLuint wip_loadProgram(GLuint vert, GLuint frag) {
 		return 0;
 	}
 	return program;
+}
+
+GLuint wip_loadProgram(GLuint vert, GLuint frag) {
+	GLuint shader[2] = { vert, frag };
+	return wip_loadProgramF(shader, 2);
 }
 

@@ -27,7 +27,7 @@ void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned 
 	static GLuint textProgram;
 	if(!model) {
 		model = wip_openModel("char");
-		texture = wip_openTexture("d_font");
+		texture = wip_openTextureF("d_font", GL_NEAREST, GL_NEAREST);
 		GLuint textVert = wip_loadShader(_binary_d_text_vert_start, GL_VERTEX_SHADER);
 		GLuint textFrag = wip_loadShader(_binary_d_text_frag_start, GL_FRAGMENT_SHADER);
 		textProgram = wip_loadProgram(textVert, textFrag);
@@ -42,8 +42,6 @@ void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned 
 
 	glBindVertexArray(model->vertex_a);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	unsigned int s[] = { wip_getConfInt("video.width"), wip_getConfInt("video.height") };
 	unsigned int p[] = { x, y };
@@ -58,6 +56,7 @@ void drawChar(char c, unsigned int x, unsigned int y, unsigned int ox, unsigned 
 	glDrawElements(GL_TRIANGLES, model->element_c, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	return;
 }
 
