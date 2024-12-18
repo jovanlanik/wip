@@ -1,5 +1,5 @@
 # WIP
-# Copyright (c) 2023 Jovan Lanik
+# Copyright (c) 2024 Jovan Lanik
 
 # TODO: default compiler options
 # TODO: default linker options

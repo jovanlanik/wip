@@ -133,7 +133,6 @@ void drawModel(wip_obj_t *object, wip_glmdl_t *model, wip_globj_t pv, wip_obj_t 
 	glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transform.f);
 	glUniformMatrix4fv(normalTransformLocation, 1, GL_FALSE, normalTransform.f);
 	glUniform3fv(materialLocation, 1, m);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_TRIANGLES, model->element_c, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
