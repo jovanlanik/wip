@@ -84,7 +84,7 @@ void drawScreen(float rot) {
 		timeLocation = glGetUniformLocation(program, "time");
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program);
 	glBindVertexArray(vertex_a);

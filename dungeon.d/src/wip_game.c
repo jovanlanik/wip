@@ -505,27 +505,57 @@ static void gameLoop(void) {
 		- wip_eventPart(&bumpEvent, wip_easeInOut)/25.0
 		+ 1.0/25.0;
 
-	drawScreen(r);
+	wip_obj_t focus;
+	focus.x = 0;
+	focus.y = wip_getConfFloat("game.focus");
+	quat_rotate(focus.rotation, r, (float[]){0, 0, 1});
+	vec3 focusOld;
+	quat_mul_vec3(focusOld, focus.rotation, focus.position);
+	vec3_add(focus.position, focusOld, center.position);
+	focus.z = center.z;
 
 	wip_globj_t pv, view;
 
-	mat4x4_look_at(view.m, camera.position, center.position, axis);
-	mat4x4_mul(pv.m, projection.m, view.m);
+	for(int i = 0; i < 2; ++i) {
+		int w = wip_getConfInt("video.width") / 2;
+		int h = wip_getConfInt("video.height");
+		int x = i * w;
+		int y = 0;
 
-	// Rendering
-	drawRoom(&d.room[currentState.room], pv);
-	drawEnts(currentState.room, currentState.entity, pv);
-	// Viewmodel
-	glClear(GL_DEPTH_BUFFER_BIT);
-	if(wip_eventPart(&attkEvent, wip_easeLinear)) drawModel(&camera, swing_model, pv, NULL);
-	else drawModel(&camera, sword_model, pv, NULL);
-	if(!paused) {
-		// Interface
+		glScissor(x, y, w, h);
+		glViewport(x, y, w, h);
+
+		drawScreen(r);
+
+		float iod = wip_getConfFloat("game.iod");
+		wip_obj_t eye;
+		eye.x = i * iod - iod/2;
+		eye.y = 0;
+		quat_rotate(eye.rotation, r, (float[]){0, 0, 1});
+		vec3 eyeOld;
+		quat_mul_vec3(eyeOld, eye.rotation, eye.position);
+		vec3_add(eye.position, eyeOld, camera.position);
+		eye.z = camera.z;
+
+		mat4x4_look_at(view.m, eye.position, focus.position, axis);
+		mat4x4_mul(pv.m, projection.m, view.m);
+
+		// Rendering
+		drawRoom(&d.room[currentState.room], pv);
+		drawEnts(currentState.room, currentState.entity, pv);
+		// Viewmodel
 		glClear(GL_DEPTH_BUFFER_BIT);
-		//drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
-		drawFormatStr(10, 10, 2.0f, "Health: %d", currentState.player.health);
-		if(toast != NULL && wip_eventPart(&toastEvent, wip_easeLinear))
-			drawStr(10, 20 + 2.0*CHAR_SIZE, 4.0f, toast);
+		if(wip_eventPart(&attkEvent, wip_easeLinear)) drawModel(&eye, swing_model, pv, NULL);
+		else drawModel(&eye, sword_model, pv, NULL);
+		if(!paused) {
+			// Interface
+			glClear(GL_DEPTH_BUFFER_BIT);
+			//drawFormatStr(10, 10, 2.0f, "%4.1f", (startTime - lastTime) * 1000.0f);
+			drawFormatStr(10, 10, 2.0f, "Health: %d", currentState.player.health);
+			if(toast != NULL && wip_eventPart(&toastEvent, wip_easeLinear))
+				drawStr(10, 20 + 2.0*CHAR_SIZE, 4.0f, toast);
+		}
+
 	}
 
 	return;
@@ -687,8 +717,18 @@ static void m_menuLoop(menu *menu) {
 		selected = 0;
 	}
 
-	drawScreen(0.0f);
-	drawMenu(*menu, selected, NULL);
+	for(int i = 0; i < 2; ++i) {
+		int w = wip_getConfInt("video.width") / 2;
+		int h = wip_getConfInt("video.height");
+		int x = i * w;
+		int y = 0;
+
+		glScissor(x, y, w, h);
+		glViewport(x, y, w, h);
+
+		drawScreen(0.0f);
+		drawMenu(*menu, selected, NULL);
+	}
 }
 
 static void p_menuLoop(menu *menu) {
@@ -709,7 +749,17 @@ static void p_menuLoop(menu *menu) {
 	gameLoop();
 	wip_globalKeyLock = 0;
 
-	drawMenu(*menu, selected, NULL);
+	for(int i = 0; i < 2; ++i) {
+		int w = wip_getConfInt("video.width") / 2;
+		int h = wip_getConfInt("video.height");
+		int x = i * w;
+		int y = 0;
+
+		glScissor(x, y, w, h);
+		glViewport(x, y, w, h);
+
+		drawMenu(*menu, selected, NULL);
+	}
 }
 
 static void messageLoop(void) {
