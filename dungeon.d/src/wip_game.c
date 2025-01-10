@@ -764,13 +764,32 @@ static void p_menuLoop(menu *menu) {
 
 static void messageLoop(void) {
 	toastEvent.length = 0;
-	drawScreen(0.0f);
+	for(int i = 0; i < 2; ++i) {
+		int w = wip_getConfInt("video.width") / 2;
+		int h = wip_getConfInt("video.height");
+		int x = i * w;
+		int y = 0;
+
+		glScissor(x, y, w, h);
+		glViewport(x, y, w, h);
+
+		drawScreen(0.0f);
+	}
 	if(started) {
 		wip_globalKeyLock = 1;
 		gameLoop();
 		wip_globalKeyLock = 0;
 	}
-	drawFormatStr(10, 10, 4.0, "%s\n%s", message, "PRESS ENTER TO CONTINUE");
+	for(int i = 0; i < 2; ++i) {
+		int w = wip_getConfInt("video.width") / 2;
+		int h = wip_getConfInt("video.height");
+		int x = i * w;
+		int y = 0;
+
+		glScissor(x, y, w, h);
+		glViewport(x, y, w, h);
+		drawFormatStr(10, 10, 4.0, "%s\n%s", message, "PRESS ENTER TO CONTINUE");
+	}
 
 	if(wip_readMotion(USE) || wip_readMotion(ESC)) {
 		wip_clearMotions();
